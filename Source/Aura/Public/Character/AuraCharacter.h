@@ -1,0 +1,22 @@
+// Copyright Alien Shores
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "AuraBaseCharacter.h"
+#include "AuraCharacter.generated.h"
+
+UCLASS()
+class AURA_API AAuraCharacter : public AAuraBaseCharacter
+{
+	GENERATED_BODY()
+
+public:
+	AAuraCharacter();
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+protected:
+	virtual void BeginPlay() override;
+
+};
