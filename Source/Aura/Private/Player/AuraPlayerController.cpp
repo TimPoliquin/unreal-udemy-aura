@@ -4,6 +4,7 @@
 #include "Player/AuraPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Interaction/HighlightInterface.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -25,7 +26,12 @@ void AAuraPlayerController::BeginPlay()
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputModeData.SetHideCursorDuringCapture(false);
 	SetInputMode(InputModeData);
-	
+}
+
+void AAuraPlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+	CursorTrace();
 }
 
 void AAuraPlayerController::SetupInputComponent()
@@ -53,3 +59,32 @@ void AAuraPlayerController::Move(const FInputActionValue& Value)
 		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.X);
 	}
 }
+
+void AAuraPlayerController::CursorTrace()
+{
+	FHitResult CursorHit;
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	if (CursorHit.bBlockingHit)
+	{
+		LastActor = ThisActor;
+		ThisActor = CursorHit.GetActor();
+		if (LastActor == nullptr && ThisActor == nullptr)
+		{
+			// both LastActor and ThisActor are null, do nothing
+		} else if (LastActor == nullptr)
+		{
+			// LastActor is null and ThisActor is not, so highlight ThisActor
+			ThisActor->HighlightActor();
+		} else if (ThisActor == nullptr)
+		{
+			// LastActor is valid and ThisActor is null, so unhighlight LastActor
+			LastActor->UnHighlightActor();
+		} else if (LastActor != ThisActor)
+		{
+			// Both are valid, but are not the same, so unhighlight LastActor and Highlight ThisActor
+			LastActor->UnHighlightActor();
+			ThisActor->HighlightActor();
+		}
+	}
+}
+
