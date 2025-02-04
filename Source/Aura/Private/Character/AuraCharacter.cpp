@@ -3,7 +3,9 @@
 
 #include "Character/AuraCharacter.h"
 
+#include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Player/AuraPlayerState.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -23,6 +25,9 @@ void AAuraCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 }
+
+
+
 void AAuraCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -31,5 +36,28 @@ void AAuraCharacter::Tick(float DeltaTime)
 void AAuraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AAuraCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	// Init ability actor info for the server
+	InitializeAbilityActorInfo();
+}
+
+void AAuraCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	// Init ability actor info for the client
+	InitializeAbilityActorInfo();
+}
+
+void AAuraCharacter::InitializeAbilityActorInfo()
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
+	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
+	AttributeSet = AuraPlayerState->GetAttributeSet();
 }
 

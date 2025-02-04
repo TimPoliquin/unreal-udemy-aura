@@ -2,9 +2,12 @@
 
 
 #include "Player/AuraPlayerController.h"
+
+#include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Interaction/HighlightInterface.h"
+#include "Player/AuraPlayerState.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -87,4 +90,5 @@ void AAuraPlayerController::CursorTrace()
 		}
 	}
 }
+
 
