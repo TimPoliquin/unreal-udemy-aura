@@ -6,6 +6,8 @@
 #include "AuraBaseCharacter.h"
 #include "AuraCharacter.generated.h"
 
+class APlayerState;
+
 UCLASS()
 class AURA_API AAuraCharacter : public AAuraBaseCharacter
 {
@@ -23,5 +25,7 @@ protected:
 
 private:
 	void InitializeAbilityActorInfo();
+	void InitializePlayerControllerHUD(APlayerController* PlayerController, APlayerState* PlayerState) const;
+
 
 };

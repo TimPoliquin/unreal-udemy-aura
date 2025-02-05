@@ -21,8 +21,10 @@ void AAuraPlayerController::BeginPlay()
 	check(AuraContext);
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	check(Subsystem);
-	Subsystem->AddMappingContext(AuraContext, 0);
+	if(Subsystem)
+	{
+		Subsystem->AddMappingContext(AuraContext, 0);
+	}
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 	FInputModeGameAndUI InputModeData;
@@ -69,25 +71,7 @@ void AAuraPlayerController::CursorTrace()
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (CursorHit.bBlockingHit)
 	{
-		LastActor = ThisActor;
-		ThisActor = CursorHit.GetActor();
-		if (LastActor == nullptr && ThisActor == nullptr)
-		{
-			// both LastActor and ThisActor are null, do nothing
-		} else if (LastActor == nullptr)
-		{
-			// LastActor is null and ThisActor is not, so highlight ThisActor
-			ThisActor->HighlightActor();
-		} else if (ThisActor == nullptr)
-		{
-			// LastActor is valid and ThisActor is null, so unhighlight LastActor
-			LastActor->UnHighlightActor();
-		} else if (LastActor != ThisActor)
-		{
-			// Both are valid, but are not the same, so unhighlight LastActor and Highlight ThisActor
-			LastActor->UnHighlightActor();
-			ThisActor->HighlightActor();
-		}
+		HighlightContext.Track(CursorHit.GetActor());
 	}
 }
 
