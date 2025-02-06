@@ -20,14 +20,34 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	Super::BindCallbacksToDependencies();
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute())
-	                      .AddUObject(this, &UOverlayWidgetController::HealthChangedCallback);
+	                      .AddLambda(
+		                      [this](const FOnAttributeChangeData& Data)
+		                      {
+			                      OnHealthChanged.Broadcast(Data.NewValue);
+		                      }
+	                      );
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute())
-	                      .AddUObject(this, &UOverlayWidgetController::MaxHealthChangedCallback);
+	                      .AddLambda(
+		                      [this](const FOnAttributeChangeData& Data)
+		                      {
+			                      OnMaxMaxHealthChanged.Broadcast(Data.NewValue);
+		                      }
+	                      );
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute())
-	                      .AddUObject(this, &UOverlayWidgetController::ManaChangedCallback);
+	                      .AddLambda(
+		                      [this](const FOnAttributeChangeData& Data)
+		                      {
+			                      OnManaChanged.Broadcast(Data.NewValue);
+		                      }
+	                      );
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute())
-	                      .AddUObject(this, &UOverlayWidgetController::MaxManaChangedCallback);
+	                      .AddLambda(
+		                      [this](const FOnAttributeChangeData& Data)
+		                      {
+			                      OnMaxManaChanged.Broadcast(Data.NewValue);
+		                      }
+	                      );
 	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
 		AbilitySystemComponent
 	))
@@ -49,24 +69,4 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 			}
 		);
 	}
-}
-
-void UOverlayWidgetController::HealthChangedCallback(const FOnAttributeChangeData& Data) const
-{
-	OnHealthChanged.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::MaxHealthChangedCallback(const FOnAttributeChangeData& Data) const
-{
-	OnMaxMaxHealthChanged.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::ManaChangedCallback(const FOnAttributeChangeData& Data) const
-{
-	OnManaChanged.Broadcast(Data.NewValue);
-}
-
-void UOverlayWidgetController::MaxManaChangedCallback(const FOnAttributeChangeData& Data) const
-{
-	OnMaxManaChanged.Broadcast(Data.NewValue);
 }

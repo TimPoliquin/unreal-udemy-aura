@@ -5,6 +5,7 @@
 
 void UAuraAbilitySystemComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(
 		this,
 		&UAuraAbilitySystemComponent::EffectApplied
