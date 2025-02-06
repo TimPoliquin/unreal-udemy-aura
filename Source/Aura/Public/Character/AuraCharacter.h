@@ -24,7 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void InitializeAbilityActorInfo();
+	virtual void InitializeAbilityActorInfo() override;
 	void InitializePlayerControllerHUD(APlayerController* PlayerController, APlayerState* PlayerState) const;
 
 

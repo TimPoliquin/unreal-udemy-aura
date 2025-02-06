@@ -22,11 +22,18 @@ void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	InitializeAbilityActorInfo();
 	GetMesh()->SetCustomDepthStencilValue(HighlightCustomDepthStencilValue);
 	if (Weapon)
 	{
 		Weapon->SetCustomDepthStencilValue(HighlightCustomDepthStencilValue);
 	}
+}
+
+void AAuraEnemy::InitializeAbilityActorInfo()
+{
+	Super::InitializeAbilityActorInfo();
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
 

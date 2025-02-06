@@ -4,6 +4,7 @@
 #include "Character/AuraCharacter.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
@@ -27,8 +28,6 @@ void AAuraCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
-
 
 void AAuraCharacter::Tick(float DeltaTime)
 {
@@ -65,7 +64,7 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	{
 		InitializePlayerControllerHUD(PlayerController, AuraPlayerState);
 	}
-
+	
 }
 
 void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* PlayerController, APlayerState* PlayerState) const
