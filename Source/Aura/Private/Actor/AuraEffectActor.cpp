@@ -55,7 +55,7 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, const FGameplayE
 	{
 		FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
 		EffectContextHandle.AddSourceObject(this);
-		const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(GameplayEffectConfig.GameplayEffectClass, 1.0f, EffectContextHandle);
+		const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(GameplayEffectConfig.GameplayEffectClass, ActorLevel, EffectContextHandle);
 		const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 		bool bIsInfiniteEffect = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite; 
 		if (bIsInfiniteEffect && GameplayEffectConfig.IsRemoveOnEndOverlap())
