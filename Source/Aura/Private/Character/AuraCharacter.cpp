@@ -26,7 +26,6 @@ AAuraCharacter::AAuraCharacter()
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AAuraCharacter::Tick(float DeltaTime)
@@ -64,7 +63,7 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	{
 		InitializePlayerControllerHUD(PlayerController, AuraPlayerState);
 	}
-	
+	InitializeDefaultAttributes();
 }
 
 void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* PlayerController, APlayerState* PlayerState) const
@@ -80,3 +79,9 @@ void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* PlayerCont
 	}
 }
 
+int32 AAuraCharacter::GetCharacterLevel() const
+{
+	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetCharacterLevel();
+}

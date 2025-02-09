@@ -19,12 +19,20 @@ public:
 	// IHighlightInterface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
-	
+	// ICombatInterface
+	FORCEINLINE virtual int GetCharacterLevel() const override
+	{
+		return Level;
+	}
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeAbilityActorInfo() override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Highlight")
 	bool bHighlighted;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Default Attributes")
+	int32 Level = 1;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Highlight")
