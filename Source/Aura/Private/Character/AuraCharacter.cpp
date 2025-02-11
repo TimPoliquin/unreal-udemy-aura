@@ -70,7 +70,7 @@ void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* PlayerCont
 {
 	if (AAuraHUD* HUD = Cast<AAuraHUD>(PlayerController->GetHUD()))
 	{
-		HUD->InitOverlay(
+		HUD->InitializeWidgets(
 			PlayerController,
 			PlayerState,
 			AbilitySystemComponent,

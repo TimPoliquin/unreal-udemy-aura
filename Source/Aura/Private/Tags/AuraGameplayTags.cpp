@@ -34,6 +34,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Secondary.ArmorPenetration"),
 		FString("")
 	);
+	Instance.Attributes_Secondary_BlockChance = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Secondary.BlockChance"),
+		FString("Reduces damage taken, improves Block Chance")
+	);
 	Instance.Attributes_Secondary_CriticalHitChance = TagManager.AddNativeGameplayTag(
 		FName("Attributes.Secondary.CriticalHitChance"),
 		FString("")
