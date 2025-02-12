@@ -26,6 +26,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Increases max health and health regen")
 	);
 
+	// Secondary Attributes
 	Instance.Attributes_Secondary_Armor = TagManager.AddNativeGameplayTag(
 		FName("Attributes.Secondary.Armor"),
 		FString("Reduces damage taken; improves block chance")
@@ -73,5 +74,31 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Attributes_Vital_Mana = TagManager.AddNativeGameplayTag(
 		FName("Attributes.Vital.Mana"),
 		FString("Current Mana")
+	);
+
+	// Input Tags
+	Instance.InputTag_LeftMouseButton = TagManager.AddNativeGameplayTag(
+		FName("InputTag.LeftMouseButton"),
+		FString("Input tag for the Left Mouse Button")
+	);
+	Instance.InputTag_RightMouseButton = TagManager.AddNativeGameplayTag(
+		FName("InputTag.RightMouseButton"),
+		FString("Input tag for the Right Mouse Button")
+	);
+	Instance.InputTag_Action1 = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Action1"),
+		FString("Input tag for Action 1")
+	);
+	Instance.InputTag_Action2 = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Action2"),
+		FString("Input tag for Action 2")
+	);
+	Instance.InputTag_Action3 = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Action3"),
+		FString("Input tag for Action 3")
+	);
+	Instance.InputTag_Action4 = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Action4"),
+		FString("Input tag for Action 4")
 	);
 }

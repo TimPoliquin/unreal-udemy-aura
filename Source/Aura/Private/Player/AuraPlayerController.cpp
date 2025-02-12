@@ -2,12 +2,9 @@
 
 
 #include "Player/AuraPlayerController.h"
-
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
-#include "Interaction/HighlightInterface.h"
-#include "Player/AuraPlayerState.h"
+#include "Input/AuraInputComponent.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -20,8 +17,10 @@ void AAuraPlayerController::BeginPlay()
 	// Stop the game if AuraContext is not set
 	check(AuraContext);
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	if(Subsystem)
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+		GetLocalPlayer()
+	);
+	if (Subsystem)
 	{
 		Subsystem->AddMappingContext(AuraContext, 0);
 	}
@@ -42,8 +41,15 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-	EnhancedInputComponent->BindAction(
+	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
+	AuraInputComponent->BindAbilityActions(
+		InputConfig,
+		this,
+		&AAuraPlayerController::AbilityInputTagPressed,
+		&AAuraPlayerController::AbilityInputTagReleased,
+		&AAuraPlayerController::AbilityInputTagHeld
+	);
+	AuraInputComponent->BindAction(
 		MoveAction,
 		ETriggerEvent::Triggered,
 		this,
@@ -75,4 +81,14 @@ void AAuraPlayerController::CursorTrace()
 	}
 }
 
+void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+}
 
+void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+}
+
+void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
+{
+}

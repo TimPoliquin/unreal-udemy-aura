@@ -37,6 +37,14 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Vital_Health;
 	FGameplayTag Attributes_Vital_Mana;
 
+	/** Input Tags **/
+	FGameplayTag InputTag_LeftMouseButton;
+	FGameplayTag InputTag_RightMouseButton;
+	FGameplayTag InputTag_Action1;
+	FGameplayTag InputTag_Action2;
+	FGameplayTag InputTag_Action3;
+	FGameplayTag InputTag_Action4;
+
 private:
 	static FAuraGameplayTags Instance;
 };

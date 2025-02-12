@@ -7,13 +7,17 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPlayerController.generated.h"
 
+struct FGameplayTag;
+class UAuraInputConfiguration;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
 
 struct FHighlightContext
 {
-	FHighlightContext(){}
+	FHighlightContext()
+	{
+	}
 
 	TScriptInterface<IHighlightInterface> LastActor;
 	TScriptInterface<IHighlightInterface> CurrentActor;
@@ -25,56 +29,80 @@ struct FHighlightContext
 		if (IsBothNullPtr())
 		{
 			// both LastActor and ThisActor are null, do nothing
-		} else if (IsLastNullPtr())
+		}
+		else if (IsLastNullPtr())
 		{
 			// LastActor is null and ThisActor is not, so highlight ThisActor
 			HighlightCurrent();
-		} else if (IsCurrentNullPtr())
+		}
+		else if (IsCurrentNullPtr())
 		{
 			// LastActor is valid and ThisActor is null, so unhighlight LastActor
 			UnHighlightLast();
-		} else if (IsDifferentPtr())
+		}
+		else if (IsDifferentPtr())
 		{
 			// Both are valid, but are not the same, so unhighlight LastActor and Highlight ThisActor
 			UnHighlightLast();
 			HighlightCurrent();
 		}
 	}
+
 	bool IsBothNullPtr() const
 	{
 		return LastActor == nullptr && CurrentActor == nullptr;
 	}
+
 	bool IsLastNullPtr() const
 	{
 		return LastActor == nullptr;
 	}
+
 	bool IsCurrentNullPtr() const
 	{
 		return CurrentActor == nullptr;
 	}
+
 	bool IsBothSamePtr() const
 	{
 		return LastActor == CurrentActor;
 	}
+
 	bool IsDifferentPtr() const
 	{
 		return LastActor != CurrentActor;
 	}
+
 	void HighlightLast() const
 	{
-		if (LastActor != nullptr) LastActor->HighlightActor();
+		if (LastActor != nullptr)
+		{
+			LastActor->HighlightActor();
+		}
 	}
+
 	void HighlightCurrent() const
 	{
-		if (CurrentActor != nullptr) CurrentActor->HighlightActor();
+		if (CurrentActor != nullptr)
+		{
+			CurrentActor->HighlightActor();
+		}
 	}
+
 	void UnHighlightLast() const
 	{
-		if (LastActor != nullptr) LastActor->UnHighlightActor();
+		if (LastActor != nullptr)
+		{
+			LastActor->UnHighlightActor();
+		}
 	}
+
 	void UnHighlightCurrent() const
 	{
-		if (CurrentActor != nullptr) CurrentActor->UnHighlightActor();
+		if (CurrentActor != nullptr)
+		{
+			CurrentActor->UnHighlightActor();
+		}
 	}
 };
 
@@ -89,6 +117,7 @@ class AURA_API AAuraPlayerController : public APlayerController
 public:
 	AAuraPlayerController();
 	virtual void PlayerTick(float DeltaTime) override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -100,7 +129,14 @@ private:
 	TObjectPtr<UInputAction> MoveAction;
 
 	FHighlightContext HighlightContext;
-	
+
 	void Move(const FInputActionValue& Value);
 	void CursorTrace();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UAuraInputConfiguration> InputConfig;
+
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHeld(FGameplayTag InputTag);
 };
