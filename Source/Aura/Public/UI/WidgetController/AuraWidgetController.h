@@ -13,7 +13,9 @@ USTRUCT(BlueprintType)
 struct FWidgetControllerParams
 {
 	GENERATED_BODY()
-	FWidgetControllerParams(){}
+	FWidgetControllerParams()
+	{
+	}
 
 	FWidgetControllerParams(
 		APlayerController* InPlayerController,
@@ -24,7 +26,9 @@ struct FWidgetControllerParams
 		PlayerController(InPlayerController),
 		PlayerState(InPlayerState),
 		AbilitySystemComponent(InAbilitySystemComponent),
-		AttributeSet(InAttributeSet) {}
+		AttributeSet(InAttributeSet)
+	{
+	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<APlayerController> PlayerController = nullptr;
@@ -48,8 +52,14 @@ class AURA_API UAuraWidgetController : public UObject
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetWidgetControllerParams(const FWidgetControllerParams& WidgetControllerParams);
-	virtual void BroadcastInitialValues() {}
-	virtual void BindCallbacksToDependencies(){}
+	UFUNCTION(BlueprintCallable)
+	virtual void BroadcastInitialValues()
+	{
+	}
+
+	virtual void BindCallbacksToDependencies()
+	{
+	}
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
@@ -60,5 +70,4 @@ protected:
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
 	TObjectPtr<UAttributeSet> AttributeSet;
-	
 };
