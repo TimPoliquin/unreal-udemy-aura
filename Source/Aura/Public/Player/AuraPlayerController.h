@@ -28,36 +28,11 @@ struct FHighlightContext
 	{
 		LastActor = CurrentActor;
 		CurrentActor = Actor;
-		if (IsBothNullPtr())
+		if (IsDifferentPtr())
 		{
-			// both LastActor and ThisActor are null, do nothing
-		}
-		else if (IsLastNullPtr())
-		{
-			// LastActor is null and ThisActor is not, so highlight ThisActor
-			HighlightCurrent();
-		}
-		else if (IsCurrentNullPtr())
-		{
-			// LastActor is valid and ThisActor is null, so unhighlight LastActor
-			UnHighlightLast();
-		}
-		else if (IsDifferentPtr())
-		{
-			// Both are valid, but are not the same, so unhighlight LastActor and Highlight ThisActor
 			UnHighlightLast();
 			HighlightCurrent();
 		}
-	}
-
-	bool IsBothNullPtr() const
-	{
-		return LastActor == nullptr && CurrentActor == nullptr;
-	}
-
-	bool IsLastNullPtr() const
-	{
-		return LastActor == nullptr;
 	}
 
 	bool HasCurrentTarget() const
@@ -65,27 +40,9 @@ struct FHighlightContext
 		return CurrentActor != nullptr;
 	}
 
-	bool IsCurrentNullPtr() const
-	{
-		return CurrentActor == nullptr;
-	}
-
-	bool IsBothSamePtr() const
-	{
-		return LastActor == CurrentActor;
-	}
-
 	bool IsDifferentPtr() const
 	{
 		return LastActor != CurrentActor;
-	}
-
-	void HighlightLast() const
-	{
-		if (LastActor != nullptr)
-		{
-			LastActor->HighlightActor();
-		}
 	}
 
 	void HighlightCurrent() const
@@ -101,14 +58,6 @@ struct FHighlightContext
 		if (LastActor != nullptr)
 		{
 			LastActor->UnHighlightActor();
-		}
-	}
-
-	void UnHighlightCurrent() const
-	{
-		if (CurrentActor != nullptr)
-		{
-			CurrentActor->UnHighlightActor();
 		}
 	}
 };
@@ -162,6 +111,8 @@ private:
 	float AutoRunAcceptanceRadius = 50.f;
 	UPROPERTY(VisibleAnywhere, Category = "Movement")
 	TObjectPtr<USplineComponent> Spline;
+
+	FHitResult CursorHit;
 
 	void AutoMove_Start();
 	void AutoMove_Process();
