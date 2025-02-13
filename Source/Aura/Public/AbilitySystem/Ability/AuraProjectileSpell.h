@@ -27,5 +27,13 @@ protected:
 	) override;
 
 	UFUNCTION(BlueprintCallable, Category ="Projectile")
-	void SpawnProjectile() const;
+	void SpawnProjectile(const FVector& ProjectileTargetLocation);
+
+private:
+	/**
+	 * Angle (y) for projectile to be fired.
+	 * Defaults to 0 to allow projectile to travel parallel to the ground. 
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	float Pitch = 0.f;
 };

@@ -19,7 +19,7 @@ void UAuraProjectileSpell::ActivateAbility(
 	// CommitAbility(Handle, ActorInfo, ActivationInfo, &Tags);
 }
 
-void UAuraProjectileSpell::SpawnProjectile() const
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
@@ -29,9 +29,12 @@ void UAuraProjectileSpell::SpawnProjectile() const
 	check(ProjectileClass);
 	if (const ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo()))
 	{
+		FVector SpawnLocation = CombatInterface->GetCombatSocketLocation();
+		FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
+		Rotation.Pitch = Pitch;
 		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(CombatInterface->GetCombatSocketLocation());
-		// TODO - set the projectile rotation
+		SpawnTransform.SetLocation(SpawnLocation);
+		SpawnTransform.SetRotation(Rotation.Quaternion());
 
 		AActor* OwningActor = GetOwningActorFromActorInfo();
 		AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
@@ -42,5 +45,6 @@ void UAuraProjectileSpell::SpawnProjectile() const
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 		);
 		// TODO - Give the projectile a gameplay effect spec for causing damage
+		SpawnedProjectile->FinishSpawning(SpawnTransform);
 	}
 }
