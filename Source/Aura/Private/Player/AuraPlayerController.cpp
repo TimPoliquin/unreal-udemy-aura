@@ -2,13 +2,19 @@
 
 
 #include "Player/AuraPlayerController.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -81,14 +87,56 @@ void AAuraPlayerController::CursorTrace()
 	}
 }
 
-void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+UAuraAbilitySystemComponent* AAuraPlayerController::GetAuraAbilitySystemComponent()
 {
+	if (AuraAbilitySystemComponent == nullptr)
+	{
+		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+			UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>())
+		);
+	}
+	return AuraAbilitySystemComponent;
 }
 
-void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	if (FAuraGameplayTags::IsLeftMouseButton(InputTag))
+	{
+		bTargeting = HighlightContext.HasCurrentTarget();
+		bAutoRunning = false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+	if (!FAuraGameplayTags::IsLeftMouseButton(InputTag) || bTargeting)
+	{
+		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+		{
+			AuraAbilitySystemComponent->AbilityInputTagHeld(InputTag);
+			return;
+		}
+	} else if (!bTargeting)
+	{
+		FollowTime += GetWorld()->GetDeltaSeconds();
+		FHitResult Hit;
+		if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+		{
+			CachedDestination = Hit.ImpactPoint;
+		}
+		if (APawn* ControlledPawn = GetPawn<APawn>())
+		{
+			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			ControlledPawn->AddMovementInput(WorldDirection);
+			
+		}
+	}
+}
+
+void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+	{
+		AuraAbilitySystemComponent->AbilityInputTagReleased(InputTag);
+	}
 }

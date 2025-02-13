@@ -102,3 +102,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Input tag for Action 4")
 	);
 }
+
+bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)
+{
+	return InputTag.MatchesTagExact(Instance.InputTag_LeftMouseButton);
+}

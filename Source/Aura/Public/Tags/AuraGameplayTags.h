@@ -16,6 +16,7 @@ struct FAuraGameplayTags
 	}
 
 	static void InitializeNativeGameplayTags();
+	static bool IsLeftMouseButton(const FGameplayTag&);
 
 	/** Primary attributes **/
 	FGameplayTag Attributes_Primary_Strength;

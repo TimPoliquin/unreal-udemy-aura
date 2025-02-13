@@ -7,6 +7,8 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPlayerController.generated.h"
 
+class USplineComponent;
+class UAuraAbilitySystemComponent;
 struct FGameplayTag;
 class UAuraInputConfiguration;
 struct FInputActionValue;
@@ -56,6 +58,11 @@ struct FHighlightContext
 	bool IsLastNullPtr() const
 	{
 		return LastActor == nullptr;
+	}
+
+	bool HasCurrentTarget() const
+	{
+		return CurrentActor != nullptr;
 	}
 
 	bool IsCurrentNullPtr() const
@@ -136,7 +143,23 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UAuraInputConfiguration> InputConfig;
 
+	UPROPERTY()
+	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent;
+	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent();
+
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	void AbilityInputTagHeld(FGameplayTag InputTag);
+
+	// Character Movement / Targeting
+	FVector CachedDestination = FVector::ZeroVector;
+	float FollowTime = 0.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float ShortPressThreshold = 0.5f;
+	bool bAutoRunning = false;
+	bool bTargeting = false;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	float AutoRunAcceptanceRadius = 50.f;
+	UPROPERTY(VisibleAnywhere, Category = "Movement")
+	TObjectPtr<USplineComponent> Spline;
 };
