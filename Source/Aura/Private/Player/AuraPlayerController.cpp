@@ -6,6 +6,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
@@ -42,6 +44,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
+	AutoMove_Process();
 }
 
 void AAuraPlayerController::SetupInputComponent()
@@ -109,14 +112,14 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (!FAuraGameplayTags::IsLeftMouseButton(InputTag) || bTargeting)
+	if (bTargeting || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
 		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
 		{
 			AuraAbilitySystemComponent->AbilityInputTagHeld(InputTag);
-			return;
 		}
-	} else if (!bTargeting)
+	}
+	else if (!bTargeting)
 	{
 		FollowTime += GetWorld()->GetDeltaSeconds();
 		FHitResult Hit;
@@ -128,15 +131,78 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		{
 			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
 			ControlledPawn->AddMovementInput(WorldDirection);
-			
 		}
 	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+	if (bTargeting || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
-		AuraAbilitySystemComponent->AbilityInputTagReleased(InputTag);
+		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+		{
+			AuraAbilitySystemComponent->AbilityInputTagReleased(InputTag);
+		}
 	}
+	else if (!bTargeting)
+	{
+		AutoMove_Start();
+	}
+}
+
+void AAuraPlayerController::AutoMove_Start()
+{
+	if (const APawn* ControlledPawn = GetPawn<APawn>(); FollowTime <= ShortPressThreshold)
+	{
+		// DEVNOTE: this only works in multiplayer if the Allow Client-side Navigation toggle is checked
+		// in the Unreal Engine Project Settings. (see corresponding change in DefaultEngine.ini)
+		if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
+			this,
+			ControlledPawn->GetActorLocation(),
+			CachedDestination
+		))
+		{
+			Spline->ClearSplinePoints();
+			for (const FVector& PathPoint : NavPath->PathPoints)
+			{
+				Spline->AddSplinePoint(PathPoint, ESplineCoordinateSpace::World);
+				DrawDebugSphere(GetWorld(), PathPoint, 8.f, 8, FColor::Green, false, 5.f);
+			}
+			// 
+			CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+			bAutoRunning = true;
+		}
+	}
+	FollowTime = 0.f;
+	bTargeting = false;
+}
+
+void AAuraPlayerController::AutoMove_Process()
+{
+	if (!bAutoRunning)
+	{
+		return;
+	}
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(
+			ControlledPawn->GetActorLocation(),
+			ESplineCoordinateSpace::World
+		);
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(
+			LocationOnSpline,
+			ESplineCoordinateSpace::World
+		);
+		ControlledPawn->AddMovementInput(Direction);
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			AutoMove_End();
+		}
+	}
+}
+
+void AAuraPlayerController::AutoMove_End()
+{
+	bAutoRunning = false;
 }
