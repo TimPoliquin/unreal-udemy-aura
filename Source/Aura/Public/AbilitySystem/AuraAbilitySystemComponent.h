@@ -27,7 +27,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void EffectApplied(
+	UFUNCTION(Client, Reliable)
+	void Client_EffectApplied(
 		UAbilitySystemComponent* AbilitySystemComponent,
 		const FGameplayEffectSpec& EffectSpec,
 		FActiveGameplayEffectHandle ActiveEffectHandle

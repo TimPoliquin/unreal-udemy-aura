@@ -11,11 +11,11 @@ void UAuraAbilitySystemComponent::BeginPlay()
 	Super::BeginPlay();
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(
 		this,
-		&UAuraAbilitySystemComponent::EffectApplied
+		&UAuraAbilitySystemComponent::Client_EffectApplied
 	);
 }
 
-void UAuraAbilitySystemComponent::EffectApplied(
+void UAuraAbilitySystemComponent::Client_EffectApplied_Implementation(
 	UAbilitySystemComponent* AbilitySystemComponent,
 	const FGameplayEffectSpec& EffectSpec,
 	FActiveGameplayEffectHandle ActiveEffectHandle
