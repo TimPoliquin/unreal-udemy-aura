@@ -15,9 +15,15 @@ void UAuraProjectileSpell::ActivateAbility(
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	const bool bIsServer = HasAuthority(&ActivationInfo);
-	if (!bIsServer)
+	// FGameplayTagContainer Tags;
+	// CommitAbility(Handle, ActorInfo, ActivationInfo, &Tags);
+}
+
+void UAuraProjectileSpell::SpawnProjectile() const
+{
+	if (!GetAvatarActorFromActorInfo()->HasAuthority())
 	{
+		// Do not execute on client - run on server only
 		return;
 	}
 	check(ProjectileClass);
@@ -28,7 +34,7 @@ void UAuraProjectileSpell::ActivateAbility(
 		// TODO - set the projectile rotation
 
 		AActor* OwningActor = GetOwningActorFromActorInfo();
-		AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+		AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 			ProjectileClass,
 			SpawnTransform,
 			OwningActor,
@@ -36,8 +42,5 @@ void UAuraProjectileSpell::ActivateAbility(
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 		);
 		// TODO - Give the projectile a gameplay effect spec for causing damage
-		Projectile->FinishSpawning(SpawnTransform);
 	}
-	// FGameplayTagContainer Tags;
-	// CommitAbility(Handle, ActorInfo, ActivationInfo, &Tags);
 }
