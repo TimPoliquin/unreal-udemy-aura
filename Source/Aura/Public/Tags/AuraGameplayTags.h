@@ -40,6 +40,7 @@ struct FAuraGameplayTags
 
 	/** Input Tags **/
 	FGameplayTag InputTag_LeftMouseButton;
+	FGameplayTag InputTag_AttackTarget;
 	FGameplayTag InputTag_RightMouseButton;
 	FGameplayTag InputTag_Action1;
 	FGameplayTag InputTag_Action2;

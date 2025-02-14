@@ -81,6 +81,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.LeftMouseButton"),
 		FString("Input tag for the Left Mouse Button")
 	);
+	Instance.InputTag_AttackTarget = TagManager.AddNativeGameplayTag(
+		FName("InputTag.AttackTarget"),
+		FString("Input tag for the Attack Target (Shift + LMB)")
+	);
 	Instance.InputTag_RightMouseButton = TagManager.AddNativeGameplayTag(
 		FName("InputTag.RightMouseButton"),
 		FString("Input tag for the Right Mouse Button")

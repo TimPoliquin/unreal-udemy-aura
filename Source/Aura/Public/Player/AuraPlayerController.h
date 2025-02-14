@@ -83,6 +83,8 @@ private:
 	TObjectPtr<UInputMappingContext> AuraContext;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
+	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="Attack Target"))
+	TObjectPtr<UInputAction> Input_AttackTarget;
 
 	FHighlightContext HighlightContext;
 

@@ -15,12 +15,12 @@ class AURA_API UAuraGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
-	FORCEINLINE FGameplayTag GetStartupInputTag() const
+	FORCEINLINE TArray<FGameplayTag> GetStartupInputTag() const
 	{
-		return StartupInputTag;
+		return StartupInputTags;
 	}
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
-	FGameplayTag StartupInputTag;
+	TArray<FGameplayTag> StartupInputTags;
 };
