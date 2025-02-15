@@ -36,7 +36,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		SpawnTransform.SetLocation(SpawnLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
 
-		AActor* OwningActor = GetOwningActorFromActorInfo();
+		AActor* OwningActor = GetAvatarActorFromActorInfo();
 		AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 			ProjectileClass,
 			SpawnTransform,
@@ -44,6 +44,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			Cast<APawn>(OwningActor),
 			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 		);
+		SpawnedProjectile->SetInstigator(Cast<APawn>(OwningActor));
 		// TODO - Give the projectile a gameplay effect spec for causing damage
 		SpawnedProjectile->FinishSpawning(SpawnTransform);
 	}

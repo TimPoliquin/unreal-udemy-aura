@@ -5,6 +5,10 @@
 
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Aura/Aura.h"
+#include "Components/AudioComponent.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -14,6 +18,7 @@ AAuraProjectile::AAuraProjectile()
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	SetRootComponent(Sphere);
+	Sphere->SetCollisionObjectType(ECC_Projectile);
 	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Sphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
@@ -29,7 +34,11 @@ AAuraProjectile::AAuraProjectile()
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
+	TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
+	TravelSoundComponent->SetSound(TravelSound);
+	TravelSoundComponent->Play();
 }
 
 void AAuraProjectile::OnSphereOverlap(
@@ -41,4 +50,48 @@ void AAuraProjectile::OnSphereOverlap(
 	const FHitResult& SweepResult
 )
 {
+	if (GetOwner() == OtherActor)
+	{
+		return;
+	}
+	PlayImpactEffect();
+	if (HasAuthority())
+	{
+		Destroy();
+	}
+	else
+	{
+		bHit = true;
+	}
+}
+
+void AAuraProjectile::PlayImpactEffect() const
+{
+	if (ImpactSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			ImpactSound,
+			GetActorLocation(),
+			FRotator::ZeroRotator
+		);
+	}
+	if (ImpactEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this,
+			ImpactEffect,
+			GetActorLocation()
+		);
+	}
+	TravelSoundComponent->Stop();
+}
+
+void AAuraProjectile::Destroyed()
+{
+	if (!bHit && !HasAuthority())
+	{
+		PlayImpactEffect();
+	}
+	Super::Destroyed();
 }

@@ -12,7 +12,6 @@
 AAuraEffectActor::AAuraEffectActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot")));
 }
 
@@ -51,13 +50,22 @@ void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, const FGameplayEffectConfig& GameplayEffectConfig)
 {
 	check(GameplayEffectConfig.GameplayEffectClass);
-	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
+	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	))
 	{
 		FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
 		EffectContextHandle.AddSourceObject(this);
-		const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(GameplayEffectConfig.GameplayEffectClass, ActorLevel, EffectContextHandle);
-		const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
-		bool bIsInfiniteEffect = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite; 
+		const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
+			GameplayEffectConfig.GameplayEffectClass,
+			ActorLevel,
+			EffectContextHandle
+		);
+		const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
+			*EffectSpecHandle.Data.Get()
+		);
+		bool bIsInfiniteEffect = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy ==
+			EGameplayEffectDurationType::Infinite;
 		if (bIsInfiniteEffect && GameplayEffectConfig.IsRemoveOnEndOverlap())
 		{
 			ActiveEffectHandles.Add(ActiveEffectHandle, TargetAbilitySystem);
@@ -71,7 +79,9 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, const FGameplayE
 
 void AAuraEffectActor::RemoveEffectsFromTarget(AActor* TargetActor)
 {
-	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
+	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	))
 	{
 		TArray<FActiveGameplayEffectHandle> HandlesToRemove;
 		for (auto HandlePair : ActiveEffectHandles)
@@ -80,7 +90,7 @@ void AAuraEffectActor::RemoveEffectsFromTarget(AActor* TargetActor)
 			{
 				TargetAbilitySystem->RemoveActiveGameplayEffect(HandlePair.Key, 1);
 				HandlesToRemove.Add(HandlePair.Key);
-			}				
+			}
 		}
 		for (auto Handle : HandlesToRemove)
 		{
@@ -88,6 +98,3 @@ void AAuraEffectActor::RemoveEffectsFromTarget(AActor* TargetActor)
 		}
 	}
 }
-
-
-
