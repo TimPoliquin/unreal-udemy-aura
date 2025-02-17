@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "AuraBaseCharacter.h"
 #include "Interaction/HighlightInterface.h"
+#include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AuraEnemy.generated.h"
+
+class UWidgetComponent;
 
 UCLASS()
 class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterface
@@ -14,6 +17,7 @@ class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterfac
 
 public:
 	AAuraEnemy();
+	void InitializeAttributeDelegates();
 	virtual void Tick(float DeltaTime) override;
 
 	// IHighlightInterface
@@ -25,6 +29,11 @@ public:
 		return Level;
 	}
 
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	FOnAttributeChangedSignature OnHealthChanged;
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	FOnAttributeChangedSignature OnMaxHealthChanged;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeAbilityActorInfo() override;
@@ -33,6 +42,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Default Attributes")
 	int32 Level = 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> HealthWidget;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Highlight")

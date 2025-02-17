@@ -7,6 +7,7 @@
 #include "AuraProjectileSpell.generated.h"
 
 class AAuraProjectile;
+class UGameplayEffect;
 /**
  * 
  */
@@ -18,6 +19,8 @@ class AURA_API UAuraProjectileSpell : public UAuraGameplayAbility
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AAuraProjectile> ProjectileClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 	virtual void ActivateAbility(
 		const FGameplayAbilitySpecHandle Handle,
@@ -36,4 +39,6 @@ private:
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float Pitch = 0.f;
+
+	FGameplayEffectSpecHandle MakeDamageEffectSpecHandle() const;
 };

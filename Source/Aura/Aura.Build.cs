@@ -9,7 +9,7 @@ public class Aura : ModuleRules
 		this.PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		this.PublicDependencyModuleNames.AddRange(new[]
-			{ "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG" });
+			{ "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG", "SlateCore" });
 
 		this.PrivateDependencyModuleNames.AddRange(new[]
 			{ "GameplayTags", "GameplayTasks", "NavigationSystem", "Niagara" });
