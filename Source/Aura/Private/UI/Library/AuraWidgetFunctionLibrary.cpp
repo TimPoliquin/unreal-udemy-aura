@@ -40,3 +40,22 @@ void UAuraWidgetFunctionLibrary::SetProgressBarImage(
 	ProgressBar->SetWidgetStyle(Style);
 	ProgressBar->SetFillColorAndOpacity(FColor::White);
 }
+
+void UAuraWidgetFunctionLibrary::InterpolateProgressBarValue(
+	UProgressBar* ProgressBar,
+	const float TargetValue,
+	const float DeltaTime,
+	const float InterpSpeed
+)
+{
+	if (ProgressBar->GetVisibility() == ESlateVisibility::Hidden)
+	{
+		return;
+	}
+	if (TargetValue == ProgressBar->GetPercent())
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Interpolating progress bar"))
+	ProgressBar->SetPercent(FMath::FInterpTo(ProgressBar->GetPercent(), TargetValue, DeltaTime, InterpSpeed));
+}

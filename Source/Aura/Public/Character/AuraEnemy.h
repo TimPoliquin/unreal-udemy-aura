@@ -17,7 +17,6 @@ class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterfac
 
 public:
 	AAuraEnemy();
-	void InitializeAttributeDelegates();
 	virtual void Tick(float DeltaTime) override;
 
 	// IHighlightInterface
@@ -49,4 +48,6 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Highlight")
 	uint8 HighlightCustomDepthStencilValue = 250;
+
+	void InitializeAttributeDelegates();
 };

@@ -34,4 +34,15 @@ public:
 		UProgressBar* ProgressBar,
 		const FSlateBrush& FillImage
 	);
+
+	UFUNCTION(
+		BlueprintCallable,
+		Category = "AuraWidgetFunctionLibrary|ProgressBar"
+	)
+	static void InterpolateProgressBarValue(
+		UProgressBar* ProgressBar,
+		float TargetValue,
+		float DeltaTime,
+		float InterpSpeed
+	);
 };
