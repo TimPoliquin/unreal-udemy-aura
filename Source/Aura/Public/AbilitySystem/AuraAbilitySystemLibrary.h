@@ -35,6 +35,12 @@ public:
 		UAbilitySystemComponent* AbilitySystemComponent
 	);
 
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
+	static void GrantStartupAbilities(
+		const UObject* WorldContextObject,
+		UAbilitySystemComponent* AbilitySystemComponent
+	);
+
 private:
 	static void GetWidgetControllerParams(
 		const UObject* WorldContextObject,

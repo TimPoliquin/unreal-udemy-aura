@@ -47,6 +47,11 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_Action3;
 	FGameplayTag InputTag_Action4;
 
+	/** Effect Tags **/
+	FGameplayTag Effect_HitReact;
+
+	FGameplayTag Damage;
+
 private:
 	static FAuraGameplayTags Instance;
 };

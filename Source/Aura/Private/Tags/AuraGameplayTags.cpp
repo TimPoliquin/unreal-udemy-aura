@@ -105,6 +105,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.Action4"),
 		FString("Input tag for Action 4")
 	);
+
+	// Effect Tags
+	Instance.Effect_HitReact = TagManager.AddNativeGameplayTag(
+		FName("Effect.HitReact"),
+		FString("Tag applied when character is reacting to a hit")
+	);
+
+	Instance.Damage = TagManager.AddNativeGameplayTag(
+		FName("Damage"),
+		FString("Damage")
+	);
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

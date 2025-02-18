@@ -77,17 +77,29 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT("Changed Health on %s, Health: %f"),
-			*Props.Target.AvatarActor->GetName(),
-			GetHealth()
-		);
 	}
 	else if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		const float IncomingDamage = GetIncomingDamage();
+		SetIncomingDamage(0.f);
+		if (IncomingDamage > 0.f)
+		{
+			const float NewHealth = GetHealth() - IncomingDamage;
+			const bool bFatal = NewHealth <= 0.f;
+			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
+			if (!bFatal)
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(FAuraGameplayTags::Get().Effect_HitReact);
+				Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
+					TagContainer
+				);
+			}
+		}
 	}
 }
 

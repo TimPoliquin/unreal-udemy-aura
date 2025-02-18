@@ -57,6 +57,7 @@ void AAuraEnemy::BeginPlay()
 	InitializeAbilityActorInfo();
 	InitializeDefaultAttributes();
 	InitializeAttributeDelegates();
+	UAuraAbilitySystemLibrary::GrantStartupAbilities(this, AbilitySystemComponent);
 	GetMesh()->SetCustomDepthStencilValue(HighlightCustomDepthStencilValue);
 	if (Weapon)
 	{

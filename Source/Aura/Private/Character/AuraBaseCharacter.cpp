@@ -7,6 +7,8 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 AAuraBaseCharacter::AAuraBaseCharacter()
 {
@@ -25,6 +27,14 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 void AAuraBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	AbilitySystemComponent->RegisterGameplayTagEvent(
+		FAuraGameplayTags::Get().Effect_HitReact,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(
+		this,
+		&AAuraBaseCharacter::OnHitReactTagChanged
+	);
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
 FVector AAuraBaseCharacter::GetCombatSocketLocation() const
@@ -49,6 +59,19 @@ void AAuraBaseCharacter::AddCharacterAbilities()
 		AbilitySystemComponent
 	);
 	AuraAbilitySystemComponent->AddCharacterAbilities(StartingAbilities);
+}
+
+void AAuraBaseCharacter::OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bHitReacting = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bHitReacting
+		                                       ? 0
+		                                       : BaseWalkSpeed;
+}
+
+UAnimMontage* AAuraBaseCharacter::GetHitReactMontage_Implementation()
+{
+	return HitReactMontage;
 }
 
 
