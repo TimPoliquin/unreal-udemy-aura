@@ -3,6 +3,9 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Game/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
@@ -32,6 +35,23 @@ UAttributeMenuWidgetController* UAuraAbilitySystemLibrary::GetAttributeMenuWidge
 	return nullptr;
 }
 
+void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
+	const UObject* WorldContextObject,
+	const ECharacterClass CharacterClass,
+	const float Level,
+	UAbilitySystemComponent* AbilitySystemComponent
+)
+{
+	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	{
+		const UCharacterClassInfo* ClassInfo = GameMode->GetCharacterClassInfo();
+		const FCharacterClassDefaultInfo DefaultInfo = ClassInfo->GetClassDefaultInfo(CharacterClass);
+		ApplyGameplayEffectSpec(AbilitySystemComponent, DefaultInfo.PrimaryAttributes, Level);
+		ApplyGameplayEffectSpec(AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
+		ApplyGameplayEffectSpec(AbilitySystemComponent, ClassInfo->VitalAttributes, Level);
+	}
+}
+
 void UAuraAbilitySystemLibrary::GetWidgetControllerParams(
 	const UObject* WorldContextObject,
 	FWidgetControllerParams& FWidgetControllerParams
@@ -56,4 +76,20 @@ AAuraHUD* UAuraAbilitySystemLibrary::GetAuraHUD(const UObject* WorldContextObjec
 		return Cast<AAuraHUD>(PlayerController->GetHUD());
 	}
 	return nullptr;
+}
+
+void UAuraAbilitySystemLibrary::ApplyGameplayEffectSpec(
+	UAbilitySystemComponent* AbilitySystemComponent,
+	const TSubclassOf<UGameplayEffect>& GameplayEffectClass,
+	const float Level
+)
+{
+	FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
+	ContextHandle.AddSourceObject(AbilitySystemComponent->GetAvatarActor());
+	const FGameplayEffectSpecHandle EffectSpec = AbilitySystemComponent->MakeOutgoingSpec(
+		GameplayEffectClass,
+		Level,
+		ContextHandle
+	);
+	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpec.Data.Get());
 }

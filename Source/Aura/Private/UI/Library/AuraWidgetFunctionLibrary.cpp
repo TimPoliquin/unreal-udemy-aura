@@ -56,6 +56,5 @@ void UAuraWidgetFunctionLibrary::InterpolateProgressBarValue(
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Interpolating progress bar"))
 	ProgressBar->SetPercent(FMath::FInterpTo(ProgressBar->GetPercent(), TargetValue, DeltaTime, InterpSpeed));
 }
