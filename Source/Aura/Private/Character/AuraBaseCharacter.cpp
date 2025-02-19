@@ -91,7 +91,40 @@ void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Dissolve();
 }
+
+void AAuraBaseCharacter::Dissolve()
+{
+	Dissolve(
+		GetMesh(),
+		DissolveMaterialInstance,
+		&AAuraBaseCharacter::StartDissolveTimeline
+	);
+	Dissolve(
+		Weapon,
+		WeaponDissolveMaterialInstance,
+		&AAuraBaseCharacter::StartWeaponDissolveTimeline
+	);
+}
+
+void AAuraBaseCharacter::Dissolve(
+	UMeshComponent* Mesh,
+	UMaterialInstance* MaterialInstance,
+	void (AAuraBaseCharacter::*Callback)(UMaterialInstanceDynamic*)
+)
+{
+	if (IsValid(Mesh) && IsValid(MaterialInstance))
+	{
+		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
+			MaterialInstance,
+			this
+		);
+		Mesh->SetMaterial(0, DynamicMaterialInstance);
+		(this->*Callback)(DynamicMaterialInstance);
+	}
+}
+
 
 void AAuraBaseCharacter::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const
 {

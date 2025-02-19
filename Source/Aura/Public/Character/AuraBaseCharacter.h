@@ -65,6 +65,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float BaseWalkSpeed = 250.f;
 
+	/** Dissolve Effect */
+	void Dissolve();
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartDissolveTimeline(UMaterialInstanceDynamic* DisolveMaterialInstance);
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartWeaponDissolveTimeline(UMaterialInstanceDynamic* DisolveMaterialInstance);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Materials|Disolve")
+	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Materials|Disolve")
+	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 
 private:
@@ -74,4 +85,9 @@ private:
 	TObjectPtr<UAnimMontage> HitReactMontage;
 
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
+	void Dissolve(
+		UMeshComponent* Mesh,
+		UMaterialInstance* MaterialInstance,
+		void (AAuraBaseCharacter::*Callback)(UMaterialInstanceDynamic*)
+	);
 };
