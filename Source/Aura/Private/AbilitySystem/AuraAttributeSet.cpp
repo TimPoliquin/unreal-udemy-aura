@@ -5,8 +5,11 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
+#include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
@@ -107,12 +110,9 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 		Props.Source.Character = Props.Source.Controller->GetCharacter();
 	}
 
-	Props.Target.AvatarActor = Data.Target.GetAvatarActor();
+	Props.Target.AvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
 	Props.Target.Controller = Data.Target.AbilityActorInfo->PlayerController.Get();
-	if (Props.Target.Controller)
-	{
-		Props.Target.Character = Props.Target.Controller->GetCharacter();
-	}
+	Props.Target.Character = Cast<ACharacter>(Props.Target.AvatarActor);
 	Props.Target.AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		Props.Target.AvatarActor
 	);
@@ -141,6 +141,20 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 			{
 				CombatInterface->Die();
 			}
+		}
+		ShowDamageText(Props, IncomingDamage);
+	}
+}
+
+void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const float& IncomingDamage) const
+{
+	if (Props.Source.Character != Props.Target.Character)
+	{
+		if (AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(
+			UGameplayStatics::GetPlayerController(Props.Source.Character, 0)
+		))
+		{
+			PlayerController->ShowDamageNumber(Props.Target.Character, IncomingDamage);
 		}
 	}
 }
