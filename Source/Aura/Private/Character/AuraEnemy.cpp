@@ -99,3 +99,9 @@ void AAuraEnemy::UnHighlightActor()
 		Weapon->SetRenderCustomDepth(false);
 	}
 }
+
+void AAuraEnemy::Die()
+{
+	Super::Die();
+	SetLifeSpan(LifeSpan);
+}

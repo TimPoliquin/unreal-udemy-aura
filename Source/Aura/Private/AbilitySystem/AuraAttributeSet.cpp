@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
+#include "Interaction/CombatInterface.h"
 #include "Net/UnrealNetwork.h"
 #include "Tags/AuraGameplayTags.h"
 
@@ -84,22 +85,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	}
 	else if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
-		const float IncomingDamage = GetIncomingDamage();
-		SetIncomingDamage(0.f);
-		if (IncomingDamage > 0.f)
-		{
-			const float NewHealth = GetHealth() - IncomingDamage;
-			const bool bFatal = NewHealth <= 0.f;
-			SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
-			if (!bFatal)
-			{
-				FGameplayTagContainer TagContainer;
-				TagContainer.AddTag(FAuraGameplayTags::Get().Effect_HitReact);
-				Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
-					TagContainer
-				);
-			}
-		}
+		HandleIncomingDamage(Props);
 	}
 }
 
@@ -130,4 +116,31 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 	Props.Target.AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		Props.Target.AvatarActor
 	);
+}
+
+void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
+{
+	const float IncomingDamage = GetIncomingDamage();
+	SetIncomingDamage(0.f);
+	if (IncomingDamage > 0.f)
+	{
+		const float NewHealth = GetHealth() - IncomingDamage;
+		const bool bFatal = NewHealth <= 0.f;
+		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
+		if (!bFatal)
+		{
+			FGameplayTagContainer TagContainer;
+			TagContainer.AddTag(FAuraGameplayTags::Get().Effect_HitReact);
+			Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
+				TagContainer
+			);
+		}
+		else
+		{
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.Target.AvatarActor))
+			{
+				CombatInterface->Die();
+			}
+		}
+	}
 }
