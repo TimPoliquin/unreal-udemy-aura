@@ -1,7 +1,7 @@
 // Copyright Alien Shores
 
 
-#include "AbilitySystem/MMC/MMC_MaxMana.h"
+#include "Aura/Public/AbilitySystem/Calculations/MMC_MaxMana.h"
 
 // Copyright Alien Shores
 

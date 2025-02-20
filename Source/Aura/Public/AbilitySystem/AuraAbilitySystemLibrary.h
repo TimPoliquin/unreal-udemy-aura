@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class UCharacterClassInfo;
 class UGameplayEffect;
 class UAbilitySystemComponent;
 enum class ECharacterClass : uint8;
@@ -40,6 +41,10 @@ public:
 		const UObject* WorldContextObject,
 		UAbilitySystemComponent* AbilitySystemComponent
 	);
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
+	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	static int GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent);
 
 private:
 	static void GetWidgetControllerParams(

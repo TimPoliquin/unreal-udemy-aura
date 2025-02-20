@@ -1,7 +1,7 @@
 // Copyright Alien Shores
 
 
-#include "AbilitySystem/MMC/MMC_MaxHealth.h"
+#include "Aura/Public/AbilitySystem/Calculations/MMC_MaxHealth.h"
 
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Interaction/CombatInterface.h"

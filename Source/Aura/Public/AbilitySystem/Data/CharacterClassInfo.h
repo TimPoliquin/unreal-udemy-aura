@@ -45,6 +45,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Common Class Defaults")
 	TArray<TSubclassOf<UGameplayAbility>> CommonAbilities;
+	UPROPERTY(EditDefaultsOnly, Category="Common Class Defaults|Damage")
+	TObjectPtr<UCurveTable> DamageCalculationCoefficients;
 
 	FCharacterClassDefaultInfo GetClassDefaultInfo(const ECharacterClass CharacterClass) const;
+
+	float GetArmorPenetrationCoefficient(const int Level) const;
+	float GetEffectiveArmorCoefficient(const int Level) const;
+	float GetCriticalHitResistanceCoefficient(const int Level) const;
 };
