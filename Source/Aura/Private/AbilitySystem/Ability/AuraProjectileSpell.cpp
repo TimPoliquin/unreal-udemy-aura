@@ -49,7 +49,11 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		);
 
 		SpawnedProjectile->SetInstigator(Cast<APawn>(OwningActor));
-		FGameplayEffectSpecHandle DamageSpecHandle = MakeDamageEffectSpecHandle();
+		FGameplayEffectSpecHandle DamageSpecHandle = MakeDamageEffectSpecHandle(
+			SpawnedProjectile,
+			ProjectileTargetLocation
+		);
+		DamageSpecHandle.Data.Get()->GetContext().AddSourceObject(SpawnedProjectile);
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
 			DamageSpecHandle,
 			FAuraGameplayTags::Get().Damage,
@@ -60,14 +64,29 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 	}
 }
 
-FGameplayEffectSpecHandle UAuraProjectileSpell::MakeDamageEffectSpecHandle() const
+FGameplayEffectSpecHandle UAuraProjectileSpell::MakeDamageEffectSpecHandle(
+	AActor* SourceObject,
+	const FVector& TargetLocation
+) const
 {
 	const UAbilitySystemComponent* SourceAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		GetAvatarActorFromActorInfo()
 	);
+	FGameplayEffectContextHandle ContextHandle = SourceAbilitySystem->MakeEffectContext();
+	ContextHandle.SetAbility(this);
+	ContextHandle.AddSourceObject(SourceObject);
+	// Add actors to the context
+	TArray<TWeakObjectPtr<AActor>> Actors;
+	Actors.Add(SourceObject);
+	ContextHandle.AddActors(Actors);
+	// Set hit result on the context
+	FHitResult HitResult;
+	HitResult.Location = TargetLocation;
+	ContextHandle.AddHitResult(HitResult);
+	// Create outgoing spec
 	return SourceAbilitySystem->MakeOutgoingSpec(
 		DamageEffectClass,
 		GetAbilityLevel(),
-		SourceAbilitySystem->MakeEffectContext()
+		ContextHandle
 	);
 }

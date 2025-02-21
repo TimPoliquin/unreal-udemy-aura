@@ -40,5 +40,5 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float Pitch = 0.f;
 
-	FGameplayEffectSpecHandle MakeDamageEffectSpecHandle() const;
+	FGameplayEffectSpecHandle MakeDamageEffectSpecHandle(AActor* SourceObject, const FVector& TargetLocation) const;
 };
