@@ -263,5 +263,8 @@ private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
 	void HandleIncomingDamage(const FEffectProperties& Props);
-	void ShowDamageText(const FEffectProperties& Props, const float& IncomingDamage) const;
+	void ShowDamageText(
+		const FEffectProperties& Props,
+		const float& IncomingDamage
+	) const;
 };

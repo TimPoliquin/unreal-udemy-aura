@@ -76,7 +76,12 @@ public:
 	virtual void PlayerTick(float DeltaTime) override;
 
 	UFUNCTION(Client, Reliable)
-	virtual void ShowDamageNumber(AActor* Target, float DamageAmount);
+	virtual void ShowDamageNumber(
+		AActor* Target,
+		float DamageAmount,
+		const bool IsBlockedHit,
+		const bool IsCriticalHit
+	);
 
 protected:
 	virtual void BeginPlay() override;

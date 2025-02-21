@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Tags/AuraGameplayTags.h"
@@ -52,7 +53,7 @@ void UExecCalc_Damage::Execute_Implementation(
 ) const
 {
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
-
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	FAggregatorEvaluateParameters EvaluateParameters;
 	EvaluateParameters.SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
 	EvaluateParameters.TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
@@ -64,6 +65,7 @@ void UExecCalc_Damage::Execute_Implementation(
 	if (IsAttackBlockedByTarget(ExecutionParams, EvaluateParameters))
 	{
 		Damage *= .5f;
+		UAuraAbilitySystemLibrary::SetIsBlockedHit(EffectContextHandle, true);
 	}
 	// Reduce damage by a percentage based on target's effective armor
 	Damage *= (100 - GetTargetEffectiveArmor(ExecutionParams, EvaluateParameters)) / 100.f;
@@ -74,6 +76,7 @@ void UExecCalc_Damage::Execute_Implementation(
 			ExecutionParams,
 			EvaluateParameters
 		);
+		UAuraAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, true);
 	}
 
 	const FGameplayModifierEvaluatedData EvaluatedData(

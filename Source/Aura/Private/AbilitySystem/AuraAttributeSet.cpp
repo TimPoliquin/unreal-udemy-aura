@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -154,7 +155,12 @@ void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const flo
 			UGameplayStatics::GetPlayerController(Props.Source.Character, 0)
 		))
 		{
-			PlayerController->ShowDamageNumber(Props.Target.Character, IncomingDamage);
+			PlayerController->ShowDamageNumber(
+				Props.Target.Character,
+				IncomingDamage,
+				UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle),
+				UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle)
+			);
 		}
 	}
 }
