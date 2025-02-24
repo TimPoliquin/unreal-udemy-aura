@@ -9,6 +9,8 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraEnemy.generated.h"
 
+class UBehaviorTree;
+class AAuraAIController;
 class UWidgetComponent;
 
 UCLASS()
@@ -19,6 +21,7 @@ class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterfac
 public:
 	AAuraEnemy();
 	virtual void Tick(float DeltaTime) override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	// IHighlightInterface
 	virtual void HighlightActor() override;
@@ -53,6 +56,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Highlight")

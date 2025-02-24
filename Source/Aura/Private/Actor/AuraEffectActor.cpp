@@ -7,12 +7,17 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayEffectTypes.h"
 #include "ActiveGameplayEffectHandle.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Aura.h"
+#include "Utils/TagUtils.h"
 
 
 AAuraEffectActor::AAuraEffectActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot")));
+	ApplyToTags.Add(TAG_PLAYER);
+	ApplyToTags.Add(TAG_ENEMY);
 }
 
 
@@ -23,6 +28,11 @@ void AAuraEffectActor::BeginPlay()
 
 void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 {
+	if (!TagUtils::HasAnyTag(TargetActor, ApplyToTags))
+	{
+		// effect does not apply to target.
+		return;
+	}
 	for (auto GameplayEffectConfig : GameplayEffectConfigs)
 	{
 		if (GameplayEffectConfig.IsApplyOnOverlap())
@@ -34,6 +44,11 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 
 void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 {
+	if (!TagUtils::HasAnyTag(TargetActor, ApplyToTags))
+	{
+		// effect does not apply to target.
+		return;
+	}
 	for (auto GameplayEffectConfig : GameplayEffectConfigs)
 	{
 		if (GameplayEffectConfig.IsApplyOnEndOverlap())
@@ -64,13 +79,12 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, const FGameplayE
 		const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
 			*EffectSpecHandle.Data.Get()
 		);
-		bool bIsInfiniteEffect = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy ==
-			EGameplayEffectDurationType::Infinite;
+		const bool bIsInfiniteEffect = UAuraAbilitySystemLibrary::IsInfiniteEffect(EffectSpecHandle);
 		if (bIsInfiniteEffect && GameplayEffectConfig.IsRemoveOnEndOverlap())
 		{
 			ActiveEffectHandles.Add(ActiveEffectHandle, TargetAbilitySystem);
 		}
-		if (bDestroyOnEffectApplication)
+		if (bDestroyOnEffectApplication && !bIsInfiniteEffect)
 		{
 			Destroy();
 		}

@@ -17,6 +17,7 @@ enum class EEffectApplicationPolicy : uint8
 	ApplyOnEndOverlap,
 	DoNotApply
 };
+
 UENUM(BlueprintType)
 enum class EEffectRemovalPolicy : uint8
 {
@@ -38,7 +39,7 @@ struct FGameplayEffectConfig
 	EEffectRemovalPolicy RemovalPolicy = EEffectRemovalPolicy::DoNotRemove;
 
 	bool IsApplyOnOverlap() const { return EffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap; }
-	bool IsApplyOnEndOverlap() const {return EffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap; }
+	bool IsApplyOnEndOverlap() const { return EffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap; }
 	bool IsRemoveOnEndOverlap() const { return RemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap; }
 };
 
@@ -62,12 +63,14 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
 	TArray<FGameplayEffectConfig> GameplayEffectConfigs;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-	bool bDestroyOnEffectApplication = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
-        float ActorLevel = 1.f;
+	bool bDestroyOnEffectApplication = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	TArray<FName> ApplyToTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	float ActorLevel = 1.f;
 
 	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
 

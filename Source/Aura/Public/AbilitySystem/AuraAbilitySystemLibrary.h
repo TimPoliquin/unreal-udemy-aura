@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+struct FGameplayEffectSpecHandle;
 struct FGameplayEffectContextHandle;
 class UCharacterClassInfo;
 class UGameplayEffect;
@@ -44,6 +45,12 @@ public:
 	);
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static bool IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle);
+
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static bool IsInstantEffect(const FGameplayEffectSpecHandle& SpecHandle);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);

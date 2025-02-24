@@ -78,6 +78,18 @@ UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObj
 	return nullptr;
 }
 
+bool UAuraAbilitySystemLibrary::IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle)
+{
+	return SpecHandle.Data.Get()->Def.Get()->DurationPolicy ==
+		EGameplayEffectDurationType::Infinite;
+}
+
+bool UAuraAbilitySystemLibrary::IsInstantEffect(const FGameplayEffectSpecHandle& SpecHandle)
+{
+	return SpecHandle.Data.Get()->Def.Get()->DurationPolicy ==
+		EGameplayEffectDurationType::Instant;
+}
+
 int UAuraAbilitySystemLibrary::GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	if (AbilitySystemComponent)
