@@ -162,7 +162,7 @@ void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const flo
 	if (Props.Source.Character != Props.Target.Character)
 	{
 		if (AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(
-			UGameplayStatics::GetPlayerController(Props.Source.Character, 0)
+			Props.Source.Character->GetController()
 		))
 		{
 			PlayerController->ShowDamageNumber(

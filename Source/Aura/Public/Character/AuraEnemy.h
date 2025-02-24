@@ -59,4 +59,5 @@ private:
 	uint8 HighlightCustomDepthStencilValue = 250;
 
 	void InitializeAttributeDelegates();
+	void InitializeStartupAbilities() const;
 };

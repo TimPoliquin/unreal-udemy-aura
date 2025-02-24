@@ -56,7 +56,7 @@ void AAuraPlayerController::ShowDamageNumber_Implementation(
 	const bool IsCriticalHit
 )
 {
-	if (IsValid(Target) && DamageTextComponentClass)
+	if (IsValid(Target) && DamageTextComponentClass && IsLocalController())
 	{
 		UDamageTextComponent* DamageText = NewObject<UDamageTextComponent>(Target, DamageTextComponentClass);
 		DamageText->RegisterComponent();

@@ -131,7 +131,7 @@ float UExecCalc_Damage::GetDamageTypeDamage(
 		ResistanceTag
 	);
 	checkf(
-		ResistanceDef == nullptr,
+		ResistanceDef,
 		TEXT("TagsToCaptureDefs doesn't contain Tag: [%s]"),
 		*ResistanceTag.ToString()
 	);

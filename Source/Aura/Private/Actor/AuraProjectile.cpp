@@ -52,7 +52,8 @@ void AAuraProjectile::OnSphereOverlap(
 	const FHitResult& SweepResult
 )
 {
-	if (GetOwner() == OtherActor)
+	if (DamageEffectSpecHandle.Data.IsValid() && DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() ==
+		OtherActor)
 	{
 		return;
 	}
@@ -75,6 +76,11 @@ void AAuraProjectile::OnSphereOverlap(
 
 void AAuraProjectile::PlayImpactEffect() const
 {
+	if (bHit)
+	{
+		// Only play impact effect once
+		return;
+	}
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(
@@ -92,12 +98,15 @@ void AAuraProjectile::PlayImpactEffect() const
 			GetActorLocation()
 		);
 	}
-	TravelSoundComponent->Stop();
+	if (TravelSoundComponent)
+	{
+		TravelSoundComponent->Stop();
+	}
 }
 
 void AAuraProjectile::Destroyed()
 {
-	if (!bHit && !HasAuthority())
+	if (!HasAuthority())
 	{
 		PlayImpactEffect();
 	}

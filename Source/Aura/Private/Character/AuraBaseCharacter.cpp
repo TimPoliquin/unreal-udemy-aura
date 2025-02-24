@@ -27,13 +27,6 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 void AAuraBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	AbilitySystemComponent->RegisterGameplayTagEvent(
-		FAuraGameplayTags::Get().Effect_HitReact,
-		EGameplayTagEventType::NewOrRemoved
-	).AddUObject(
-		this,
-		&AAuraBaseCharacter::OnHitReactTagChanged
-	);
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
@@ -59,6 +52,13 @@ void AAuraBaseCharacter::AddCharacterAbilities()
 		AbilitySystemComponent
 	);
 	AuraAbilitySystemComponent->AddCharacterAbilities(StartingAbilities);
+	AbilitySystemComponent->RegisterGameplayTagEvent(
+		FAuraGameplayTags::Get().Effect_HitReact,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(
+		this,
+		&AAuraBaseCharacter::OnHitReactTagChanged
+	);
 }
 
 void AAuraBaseCharacter::OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

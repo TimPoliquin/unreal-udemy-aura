@@ -121,7 +121,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Damage"),
 		FString("Damage")
 	);
-	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+	Instance.Damage_Arcane = TagManager.AddNativeGameplayTag(
 		FName("Damage.Arcane"),
 		FString("Arcane Damage")
 	);
@@ -129,11 +129,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Damage.Fire"),
 		FString("Fire Damage")
 	);
-	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+	Instance.Damage_Lightning = TagManager.AddNativeGameplayTag(
 		FName("Damage.Lightning"),
 		FString("Lightning Damage")
 	);
-	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+	Instance.Damage_Physical = TagManager.AddNativeGameplayTag(
 		FName("Damage.Physical"),
 		FString("Physical Damage")
 	);

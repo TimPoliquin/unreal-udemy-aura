@@ -57,7 +57,7 @@ void AAuraEnemy::BeginPlay()
 	InitializeAbilityActorInfo();
 	InitializeDefaultAttributes();
 	InitializeAttributeDelegates();
-	UAuraAbilitySystemLibrary::GrantStartupAbilities(this, AbilitySystemComponent);
+	InitializeStartupAbilities();
 	GetMesh()->SetCustomDepthStencilValue(HighlightCustomDepthStencilValue);
 	if (Weapon)
 	{
@@ -73,7 +73,18 @@ void AAuraEnemy::InitializeAbilityActorInfo()
 
 void AAuraEnemy::InitializeDefaultAttributes() const
 {
-	UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
+	if (HasAuthority())
+	{
+		UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
+	}
+}
+
+void AAuraEnemy::InitializeStartupAbilities() const
+{
+	if (HasAuthority())
+	{
+		UAuraAbilitySystemLibrary::GrantStartupAbilities(this, AbilitySystemComponent);
+	}
 }
 
 
