@@ -54,3 +54,9 @@ public:
 	float GetEffectiveArmorCoefficient(const int Level) const;
 	float GetCriticalHitResistanceCoefficient(const int Level) const;
 };
+
+class CharacterClassUtils
+{
+public:
+	static bool IsRangedAttacker(ECharacterClass CharacterClass);
+};

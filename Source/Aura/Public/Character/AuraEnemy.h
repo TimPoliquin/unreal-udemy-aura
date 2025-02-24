@@ -23,6 +23,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void PossessedBy(AController* NewController) override;
 
+	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
+
 	// IHighlightInterface
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
@@ -61,6 +63,21 @@ protected:
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;
+	/** Attack range for the enemy. Note: This should probably be in the ability instead of the enemy. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float AttackRange = 500.f;
+	/**
+	 * Attack Range Tolerance
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float AttackRangeTolerance = 20.f;
+	/** Targeting range for enemy. If the enemy detects a player within this range, it will move to attack. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float TargetingRange = 4000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float AttackWaitTime = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float AttackWaitDeviation = .5f;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Highlight")

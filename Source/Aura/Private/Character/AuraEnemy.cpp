@@ -111,6 +111,28 @@ void AAuraEnemy::PossessedBy(AController* NewController)
 	AuraAIController = CastChecked<AAuraAIController>(NewController);
 	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
 	AuraAIController->RunBehaviorTree(BehaviorTree);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(
+		FName("IsRanged"),
+		CharacterClassUtils::IsRangedAttacker(CharacterClass)
+	);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(FName("TargetingRange"), TargetingRange);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(
+		FName("AttackRange_Min"),
+		AttackRange - AttackRangeTolerance
+	);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(
+		FName("AttackRange_Max"),
+		AttackRange + AttackRangeTolerance
+	);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(
+		FName("AttackWaitTime"),
+		AttackWaitTime
+	);
+	AuraAIController->GetBlackboardComponent()->SetValueAsFloat(
+		FName("AttackWaitDeviation"),
+		AttackWaitDeviation
+	);
 }
 
 void AAuraEnemy::HighlightActor()
@@ -135,4 +157,10 @@ void AAuraEnemy::Die()
 {
 	Super::Die();
 	SetLifeSpan(LifeSpan);
+}
+
+void AAuraEnemy::OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::OnHitReactTagChanged(CallbackTag, NewCount);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
 }

@@ -31,3 +31,17 @@ float UCharacterClassInfo::GetCriticalHitResistanceCoefficient(const int Level) 
 		FString()
 	)->Eval(Level);
 }
+
+bool CharacterClassUtils::IsRangedAttacker(ECharacterClass CharacterClass)
+{
+	switch (CharacterClass)
+	{
+	case ECharacterClass::Warrior:
+		return false;
+	case ECharacterClass::Elementalist:
+		return true;
+	case ECharacterClass::Ranger:
+		return true;
+	}
+	return false;
+}
