@@ -12,11 +12,18 @@ struct FAuraGameplayTags
 {
 	static FAuraGameplayTags& Get()
 	{
+		if (!Instance.bInitialized)
+		{
+			Instance.InitializeNativeGameplayTags();
+			Instance.bInitialized = true;
+		}
 		return Instance;
 	}
 
 	static void InitializeNativeGameplayTags();
 	static bool IsLeftMouseButton(const FGameplayTag&);
+
+	bool bInitialized = false;
 
 	/** Primary attributes **/
 	FGameplayTag Attributes_Primary_Strength;
@@ -50,8 +57,31 @@ struct FAuraGameplayTags
 	/** Effect Tags **/
 	FGameplayTag Effect_HitReact;
 
+	/** Damage Tags **/
 	FGameplayTag Damage;
+	FGameplayTag Damage_Arcane;
+	FGameplayTag Damage_Fire;
+	FGameplayTag Damage_Lightning;
+	FGameplayTag Damage_Physical;
+
+	/** Resistance Tags **/
+	FGameplayTag Attributes_Resistance_Arcane;
+	FGameplayTag Attributes_Resistance_Fire;
+	FGameplayTag Attributes_Resistance_Lightning;
+	FGameplayTag Attributes_Resistance_Physical;
+
+	FORCEINLINE const TArray<FGameplayTag>& GetDamageTypes() const
+	{
+		return DamageTypes;
+	}
+
+	FORCEINLINE FGameplayTag GetDamageTypeResistanceTag(const FGameplayTag& DamageType) const
+	{
+		return DamageTypesToResistances[DamageType];
+	}
 
 private:
 	static FAuraGameplayTags Instance;
+	TArray<FGameplayTag> DamageTypes;
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 };

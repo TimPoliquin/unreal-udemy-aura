@@ -8,6 +8,10 @@ FAuraGameplayTags FAuraGameplayTags::Instance;
 
 void FAuraGameplayTags::InitializeNativeGameplayTags()
 {
+	if (Instance.bInitialized)
+	{
+		return;
+	}
 	UGameplayTagsManager& TagManager = UGameplayTagsManager::Get();
 	Instance.Attributes_Primary_Strength = TagManager.AddNativeGameplayTag(
 		FName("Attributes.Primary.Strength"),
@@ -112,10 +116,56 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Tag applied when character is reacting to a hit")
 	);
 
+	// Damage Tags
 	Instance.Damage = TagManager.AddNativeGameplayTag(
 		FName("Damage"),
 		FString("Damage")
 	);
+	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+		FName("Damage.Arcane"),
+		FString("Arcane Damage")
+	);
+	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+		FName("Damage.Fire"),
+		FString("Fire Damage")
+	);
+	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+		FName("Damage.Lightning"),
+		FString("Lightning Damage")
+	);
+	Instance.Damage_Fire = TagManager.AddNativeGameplayTag(
+		FName("Damage.Physical"),
+		FString("Physical Damage")
+	);
+	Instance.DamageTypes.Add(Instance.Damage_Arcane);
+	Instance.DamageTypes.Add(Instance.Damage_Fire);
+	Instance.DamageTypes.Add(Instance.Damage_Lightning);
+	Instance.DamageTypes.Add(Instance.Damage_Physical);
+
+	// Resistances
+	Instance.Attributes_Resistance_Arcane = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Resistance.Arcane"),
+		FString("Arcane Damage Resistance")
+	);
+	Instance.Attributes_Resistance_Fire = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Resistance.Fire"),
+		FString("Fire Damage Resistance")
+	);
+	Instance.Attributes_Resistance_Lightning = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Resistance.Lightning"),
+		FString("Lightning Damage Resistance")
+	);
+	Instance.Attributes_Resistance_Physical = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Resistance.Physical"),
+		FString("Physical Damage Resistance")
+	);
+	// Map damage type to resistance attribute
+	Instance.DamageTypesToResistances.Add(Instance.Damage_Arcane, Instance.Attributes_Resistance_Arcane);
+	Instance.DamageTypesToResistances.Add(Instance.Damage_Fire, Instance.Attributes_Resistance_Fire);
+	Instance.DamageTypesToResistances.Add(Instance.Damage_Lightning, Instance.Attributes_Resistance_Lightning);
+	Instance.DamageTypesToResistances.Add(Instance.Damage_Physical, Instance.Attributes_Resistance_Physical);
+
+	Instance.DamageTypesToResistances.GenerateKeyArray(Instance.DamageTypes);
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

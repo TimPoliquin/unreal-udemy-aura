@@ -252,6 +252,48 @@ public:
 		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldMana);
 	}
 
+	/** Resistances **/
+
+	// Resistance - Arcane
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistanceArcane, Category = "Resistance Attributes")
+	FGameplayAttributeData Resistance_Arcane;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Resistance_Arcane);
+	UFUNCTION()
+	FORCEINLINE void OnRep_ResistanceArcane(const FGameplayAttributeData& OldValue) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Resistance_Arcane, OldValue);
+	}
+
+	// Resistance - Fire
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistanceFire, Category = "Resistance Attributes")
+	FGameplayAttributeData Resistance_Fire;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Resistance_Fire);
+	UFUNCTION()
+	FORCEINLINE void OnRep_ResistanceFire(const FGameplayAttributeData& OldValue) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Resistance_Fire, OldValue);
+	}
+
+	// Resistance - Lightning
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistanceLightning, Category = "Resistance Attributes")
+	FGameplayAttributeData Resistance_Lightning;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Resistance_Lightning);
+	UFUNCTION()
+	FORCEINLINE void OnRep_ResistanceLightning(const FGameplayAttributeData& OldValue) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Resistance_Lightning, OldValue);
+	}
+
+	// Resistance - Physical
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ResistancePhysical, Category = "Resistance Attributes")
+	FGameplayAttributeData Resistance_Physical;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Resistance_Physical);
+	UFUNCTION()
+	FORCEINLINE void OnRep_ResistancePhysical(const FGameplayAttributeData& OldValue) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Resistance_Physical, OldValue);
+	}
+
 	/**
 	 *Meta Attributes
 	 */

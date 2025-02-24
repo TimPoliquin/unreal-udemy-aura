@@ -27,9 +27,6 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 {
 	Super::BroadcastInitialValues();
 	check(AttributeInfo);
-	FAuraAttributeInfo StrengthInfo = AttributeInfo->FindAttributeInfoForTag(
-		FAuraGameplayTags::Get().Attributes_Primary_Strength
-	);
 	UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	for (auto& Pair : AuraAttributeSet->TagsToAttributes)
 	{

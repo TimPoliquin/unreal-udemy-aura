@@ -22,6 +22,12 @@ public:
 		FGameplayEffectCustomExecutionOutput& OutExecutionOutput
 	) const override;
 
+	static float GetDamageTypeDamage(
+		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+		const FAggregatorEvaluateParameters& EvaluateParameters,
+		const FGameplayTag& DamageTypeTag
+	);
+
 	static bool IsAttackBlockedByTarget(
 		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 		const FAggregatorEvaluateParameters& EvaluateParameters

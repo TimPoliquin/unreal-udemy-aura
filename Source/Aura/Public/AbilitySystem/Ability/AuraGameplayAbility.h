@@ -20,15 +20,6 @@ public:
 		return StartupInputTags;
 	}
 
-	FORCEINLINE FScalableFloat GetPower() const
-	{
-		return Power;
-	}
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Power")
-	FScalableFloat Power;
-
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TArray<FGameplayTag> StartupInputTags;
