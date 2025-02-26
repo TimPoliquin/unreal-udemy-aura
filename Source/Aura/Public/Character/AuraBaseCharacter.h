@@ -28,7 +28,8 @@ public:
 	/** Combat Interface **/
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
-	virtual FVector GetCombatSocketLocation_Implementation() const override;
+	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() const override;
+	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const override;
 	virtual void Die() override;
 	virtual bool IsDead_Implementation() const override;
 
@@ -48,10 +49,8 @@ protected:
 	{
 	};
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	FName WeaponTipSocketName;
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -92,6 +91,8 @@ private:
 	TArray<TSubclassOf<UGameplayAbility>> StartingAbilities;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TArray<FTaggedMontage> AttackMontages;
 
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 	void Dissolve(

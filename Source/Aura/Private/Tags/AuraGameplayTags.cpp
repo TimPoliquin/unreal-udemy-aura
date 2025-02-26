@@ -167,9 +167,24 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	Instance.DamageTypesToResistances.GenerateKeyArray(Instance.DamageTypes);
 
+	/** Ability Tags */
 	Instance.Abilities_Attack = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Attack"),
 		FString("Attack Abilities parent tag")
+	);
+
+	/** Montage Attack Tags **/
+	Instance.Montage_Attack_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Montage.Attack.Weapon"),
+		FString("Weapon Attack")
+	);
+	Instance.Montage_Attack_RightHand = TagManager.AddNativeGameplayTag(
+		FName("Montage.Attack.RightHand"),
+		FString("Right Hand Attack")
+	);
+	Instance.Montage_Attack_LeftHand = TagManager.AddNativeGameplayTag(
+		FName("Montage.Attack.LeftHand"),
+		FString("Left Hand Attack")
 	);
 }
 

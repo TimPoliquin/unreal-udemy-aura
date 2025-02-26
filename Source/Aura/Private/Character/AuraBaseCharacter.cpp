@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Tags/AuraGameplayTags.h"
+#include "Utils/ArrayUtils.h"
 
 AAuraBaseCharacter::AAuraBaseCharacter()
 {
@@ -30,9 +31,24 @@ void AAuraBaseCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
-FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation() const
+FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const
 {
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	if (const FTaggedMontage* ActiveMontageDef = AttackMontages.FindByPredicate(
+		[MontageTag](const FTaggedMontage& Item)
+		{
+			return Item.MontageTag.MatchesTagExact(MontageTag);
+		}
+	))
+	{
+		const FName& SocketName = ActiveMontageDef->SocketName;
+		if (IsValid(Weapon) && Weapon->HasAnySockets() && Weapon->GetSocketByName(SocketName))
+		{
+			return Weapon->GetSocketLocation(SocketName);
+		}
+		return GetMesh()->GetSocketLocation(SocketName);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("%s: No montage definition found for tag [%s]"), *GetName(), *MontageTag.ToString());
+	return GetActorLocation();
 }
 
 void AAuraBaseCharacter::InitializeDefaultAttributes() const
@@ -78,6 +94,11 @@ AActor* AAuraBaseCharacter::GetAvatar_Implementation()
 UAnimMontage* AAuraBaseCharacter::GetHitReactMontage_Implementation()
 {
 	return HitReactMontage;
+}
+
+TArray<FTaggedMontage> AAuraBaseCharacter::GetAttackMontages_Implementation() const
+{
+	return AttackMontages;
 }
 
 void AAuraBaseCharacter::Die()

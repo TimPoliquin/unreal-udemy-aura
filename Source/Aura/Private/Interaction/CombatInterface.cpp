@@ -3,6 +3,8 @@
 
 #include "Interaction/CombatInterface.h"
 
+#include "Utils/ArrayUtils.h"
+
 
 // Add default functionality here for any ICombatInterface functions that are not pure virtual.
 int32 ICombatInterface::GetCharacterLevel() const
@@ -36,4 +38,13 @@ bool ICombatInterface::IsDead(const AActor* Actor)
 		return Execute_IsDead(Actor);
 	}
 	return false;
+}
+
+TArray<FTaggedMontage> ICombatInterface::GetAttackMontages(const AActor* Actor)
+{
+	if (Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetAttackMontages(Actor);
+	}
+	return TArray<FTaggedMontage>();
 }

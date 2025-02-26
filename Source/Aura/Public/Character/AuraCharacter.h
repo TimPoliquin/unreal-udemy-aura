@@ -22,6 +22,7 @@ public:
 	virtual void OnRep_PlayerState() override;
 	// ICombatInterface
 	virtual int32 GetCharacterLevel() const override;
+	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() override;
 
 protected:
 	virtual void BeginPlay() override;

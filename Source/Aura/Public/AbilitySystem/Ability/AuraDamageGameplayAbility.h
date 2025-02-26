@@ -6,6 +6,7 @@
 #include "AuraGameplayAbility.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
+struct FTaggedMontage;
 /**
  * 
  */
@@ -16,6 +17,9 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 
 	UFUNCTION(BlueprintCallable)
 	void DealDamage(AActor* TargetActor);
+
+	UFUNCTION(BlueprintPure)
+	FTaggedMontage GetRandomAttackMontage() const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")

@@ -3,8 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
+
+USTRUCT(BlueprintType)
+struct FTaggedMontage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* Montage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag MontageTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName SocketName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ImpactRadius = 45.f;
+};
 
 // This class does not need to be modified.
 UINTERFACE(BlueprintType)
@@ -31,9 +50,10 @@ public:
 	AActor* GetAvatar();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	TArray<FName> GetTargetTagsToIgnore();
-
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	FVector GetCombatSocketLocation() const;
+	TArray<FTaggedMontage> GetAttackMontages() const;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag) const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UAnimMontage* GetHitReactMontage();
 
@@ -55,4 +75,6 @@ public:
 	 * @return true if the provided actor implements ICombatInterface and is dead.
 	 */
 	static bool IsDead(const AActor* Actor);
+
+	static TArray<FTaggedMontage> GetAttackMontages(const AActor* Actor);
 };

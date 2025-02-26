@@ -31,7 +31,10 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		return;
 	}
 	check(ProjectileClass);
-	FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(OwningActor);
+	FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(
+		OwningActor,
+		FAuraGameplayTags::Get().Montage_Attack_Weapon
+	);
 	FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
 	Rotation.Pitch = Pitch;
 	FTransform SpawnTransform;
@@ -52,14 +55,19 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		ProjectileTargetLocation
 	);
 	DamageSpecHandle.Data.Get()->GetContext().AddSourceObject(SpawnedProjectile);
-	for (auto& DamageTypePair : DamageTypes)
+	for (const FGameplayTag& DamageTag : FAuraGameplayTags::Get().GetDamageTypes())
 	{
+		float DamageValue = 0.f;
+		if (DamageTypes.Contains(DamageTag))
+		{
+			DamageValue = DamageTypes[DamageTag].GetValueAtLevel(GetAbilityLevel());
+		}
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
 			DamageSpecHandle,
 			// Damage Type
-			DamageTypePair.Key,
+			DamageTag,
 			// Damage Value
-			DamageTypePair.Value.GetValueAtLevel(GetAbilityLevel())
+			DamageValue
 		);
 	}
 	SpawnedProjectile->DamageEffectSpecHandle = DamageSpecHandle;

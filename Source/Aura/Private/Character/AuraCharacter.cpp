@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerController.h"
@@ -88,4 +89,11 @@ int32 AAuraCharacter::GetCharacterLevel() const
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	return AuraPlayerState->GetCharacterLevel();
+}
+
+TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation()
+{
+	TArray<FName> IgnoreTags;
+	IgnoreTags.Add(TAG_PLAYER);
+	return IgnoreTags;
 }
