@@ -35,7 +35,7 @@ public:
 		return Level;
 	}
 
-	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() override;
+	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
 
 	virtual void Die() override;
 	// IEnemyInterface

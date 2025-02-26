@@ -49,7 +49,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	AActor* GetAvatar();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	TArray<FName> GetTargetTagsToIgnore();
+	TArray<FName> GetTargetTagsToIgnore() const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	TArray<FTaggedMontage> GetAttackMontages() const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -77,4 +77,6 @@ public:
 	static bool IsDead(const AActor* Actor);
 
 	static TArray<FTaggedMontage> GetAttackMontages(const AActor* Actor);
+
+	static TArray<FName> GetTargetTagsToIgnore(const AActor* Actor);
 };

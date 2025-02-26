@@ -158,7 +158,7 @@ void AAuraEnemy::UnHighlightActor()
 	}
 }
 
-TArray<FName> AAuraEnemy::GetTargetTagsToIgnore_Implementation()
+TArray<FName> AAuraEnemy::GetTargetTagsToIgnore_Implementation() const
 {
 	TArray<FName> IgnoreTargetTags;
 	IgnoreTargetTags.Add(TAG_ENEMY);

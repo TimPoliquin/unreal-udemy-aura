@@ -91,7 +91,7 @@ int32 AAuraCharacter::GetCharacterLevel() const
 	return AuraPlayerState->GetCharacterLevel();
 }
 
-TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation()
+TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation() const
 {
 	TArray<FName> IgnoreTags;
 	IgnoreTags.Add(TAG_PLAYER);

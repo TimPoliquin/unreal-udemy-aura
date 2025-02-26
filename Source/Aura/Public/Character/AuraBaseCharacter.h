@@ -33,7 +33,7 @@ public:
 	virtual void Die() override;
 	virtual bool IsDead_Implementation() const override;
 
-	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() override
+	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override
 	{
 		return TArray<FName>();
 	};
@@ -49,7 +49,7 @@ protected:
 	{
 	};
 
-	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 	UPROPERTY()

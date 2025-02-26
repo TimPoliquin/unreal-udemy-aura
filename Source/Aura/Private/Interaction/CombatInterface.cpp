@@ -48,3 +48,12 @@ TArray<FTaggedMontage> ICombatInterface::GetAttackMontages(const AActor* Actor)
 	}
 	return TArray<FTaggedMontage>();
 }
+
+TArray<FName> ICombatInterface::GetTargetTagsToIgnore(const AActor* Actor)
+{
+	if (Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetTargetTagsToIgnore(Actor);
+	}
+	return TArray<FName>();
+}

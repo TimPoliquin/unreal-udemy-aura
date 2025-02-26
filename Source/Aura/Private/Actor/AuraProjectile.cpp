@@ -11,6 +11,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
+#include "Interaction/CombatInterface.h"
+#include "Utils/TagUtils.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -38,9 +40,12 @@ void AAuraProjectile::BeginPlay()
 	Super::BeginPlay();
 	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
-	TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
-	TravelSoundComponent->SetSound(TravelSound);
-	TravelSoundComponent->Play();
+	if (TravelSound)
+	{
+		TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
+		TravelSoundComponent->SetSound(TravelSound);
+		TravelSoundComponent->Play();
+	}
 }
 
 void AAuraProjectile::OnSphereOverlap(
@@ -54,6 +59,11 @@ void AAuraProjectile::OnSphereOverlap(
 {
 	if (DamageEffectSpecHandle.Data.IsValid() && DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() ==
 		OtherActor)
+	{
+		return;
+	}
+	const AActor* EffectCauser = DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser();
+	if (TagUtils::HasAnyTag(OtherActor, ICombatInterface::GetTargetTagsToIgnore(EffectCauser)))
 	{
 		return;
 	}
