@@ -7,6 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AI/AuraAIController.h"
+#include "Aura/Aura.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/WidgetComponent.h"
@@ -91,10 +92,14 @@ void AAuraEnemy::InitializeStartupAbilities() const
 {
 	if (HasAuthority())
 	{
-		UAuraAbilitySystemLibrary::GrantStartupAbilities(this, AbilitySystemComponent);
+		UAuraAbilitySystemLibrary::GrantStartupAbilities(
+			this,
+			AbilitySystemComponent,
+			CharacterClass,
+			GetCharacterLevel()
+		);
 	}
 }
-
 
 void AAuraEnemy::Tick(float DeltaTime)
 {
@@ -153,6 +158,13 @@ void AAuraEnemy::UnHighlightActor()
 	}
 }
 
+TArray<FName> AAuraEnemy::GetTargetTagsToIgnore_Implementation()
+{
+	TArray<FName> IgnoreTargetTags;
+	IgnoreTargetTags.Add(TAG_ENEMY);
+	return IgnoreTargetTags;
+}
+
 void AAuraEnemy::Die()
 {
 	Super::Die();
@@ -162,5 +174,8 @@ void AAuraEnemy::Die()
 void AAuraEnemy::OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	Super::OnHitReactTagChanged(CallbackTag, NewCount);
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
 }

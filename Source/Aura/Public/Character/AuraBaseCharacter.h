@@ -25,7 +25,18 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const;
 
+	/** Combat Interface **/
+	virtual AActor* GetAvatar_Implementation() override;
+	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
+	virtual FVector GetCombatSocketLocation_Implementation() const override;
 	virtual void Die() override;
+	virtual bool IsDead_Implementation() const override;
+
+	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() override
+	{
+		return TArray<FName>();
+	};
+	/** Combat Interface End **/
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath();
@@ -41,7 +52,6 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> Weapon;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName WeaponTipSocketName;
-	virtual FVector GetCombatSocketLocation() const override;
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -76,9 +86,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Materials|Disolve")
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
 
-	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
-
 private:
+	bool bDead = false;
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartingAbilities;
 	UPROPERTY(EditAnywhere, Category = "Combat")

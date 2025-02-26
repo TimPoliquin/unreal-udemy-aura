@@ -70,6 +70,9 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Physical;
 
+	/** Abilities **/
+	FGameplayTag Abilities_Attack;
+
 	FORCEINLINE const TArray<FGameplayTag>& GetDamageTypes() const
 	{
 		return DamageTypes;

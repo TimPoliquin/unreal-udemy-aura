@@ -24,49 +24,46 @@ void UAuraProjectileSpell::ActivateAbility(
 
 void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
 {
-	if (!GetAvatarActorFromActorInfo()->HasAuthority())
+	AActor* OwningActor = GetAvatarActorFromActorInfo();
+	if (!OwningActor->HasAuthority())
 	{
 		// Do not execute on client - run on server only
 		return;
 	}
 	check(ProjectileClass);
-	if (const ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo()))
+	FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(OwningActor);
+	FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
+	Rotation.Pitch = Pitch;
+	FTransform SpawnTransform;
+	SpawnTransform.SetLocation(SpawnLocation);
+	SpawnTransform.SetRotation(Rotation.Quaternion());
+
+	AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+		ProjectileClass,
+		SpawnTransform,
+		OwningActor,
+		Cast<APawn>(OwningActor),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+	);
+
+	SpawnedProjectile->SetInstigator(Cast<APawn>(OwningActor));
+	FGameplayEffectSpecHandle DamageSpecHandle = MakeDamageEffectSpecHandle(
+		SpawnedProjectile,
+		ProjectileTargetLocation
+	);
+	DamageSpecHandle.Data.Get()->GetContext().AddSourceObject(SpawnedProjectile);
+	for (auto& DamageTypePair : DamageTypes)
 	{
-		FVector SpawnLocation = CombatInterface->GetCombatSocketLocation();
-		FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
-		Rotation.Pitch = Pitch;
-		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(SpawnLocation);
-		SpawnTransform.SetRotation(Rotation.Quaternion());
-
-		AActor* OwningActor = GetAvatarActorFromActorInfo();
-		AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
-			ProjectileClass,
-			SpawnTransform,
-			OwningActor,
-			Cast<APawn>(OwningActor),
-			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+			DamageSpecHandle,
+			// Damage Type
+			DamageTypePair.Key,
+			// Damage Value
+			DamageTypePair.Value.GetValueAtLevel(GetAbilityLevel())
 		);
-
-		SpawnedProjectile->SetInstigator(Cast<APawn>(OwningActor));
-		FGameplayEffectSpecHandle DamageSpecHandle = MakeDamageEffectSpecHandle(
-			SpawnedProjectile,
-			ProjectileTargetLocation
-		);
-		DamageSpecHandle.Data.Get()->GetContext().AddSourceObject(SpawnedProjectile);
-		for (auto& DamageTypePair : DamageTypes)
-		{
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-				DamageSpecHandle,
-				// Damage Type
-				DamageTypePair.Key,
-				// Damage Value
-				DamageTypePair.Value.GetValueAtLevel(GetAbilityLevel())
-			);
-		}
-		SpawnedProjectile->DamageEffectSpecHandle = DamageSpecHandle;
-		SpawnedProjectile->FinishSpawning(SpawnTransform);
 	}
+	SpawnedProjectile->DamageEffectSpecHandle = DamageSpecHandle;
+	SpawnedProjectile->FinishSpawning(SpawnTransform);
 }
 
 FGameplayEffectSpecHandle UAuraProjectileSpell::MakeDamageEffectSpecHandle(

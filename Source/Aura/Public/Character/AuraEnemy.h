@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraBaseCharacter.h"
+#include "EnemyInterface.h"
 #include "Interaction/HighlightInterface.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
@@ -14,7 +15,7 @@ class AAuraAIController;
 class UWidgetComponent;
 
 UCLASS()
-class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterface
+class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterface, public IEnemyInterface
 {
 	GENERATED_BODY()
 
@@ -34,7 +35,19 @@ public:
 		return Level;
 	}
 
+	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() override;
+
 	virtual void Die() override;
+	// IEnemyInterface
+	FORCEINLINE virtual AActor* GetCombatTarget_Implementation() const override
+	{
+		return CombatTarget;
+	}
+
+	FORCEINLINE virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override
+	{
+		CombatTarget = InCombatTarget;
+	}
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOnAttributeChangedSignature OnHealthChanged;
@@ -78,6 +91,9 @@ protected:
 	float AttackWaitTime = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	float AttackWaitDeviation = .5f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "AI")
+	TObjectPtr<AActor> CombatTarget;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Highlight")

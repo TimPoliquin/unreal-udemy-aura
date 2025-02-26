@@ -10,7 +10,30 @@ int32 ICombatInterface::GetCharacterLevel() const
 	return 0;
 }
 
-FVector ICombatInterface::GetCombatSocketLocation() const
+int32 ICombatInterface::GetCharacterLevel(const AActor* Actor)
 {
-	return FVector();
+	if (const ICombatInterface* CombatInterface = Cast<ICombatInterface>(Actor))
+	{
+		return CombatInterface->GetCharacterLevel();
+	}
+	return -1;
+}
+
+bool ICombatInterface::IsAlive(const AActor* Actor)
+{
+	if (Actor->Implements<UCombatInterface>())
+	{
+		return !Execute_IsDead(Actor);
+	}
+	return false;
+}
+
+
+bool ICombatInterface::IsDead(const AActor* Actor)
+{
+	if (Actor->Implements<UCombatInterface>())
+	{
+		return Execute_IsDead(Actor);
+	}
+	return false;
 }

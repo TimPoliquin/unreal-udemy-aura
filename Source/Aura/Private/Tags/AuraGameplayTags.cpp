@@ -166,6 +166,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.DamageTypesToResistances.Add(Instance.Damage_Physical, Instance.Attributes_Resistance_Physical);
 
 	Instance.DamageTypesToResistances.GenerateKeyArray(Instance.DamageTypes);
+
+	Instance.Abilities_Attack = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Attack"),
+		FString("Attack Abilities parent tag")
+	);
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class UGameplayAbility;
 struct FGameplayEffectSpecHandle;
 struct FGameplayEffectContextHandle;
 class UCharacterClassInfo;
@@ -41,7 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static void GrantStartupAbilities(
 		const UObject* WorldContextObject,
-		UAbilitySystemComponent* AbilitySystemComponent
+		UAbilitySystemComponent* AbilitySystemComponent,
+		ECharacterClass CharacterClass,
+		int Level
 	);
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
@@ -65,6 +68,16 @@ public:
 
 	static int GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent);
 
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static void GetLivePlayersWithinRadius(
+		const UObject* WorldContextObject,
+		const TArray<AActor*>& ActorsToIgnore,
+		const TArray<FName>& TagsToIgnore,
+		const FVector& SphereOrigin,
+		float Radius,
+		TArray<AActor*>& OutOverlappingActors
+	);
+
 private:
 	static void GetWidgetControllerParams(
 		const UObject* WorldContextObject,
@@ -76,5 +89,11 @@ private:
 		UAbilitySystemComponent* AbilitySystemComponent,
 		const TSubclassOf<UGameplayEffect>& GameplayEffectClass,
 		const float Level
+	);
+
+	static void GrantAbilities(
+		UAbilitySystemComponent* AbilitySystemComponent,
+		const TArray<TSubclassOf<UGameplayAbility>>& Abilities,
+		int Level
 	);
 };

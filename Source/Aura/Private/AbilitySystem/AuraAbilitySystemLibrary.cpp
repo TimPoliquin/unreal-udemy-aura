@@ -12,6 +12,7 @@
 #include "Player/AuraPlayerState.h"
 #include "UI/HUD/AuraHUD.h"
 #include "UI/WidgetController/AuraWidgetController.h"
+#include "Utils/TagUtils.h"
 
 UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
 {
@@ -56,16 +57,34 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 
 void UAuraAbilitySystemLibrary::GrantStartupAbilities(
 	const UObject* WorldContextObject,
-	UAbilitySystemComponent* AbilitySystemComponent
+	UAbilitySystemComponent* AbilitySystemComponent,
+	const ECharacterClass CharacterClass,
+	const int Level
 )
 {
 	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
 	{
-		for (const TSubclassOf AbilityClass : GameMode->GetCharacterClassInfo()->CommonAbilities)
-		{
-			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
-			AbilitySystemComponent->GiveAbility(AbilitySpec);
-		}
+		UCharacterClassInfo* CharacterClassInfo = GameMode->GetCharacterClassInfo();
+		GrantAbilities(AbilitySystemComponent, CharacterClassInfo->CommonAbilities, 1);
+		GrantAbilities(
+			AbilitySystemComponent,
+			CharacterClassInfo->CharacterClassInformation[CharacterClass].
+			ClassAbilities,
+			Level
+		);
+	}
+}
+
+void UAuraAbilitySystemLibrary::GrantAbilities(
+	UAbilitySystemComponent* AbilitySystemComponent,
+	const TArray<TSubclassOf<UGameplayAbility>>& Abilities,
+	const int Level
+)
+{
+	for (const TSubclassOf AbilityClass : Abilities)
+	{
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, Level);
+		AbilitySystemComponent->GiveAbility(AbilitySpec);
 	}
 }
 
@@ -100,6 +119,47 @@ int UAuraAbilitySystemLibrary::GetCharacterLevel(UAbilitySystemComponent* Abilit
 		}
 	}
 	return 0;
+}
+
+void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
+	const UObject* WorldContextObject,
+	const TArray<AActor*>& ActorsToIgnore,
+	const TArray<FName>& TagsToIgnore,
+	const FVector& SphereOrigin,
+	const float Radius,
+	TArray<AActor*>& OutOverlappingActors
+)
+{
+	FCollisionQueryParams SphereParams;
+	SphereParams.AddIgnoredActors(ActorsToIgnore);
+	if (const UWorld* World = GEngine->GetWorldFromContextObject(
+		WorldContextObject,
+		EGetWorldErrorMode::LogAndReturnNull
+	))
+	{
+		TArray<FOverlapResult> Overlaps;
+		World->OverlapMultiByObjectType(
+			Overlaps,
+			SphereOrigin,
+			FQuat::Identity,
+			FCollisionObjectQueryParams(FCollisionObjectQueryParams::InitType::AllDynamicObjects),
+			FCollisionShape::MakeSphere(Radius),
+			SphereParams
+		);
+		for (const FOverlapResult& Overlap : Overlaps)
+		{
+			AActor* OverlapActor = Overlap.GetActor();
+			// skip actor if it has any of the tags in the ignore list
+			if (TagUtils::HasAnyTag(OverlapActor, TagsToIgnore))
+			{
+				continue;
+			}
+			if (ICombatInterface::IsAlive(Overlap.GetActor()))
+			{
+				OutOverlappingActors.Add(OverlapActor);
+			}
+		}
+	}
 }
 
 void UAuraAbilitySystemLibrary::GetWidgetControllerParams(

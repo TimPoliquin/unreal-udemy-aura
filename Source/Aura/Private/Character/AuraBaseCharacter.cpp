@@ -30,7 +30,7 @@ void AAuraBaseCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 }
 
-FVector AAuraBaseCharacter::GetCombatSocketLocation() const
+FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation() const
 {
 	return Weapon->GetSocketLocation(WeaponTipSocketName);
 }
@@ -69,6 +69,12 @@ void AAuraBaseCharacter::OnHitReactTagChanged(const FGameplayTag CallbackTag, in
 		                                       : BaseWalkSpeed;
 }
 
+AActor* AAuraBaseCharacter::GetAvatar_Implementation()
+{
+	return this;
+}
+
+
 UAnimMontage* AAuraBaseCharacter::GetHitReactMontage_Implementation()
 {
 	return HitReactMontage;
@@ -80,8 +86,14 @@ void AAuraBaseCharacter::Die()
 	MulticastHandleDeath();
 }
 
+bool AAuraBaseCharacter::IsDead_Implementation() const
+{
+	return bDead;
+}
+
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 {
+	bDead = true;
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
