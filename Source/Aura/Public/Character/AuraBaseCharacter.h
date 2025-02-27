@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
+class UNiagaraSystem;
 struct FGameplayTag;
 class UGameplayAbility;
 class UGameplayEffect;
@@ -32,6 +33,7 @@ public:
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const override;
 	virtual void Die() override;
 	virtual bool IsDead_Implementation() const override;
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override
 	{
@@ -84,6 +86,9 @@ protected:
 	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Materials|Disolve")
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<UNiagaraSystem> BloodEffect;
 
 private:
 	bool bDead = false;

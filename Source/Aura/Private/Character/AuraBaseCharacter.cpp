@@ -112,6 +112,11 @@ bool AAuraBaseCharacter::IsDead_Implementation() const
 	return bDead;
 }
 
+UNiagaraSystem* AAuraBaseCharacter::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 {
 	bDead = true;

@@ -7,6 +7,8 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
+class UNiagaraSystem;
+
 USTRUCT(BlueprintType)
 struct FTaggedMontage
 {
@@ -23,6 +25,9 @@ struct FTaggedMontage
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float ImpactRadius = 45.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USoundBase* ImpactSound = nullptr;
 };
 
 // This class does not need to be modified.
@@ -56,6 +61,8 @@ public:
 	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag) const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UAnimMontage* GetHitReactMontage();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UNiagaraSystem* GetBloodEffect();
 
 	/**
 	 * 

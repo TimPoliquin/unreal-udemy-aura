@@ -168,6 +168,10 @@ TArray<FName> AAuraEnemy::GetTargetTagsToIgnore_Implementation() const
 void AAuraEnemy::Die()
 {
 	Super::Die();
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
+	}
 	SetLifeSpan(LifeSpan);
 }
 
