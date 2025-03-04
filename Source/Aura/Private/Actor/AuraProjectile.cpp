@@ -78,13 +78,9 @@ void AAuraProjectile::OnSphereOverlap(
 		}
 		Destroy();
 	}
-	else
-	{
-		bHit = true;
-	}
 }
 
-void AAuraProjectile::PlayImpactEffect() const
+void AAuraProjectile::PlayImpactEffect()
 {
 	if (bHit)
 	{
@@ -112,6 +108,7 @@ void AAuraProjectile::PlayImpactEffect() const
 	{
 		TravelSoundComponent->Stop();
 	}
+	bHit = true;
 }
 
 void AAuraProjectile::Destroyed()

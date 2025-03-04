@@ -173,19 +173,32 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("Attack Abilities parent tag")
 	);
 
-	/** Montage Attack Tags **/
-	Instance.Montage_Attack_Weapon = TagManager.AddNativeGameplayTag(
-		FName("Montage.Attack.Weapon"),
-		FString("Weapon Attack")
+	/** Combat Socket Tags **/
+	Instance.Combat_Socket_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Combat.Socket.Weapon"),
+		FString("Weapon Socket")
 	);
-	Instance.Montage_Attack_RightHand = TagManager.AddNativeGameplayTag(
-		FName("Montage.Attack.RightHand"),
-		FString("Right Hand Attack")
+	Instance.Combat_Socket_RightHand = TagManager.AddNativeGameplayTag(
+		FName("Combat.Socket.RightHand"),
+		FString("Right Hand Socket")
 	);
-	Instance.Montage_Attack_LeftHand = TagManager.AddNativeGameplayTag(
-		FName("Montage.Attack.LeftHand"),
-		FString("Left Hand Attack")
+	Instance.Combat_Socket_LeftHand = TagManager.AddNativeGameplayTag(
+		FName("Combat.Socket.LeftHand"),
+		FString("Left Hand Socket")
 	);
+
+	/**
+	 *Montage Attack Tags
+	 */
+	for (int32 i = 0; i < Instance.MontageAttackNum; i++)
+	{
+		Instance.Montage_Attack_Tags.Add(
+			TagManager.AddNativeGameplayTag(
+				FName(*FString::Printf(TEXT("Montage.Attack.%i"), i)),
+				FString("Attack montage tag")
+			)
+		);
+	}
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

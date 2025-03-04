@@ -19,6 +19,8 @@ struct FTaggedMontage
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag MontageTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag SocketTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName SocketName;
@@ -63,6 +65,8 @@ public:
 	UAnimMontage* GetHitReactMontage();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UNiagaraSystem* GetBloodEffect();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	FTaggedMontage GetTagMontageByTag(const FGameplayTag& MontageTag);
 
 	/**
 	 * 

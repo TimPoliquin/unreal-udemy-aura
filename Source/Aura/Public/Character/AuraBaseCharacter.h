@@ -30,6 +30,7 @@ public:
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() const override;
+	virtual FTaggedMontage GetTagMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const override;
 	virtual void Die() override;
 	virtual bool IsDead_Implementation() const override;
@@ -89,6 +90,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UNiagaraSystem> BloodEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
+	TObjectPtr<USoundBase> DeathSound;
 
 private:
 	bool bDead = false;

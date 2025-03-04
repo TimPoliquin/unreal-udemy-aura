@@ -8,6 +8,7 @@
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 
@@ -36,7 +37,7 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	if (const FTaggedMontage* ActiveMontageDef = AttackMontages.FindByPredicate(
 		[MontageTag](const FTaggedMontage& Item)
 		{
-			return Item.MontageTag.MatchesTagExact(MontageTag);
+			return Item.SocketTag.MatchesTagExact(MontageTag);
 		}
 	))
 	{
@@ -101,6 +102,18 @@ TArray<FTaggedMontage> AAuraBaseCharacter::GetAttackMontages_Implementation() co
 	return AttackMontages;
 }
 
+FTaggedMontage AAuraBaseCharacter::GetTagMontageByTag_Implementation(const FGameplayTag& MontageTag)
+{
+	for (const FTaggedMontage& Item : AttackMontages)
+	{
+		if (Item.MontageTag.MatchesTagExact(MontageTag))
+		{
+			return Item;
+		}
+	}
+	return FTaggedMontage();
+}
+
 void AAuraBaseCharacter::Die()
 {
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
@@ -120,6 +133,10 @@ UNiagaraSystem* AAuraBaseCharacter::GetBloodEffect_Implementation()
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 {
 	bDead = true;
+	if (DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
+	}
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);

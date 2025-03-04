@@ -73,10 +73,16 @@ struct FAuraGameplayTags
 	/** Abilities **/
 	FGameplayTag Abilities_Attack;
 
-	/** Montage Tags */
-	FGameplayTag Montage_Attack_Weapon;
-	FGameplayTag Montage_Attack_LeftHand;
-	FGameplayTag Montage_Attack_RightHand;
+	/** Combat Socket Tags */
+	FGameplayTag Combat_Socket_Weapon;
+	FGameplayTag Combat_Socket_LeftHand;
+	FGameplayTag Combat_Socket_RightHand;
+
+	/**
+	 * Montage Attack Tags 
+	 */
+	uint8 MontageAttackNum = 4;
+	TArray<FGameplayTag> Montage_Attack_Tags;
 
 	FORCEINLINE const TArray<FGameplayTag>& GetDamageTypes() const
 	{

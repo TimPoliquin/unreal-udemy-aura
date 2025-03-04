@@ -55,5 +55,5 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float LifeSpan = 10.f;
 
-	void PlayImpactEffect() const;
+	void PlayImpactEffect();
 };
