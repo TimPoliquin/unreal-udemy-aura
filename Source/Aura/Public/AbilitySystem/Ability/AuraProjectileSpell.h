@@ -28,7 +28,11 @@ protected:
 	) override;
 
 	UFUNCTION(BlueprintCallable, Category ="Projectile")
-	void SpawnProjectile(const FVector& ProjectileTargetLocation, const AActor* HitActor);
+	void SpawnProjectile(
+		const FVector& ProjectileTargetLocation,
+		const AActor* HitActor,
+		const FGameplayTag& SocketTag
+	);
 
 private:
 	/**

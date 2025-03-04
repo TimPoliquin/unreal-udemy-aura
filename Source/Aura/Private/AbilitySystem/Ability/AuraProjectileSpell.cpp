@@ -22,7 +22,11 @@ void UAuraProjectileSpell::ActivateAbility(
 	// CommitAbility(Handle, ActorInfo, ActivationInfo, &Tags);
 }
 
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const AActor* HitActor)
+void UAuraProjectileSpell::SpawnProjectile(
+	const FVector& ProjectileTargetLocation,
+	const AActor* HitActor,
+	const FGameplayTag& SocketTag
+)
 {
 	AActor* OwningActor = GetAvatarActorFromActorInfo();
 	if (!OwningActor->HasAuthority())
@@ -33,7 +37,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 	check(ProjectileClass);
 	FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(
 		OwningActor,
-		FAuraGameplayTags::Get().Combat_Socket_Weapon
+		SocketTag
 	);
 	FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
 	if (HitActor == nullptr)
