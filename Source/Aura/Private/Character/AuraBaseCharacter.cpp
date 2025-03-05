@@ -130,6 +130,16 @@ UNiagaraSystem* AAuraBaseCharacter::GetBloodEffect_Implementation()
 	return BloodEffect;
 }
 
+int32 AAuraBaseCharacter::GetMinionCount_Implementation() const
+{
+	return MinionCount;
+}
+
+void AAuraBaseCharacter::ChangeMinionCount_Implementation(const int32 Delta)
+{
+	MinionCount += Delta;
+}
+
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 {
 	bDead = true;

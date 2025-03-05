@@ -72,6 +72,7 @@ struct FAuraGameplayTags
 
 	/** Abilities **/
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
 
 	/** Combat Socket Tags */
 	FGameplayTag Combat_Socket_Weapon;

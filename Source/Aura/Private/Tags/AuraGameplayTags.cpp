@@ -172,6 +172,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Attack"),
 		FString("Attack Abilities parent tag")
 	);
+	Instance.Abilities_Summon = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Summon"),
+		FString("Summon Abilities parent tag")
+	);
 
 	/** Combat Socket Tags **/
 	Instance.Combat_Socket_Weapon = TagManager.AddNativeGameplayTag(

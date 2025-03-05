@@ -135,7 +135,7 @@ float UExecCalc_Damage::GetDamageTypeDamage(
 		TEXT("TagsToCaptureDefs doesn't contain Tag: [%s]"),
 		*ResistanceTag.ToString()
 	);
-	const float Damage = Spec.GetSetByCallerMagnitude(DamageTypeTag);
+	const float Damage = Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
 	float Resistance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
 		*ResistanceDef,

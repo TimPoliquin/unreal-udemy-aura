@@ -40,6 +40,8 @@ public:
 	{
 		return TArray<FName>();
 	};
+	virtual int32 GetMinionCount_Implementation() const override;
+	virtual void ChangeMinionCount_Implementation(const int32 Delta) override;
 	/** Combat Interface End **/
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -92,6 +94,9 @@ protected:
 	TObjectPtr<UNiagaraSystem> BloodEffect;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	TObjectPtr<USoundBase> DeathSound;
+
+	/** Minions **/
+	int32 MinionCount = 0;
 
 private:
 	bool bDead = false;
