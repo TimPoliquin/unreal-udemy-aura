@@ -10,6 +10,7 @@
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
+#include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUD.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "Utils/TagUtils.h"
@@ -119,6 +120,36 @@ int UAuraAbilitySystemLibrary::GetCharacterLevel(UAbilitySystemComponent* Abilit
 		}
 	}
 	return 0;
+}
+
+FGameplayTag UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		for (const FGameplayTag& Tag : AbilitySpec.Ability.Get()->GetAssetTags())
+		{
+			if (Tag.MatchesTag(FAuraGameplayTags::Get().Abilities))
+			{
+				return Tag;
+			}
+		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemLibrary::GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		for (const FGameplayTag& Tag : AbilitySpec.GetDynamicSpecSourceTags())
+		{
+			if (Tag.MatchesTag(FAuraGameplayTags::Get().InputTag))
+			{
+				return Tag;
+			}
+		}
+	}
+	return FGameplayTag();
 }
 
 void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(

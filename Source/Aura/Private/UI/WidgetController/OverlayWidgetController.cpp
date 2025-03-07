@@ -1,10 +1,12 @@
 // Copyright Alien Shores
 
 
-#include "OverlayWidgetController.h"
+#include "UI/WidgetController/OverlayWidgetController.h"
 
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -52,7 +54,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		AbilitySystemComponent
 	))
 	{
-		AuraAbilitySystemComponent->OnEffectAssetTags.AddLambda(
+		AuraAbilitySystemComponent->OnEffectAssetTagsDelegate.AddLambda(
 			[this](const FGameplayTagContainer& AssetTags)
 			{
 				for (const FGameplayTag& Tag : AssetTags)
@@ -68,5 +70,36 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 				}
 			}
 		);
+		if (AuraAbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
+		{
+			OnInitializeStartupAbilities(AuraAbilitySystemComponent);
+		}
+		else
+		{
+			AuraAbilitySystemComponent->OnAbilitiesGivenDelegate.AddUObject(
+				this,
+				&UOverlayWidgetController::OnInitializeStartupAbilities
+			);
+		}
 	}
+}
+
+void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!AbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
+	{
+		return;
+	}
+	FForEachAbility BroadcastDelegate;
+	BroadcastDelegate.BindLambda(
+		[this](const FGameplayAbilitySpec& AbilitySpec)
+		{
+			// Get ability tag for given ability spec.
+			const FGameplayTag AbilityTag = UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(AbilitySpec);
+			FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+			Info.InputTag = UAuraAbilitySystemLibrary::GetInputTagFromSpec(AbilitySpec);
+			AbilityInfoDelegate.Broadcast(Info);
+		}
+	);
+	AbilitySystemComponent->ForEachAbility(BroadcastDelegate);
 }

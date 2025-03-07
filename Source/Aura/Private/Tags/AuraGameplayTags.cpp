@@ -81,6 +81,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	);
 
 	// Input Tags
+	Instance.InputTag = TagManager.AddNativeGameplayTag(
+		FName("InputTag"),
+		FString("Input tag root")
+	);
 	Instance.InputTag_LeftMouseButton = TagManager.AddNativeGameplayTag(
 		FName("InputTag.LeftMouseButton"),
 		FString("Input tag for the Left Mouse Button")
@@ -168,6 +172,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.DamageTypesToResistances.GenerateKeyArray(Instance.DamageTypes);
 
 	/** Ability Tags */
+	Instance.Abilities = TagManager.AddNativeGameplayTag(FName("Abilities"), FString("Abilities root tag"));
 	Instance.Abilities_Attack = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Attack"),
 		FString("Attack Abilities parent tag")
@@ -175,6 +180,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Abilities_Summon = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Summon"),
 		FString("Summon Abilities parent tag")
+	);
+	Instance.Abilities_Fire_FireBolt = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Fire.FireBolt"),
+		FString("FireBolt ability tag")
 	);
 
 	/** Combat Socket Tags **/

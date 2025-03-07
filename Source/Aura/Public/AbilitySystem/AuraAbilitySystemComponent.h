@@ -6,7 +6,11 @@
 #include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
+class UAuraAbilitySystemComponent;
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*Asset Tags*/)
+DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven, UAuraAbilitySystemComponent*);
+DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&);
 
 /**
  * 
@@ -17,12 +21,20 @@ class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 	GENERATED_BODY()
 
 public:
-	FEffectAssetTags OnEffectAssetTags;
+	FEffectAssetTags OnEffectAssetTagsDelegate;
 
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>> StartupAbilities);
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
+	virtual void OnRep_ActivateAbilities() override;
+	FAbilitiesGiven OnAbilitiesGivenDelegate;
+	FORCEINLINE bool HasFiredOnAbilitiesGivenDelegate() const
+	{
+		return bAbilitiesGiven;
+	}
+
+	void ForEachAbility(const FForEachAbility& ForEachAbilityDelegate);
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,4 +45,7 @@ protected:
 		const FGameplayEffectSpec& EffectSpec,
 		FActiveGameplayEffectHandle ActiveEffectHandle
 	);
+
+private:
+	bool bAbilitiesGiven = false;
 };

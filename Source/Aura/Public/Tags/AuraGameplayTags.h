@@ -46,6 +46,7 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Vital_Mana;
 
 	/** Input Tags **/
+	FGameplayTag InputTag;
 	FGameplayTag InputTag_LeftMouseButton;
 	FGameplayTag InputTag_AttackTarget;
 	FGameplayTag InputTag_RightMouseButton;
@@ -71,8 +72,10 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Physical;
 
 	/** Abilities **/
+	FGameplayTag Abilities;
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;
+	FGameplayTag Abilities_Fire_FireBolt;
 
 	/** Combat Socket Tags */
 	FGameplayTag Combat_Socket_Weapon;
