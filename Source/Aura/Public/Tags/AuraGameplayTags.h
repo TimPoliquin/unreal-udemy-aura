@@ -77,6 +77,9 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Summon;
 	FGameplayTag Abilities_Fire_FireBolt;
 
+	/** Cooldown **/
+	FGameplayTag Cooldown_Fire_FireBullet;
+
 	/** Combat Socket Tags */
 	FGameplayTag Combat_Socket_Weapon;
 	FGameplayTag Combat_Socket_LeftHand;
