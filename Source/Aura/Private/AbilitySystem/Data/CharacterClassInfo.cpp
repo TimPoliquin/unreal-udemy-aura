@@ -32,6 +32,11 @@ float UCharacterClassInfo::GetCriticalHitResistanceCoefficient(const int Level) 
 	)->Eval(Level);
 }
 
+int32 UCharacterClassInfo::GetXPReward(const ECharacterClass& CharacterClass, const int32 Level) const
+{
+	return static_cast<int>(CharacterClassInformation[CharacterClass].XPCurve.GetValueAtLevel(Level));
+}
+
 bool CharacterClassUtils::IsRangedAttacker(ECharacterClass CharacterClass)
 {
 	switch (CharacterClass)

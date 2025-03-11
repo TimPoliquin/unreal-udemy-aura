@@ -112,7 +112,7 @@ void UExecCalc_Damage::Execute_Implementation(
 	}
 
 	const FGameplayModifierEvaluatedData EvaluatedData(
-		UAuraAttributeSet::GetIncomingDamageAttribute(),
+		UAuraAttributeSet::GetMeta_IncomingDamageAttribute(),
 		EGameplayModOp::Additive,
 		Damage
 	);

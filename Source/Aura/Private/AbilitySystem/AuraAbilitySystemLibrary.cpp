@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameModeBase.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -150,6 +151,20 @@ FGameplayTag UAuraAbilitySystemLibrary::GetInputTagFromSpec(const FGameplayAbili
 		}
 	}
 	return FGameplayTag();
+}
+
+int32 UAuraAbilitySystemLibrary::GetXPReward(
+	const UObject* WorldContextObject,
+	const ECharacterClass& CharacterClass,
+	const int32 Level
+)
+{
+	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	{
+		return GameMode->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
+	}
+	UE_LOG(LogAura, Error, TEXT("Game mode is not set to AuraGameMode!"))
+	return 0;
 }
 
 void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(

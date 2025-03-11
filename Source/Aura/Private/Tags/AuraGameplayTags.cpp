@@ -79,6 +79,15 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Vital.Mana"),
 		FString("Current Mana")
 	);
+	// Meta Attributes
+	Instance.Attributes_Meta_IncomingDamage = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Meta.IncomingDamage"),
+		FString("Incoming damage")
+	);
+	Instance.Attributes_Meta_IncomingXP = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Meta.IncomingXP"),
+		FString("Incoming XP")
+	);
 
 	// Input Tags
 	Instance.InputTag = TagManager.AddNativeGameplayTag(

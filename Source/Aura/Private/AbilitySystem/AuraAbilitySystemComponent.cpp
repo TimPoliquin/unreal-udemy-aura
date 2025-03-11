@@ -40,7 +40,10 @@ void UAuraAbilitySystemComponent::Client_EffectApplied_Implementation(
 	OnEffectAssetTagsDelegate.Broadcast(TagContainer);
 }
 
-void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>> StartupAbilities)
+void UAuraAbilitySystemComponent::AddCharacterAbilities(
+	const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities,
+	const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities
+)
 {
 	for (const TSubclassOf AbilityClass : StartupAbilities)
 	{
@@ -53,6 +56,11 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 			}
 			GiveAbility(AbilitySpec);
 		}
+	}
+	for (const TSubclassOf PassiveAbilityClass : StartupPassiveAbilities)
+	{
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(PassiveAbilityClass, 1);
+		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 	// NOTE: This is client-side only! OnRep_ActivateAbilities handles server-side.
 	bAbilitiesGiven = true;

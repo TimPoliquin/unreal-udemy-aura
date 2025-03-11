@@ -97,3 +97,10 @@ TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation() const
 	IgnoreTags.Add(TAG_PLAYER);
 	return IgnoreTags;
 }
+
+void AAuraCharacter::AddToXP_Implementation(int32 InXP)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddToXP(InXP);
+}

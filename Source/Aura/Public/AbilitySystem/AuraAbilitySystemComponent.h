@@ -23,7 +23,10 @@ class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	FEffectAssetTags OnEffectAssetTagsDelegate;
 
-	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>> StartupAbilities);
+	void AddCharacterAbilities(
+		const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities,
+		const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities
+	);
 
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);

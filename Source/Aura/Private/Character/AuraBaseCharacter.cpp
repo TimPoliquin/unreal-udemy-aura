@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -68,7 +69,7 @@ void AAuraBaseCharacter::AddCharacterAbilities()
 	UAuraAbilitySystemComponent* AuraAbilitySystemComponent = CastChecked<UAuraAbilitySystemComponent>(
 		AbilitySystemComponent
 	);
-	AuraAbilitySystemComponent->AddCharacterAbilities(StartingAbilities);
+	AuraAbilitySystemComponent->AddCharacterAbilities(StartingAbilities, StartingPassiveAbilities);
 	AbilitySystemComponent->RegisterGameplayTagEvent(
 		FAuraGameplayTags::Get().Effect_HitReact,
 		EGameplayTagEventType::NewOrRemoved
@@ -128,6 +129,11 @@ bool AAuraBaseCharacter::IsDead_Implementation() const
 UNiagaraSystem* AAuraBaseCharacter::GetBloodEffect_Implementation()
 {
 	return BloodEffect;
+}
+
+int32 AAuraBaseCharacter::GetXPReward_Implementation() const
+{
+	return 0;
 }
 
 int32 AAuraBaseCharacter::GetMinionCount_Implementation() const

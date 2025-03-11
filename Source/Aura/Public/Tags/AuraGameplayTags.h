@@ -44,6 +44,9 @@ struct FAuraGameplayTags
 	/** Vital Attributes **/
 	FGameplayTag Attributes_Vital_Health;
 	FGameplayTag Attributes_Vital_Mana;
+	/** Meta Attributes **/
+	FGameplayTag Attributes_Meta_IncomingDamage;
+	FGameplayTag Attributes_Meta_IncomingXP;
 
 	/** Input Tags **/
 	FGameplayTag InputTag;

@@ -57,3 +57,12 @@ TArray<FName> ICombatInterface::GetTargetTagsToIgnore(const AActor* Actor)
 	}
 	return TArray<FName>();
 }
+
+int32 ICombatInterface::GetXPReward(const AActor* Actor)
+{
+	if (Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetXPReward(Actor);
+	}
+	return 0;
+}

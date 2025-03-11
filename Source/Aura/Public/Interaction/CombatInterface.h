@@ -71,6 +71,8 @@ public:
 	int32 GetMinionCount() const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void ChangeMinionCount(const int32 Delta);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetXPReward() const;
 
 	/**
 	 * 
@@ -94,4 +96,6 @@ public:
 	static TArray<FTaggedMontage> GetAttackMontages(const AActor* Actor);
 
 	static TArray<FName> GetTargetTagsToIgnore(const AActor* Actor);
+
+	static int32 GetXPReward(const AActor* Actor);
 };

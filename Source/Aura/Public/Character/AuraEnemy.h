@@ -35,6 +35,8 @@ public:
 		return Level;
 	}
 
+	virtual int32 GetXPReward_Implementation() const override;
+
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
 
 	virtual void Die() override;

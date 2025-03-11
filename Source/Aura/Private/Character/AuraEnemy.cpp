@@ -158,6 +158,11 @@ void AAuraEnemy::UnHighlightActor()
 	}
 }
 
+int32 AAuraEnemy::GetXPReward_Implementation() const
+{
+	return UAuraAbilitySystemLibrary::GetXPReward(this, CharacterClass, Level);
+}
+
 TArray<FName> AAuraEnemy::GetTargetTagsToIgnore_Implementation() const
 {
 	TArray<FName> IgnoreTargetTags;

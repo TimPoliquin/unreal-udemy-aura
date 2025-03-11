@@ -6,8 +6,10 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/AuraLogChannels.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
+#include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerController.h"
@@ -97,9 +99,13 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
-	else if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	else if (Data.EvaluatedData.Attribute == GetMeta_IncomingDamageAttribute())
 	{
 		HandleIncomingDamage(Props);
+	}
+	else if (Data.EvaluatedData.Attribute == GetMeta_IncomingXPAttribute())
+	{
+		HandleIncomingXP(Props);
 	}
 }
 
@@ -131,8 +137,8 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 
 void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 {
-	const float IncomingDamage = GetIncomingDamage();
-	SetIncomingDamage(0.f);
+	const float IncomingDamage = GetMeta_IncomingDamage();
+	SetMeta_IncomingDamage(0.f);
 	if (IncomingDamage > 0.f)
 	{
 		const float NewHealth = GetHealth() - IncomingDamage;
@@ -152,10 +158,20 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 			{
 				CombatInterface->Die();
 			}
+			SendXPEvent(Props);
 		}
 		ShowDamageText(Props, IncomingDamage);
 	}
 }
+
+void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
+{
+	const float IncomingXP = GetMeta_IncomingXP();
+	SetMeta_IncomingXP(0.f);
+	// TODO - Determine if we need to level up!
+	IPlayerInterface::AddToXP(Props.Source.AvatarActor, IncomingXP);
+}
+
 
 void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const float& IncomingDamage) const
 {
@@ -186,4 +202,17 @@ void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const flo
 			);
 		}
 	}
+}
+
+void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
+{
+	const int32 XPReward = ICombatInterface::Execute_GetXPReward(Props.Target.AvatarActor);
+	FGameplayEventData Payload;
+	Payload.EventTag = FAuraGameplayTags::Get().Attributes_Meta_IncomingXP;
+	Payload.EventMagnitude = XPReward;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+		Props.Source.AvatarActor,
+		Payload.EventTag,
+		Payload
+	);
 }

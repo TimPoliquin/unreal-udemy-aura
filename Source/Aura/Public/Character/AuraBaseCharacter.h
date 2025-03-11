@@ -35,6 +35,7 @@ public:
 	virtual void Die() override;
 	virtual bool IsDead_Implementation() const override;
 	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
+	virtual int32 GetXPReward_Implementation() const override;
 
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override
 	{
@@ -102,6 +103,8 @@ private:
 	bool bDead = false;
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartingAbilities;
+	UPROPERTY(EditAnywhere, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> StartingPassiveAbilities;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<UAnimMontage> HitReactMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")

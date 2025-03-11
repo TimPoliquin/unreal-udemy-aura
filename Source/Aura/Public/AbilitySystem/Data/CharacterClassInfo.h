@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScalableFloat.h"
 #include "Engine/DataAsset.h"
 #include "CharacterClassInfo.generated.h"
 
@@ -27,6 +28,9 @@ struct FCharacterClassDefaultInfo
 
 	UPROPERTY(EditDefaultsOnly, Category="Class Defaults")
 	TArray<TSubclassOf<UGameplayAbility>> ClassAbilities;
+
+	UPROPERTY(EditDefaultsOnly, Category="Class Defaults")
+	FScalableFloat XPCurve;
 };
 
 /**
@@ -56,6 +60,7 @@ public:
 	float GetArmorPenetrationCoefficient(const int Level) const;
 	float GetEffectiveArmorCoefficient(const int Level) const;
 	float GetCriticalHitResistanceCoefficient(const int Level) const;
+	int32 GetXPReward(const ECharacterClass& CharacterClass, const int32 Level) const;
 };
 
 class CharacterClassUtils

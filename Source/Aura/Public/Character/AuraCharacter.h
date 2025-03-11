@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AuraBaseCharacter.h"
+#include "Interaction/PlayerInterface.h"
 #include "AuraCharacter.generated.h"
 
 class APlayerState;
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,9 @@ public:
 	// ICombatInterface
 	virtual int32 GetCharacterLevel() const override;
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
+
+	// Player Interface
+	virtual void AddToXP_Implementation(int32 InXP) override;
 
 protected:
 	virtual void BeginPlay() override;
