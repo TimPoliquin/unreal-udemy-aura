@@ -30,7 +30,6 @@ float UMMC_MaxMana::CalculateBaseMagnitude_Implementation(const FGameplayEffectS
 	Intelligence = FMath::Max(Intelligence, 0.f);
 
 	// Max Mana is a function of Intelligence and character level.
-	const ICombatInterface* CombatInterface = Cast<ICombatInterface>(Spec.GetContext().GetSourceObject());
-	const int32 PlayerLevel = CombatInterface->GetCharacterLevel();
+	const int32 PlayerLevel = ICombatInterface::GetCharacterLevel(Spec.GetContext().GetSourceObject());
 	return 50.f + (2.5f * Intelligence) + (15.f * PlayerLevel);
 }

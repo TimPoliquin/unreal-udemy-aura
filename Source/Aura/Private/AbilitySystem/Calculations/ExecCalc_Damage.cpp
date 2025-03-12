@@ -8,6 +8,7 @@
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Interaction/CombatInterface.h"
 #include "Tags/AuraGameplayTags.h"
 
 struct AuraDamageStatics
@@ -184,11 +185,11 @@ float UExecCalc_Damage::GetTargetEffectiveArmor(
 	);
 	const float EffectiveArmorCoefficient =
 		CharacterClassInfo->GetEffectiveArmorCoefficient(
-			UAuraAbilitySystemLibrary::GetCharacterLevel(ExecutionParams.GetTargetAbilitySystemComponent())
+			ICombatInterface::GetCharacterLevel(ExecutionParams.GetTargetAbilitySystemComponent())
 		);
 	const float ArmorPenetrationCoefficient =
 		CharacterClassInfo->GetArmorPenetrationCoefficient(
-			UAuraAbilitySystemLibrary::GetCharacterLevel(ExecutionParams.GetSourceAbilitySystemComponent())
+			ICombatInterface::GetCharacterLevel(ExecutionParams.GetSourceAbilitySystemComponent())
 		);
 	const float EffectiveArmor = EffectiveArmorCoefficient * FMath::Max<float>(
 		TargetArmor * (100 - SourceArmorPenetration * ArmorPenetrationCoefficient) / 100.f,
@@ -219,7 +220,7 @@ bool UExecCalc_Damage::IsCriticalHitOnTarget(
 		ExecutionParams.GetSourceAbilitySystemComponent()
 	);
 	TargetCriticalHitResistance *= CharacterClassInfo->GetCriticalHitResistanceCoefficient(
-		UAuraAbilitySystemLibrary::GetCharacterLevel(ExecutionParams.GetTargetAbilitySystemComponent())
+		ICombatInterface::GetCharacterLevel(ExecutionParams.GetTargetAbilitySystemComponent())
 	);
 	const float CriticalHitCalculation = FMath::RandRange(1, 100) - TargetCriticalHitResistance;
 	return CriticalHitCalculation <= SourceCriticalHitChance;

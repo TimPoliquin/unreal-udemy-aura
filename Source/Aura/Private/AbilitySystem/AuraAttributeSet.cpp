@@ -6,11 +6,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
-#include "Aura/AuraLogChannels.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
@@ -168,8 +166,34 @@ void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 {
 	const float IncomingXP = GetMeta_IncomingXP();
 	SetMeta_IncomingXP(0.f);
-	// TODO - Determine if we need to level up!
-	IPlayerInterface::AddToXP(Props.Source.AvatarActor, IncomingXP);
+	if (IPlayerInterface::ImplementsPlayerInterface(Props.Source.AvatarActor))
+	{
+		const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.Source.Character);
+		const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.Source.Character, CurrentXP + IncomingXP);
+		const int32 CurrentLevel = ICombatInterface::GetCharacterLevel(Props.Source.Character);
+		if (CurrentLevel < NewLevel)
+		{
+			for (int32 Idx = 0; Idx < NewLevel - CurrentLevel; Idx++)
+			{
+				// Get level up rewards (attribute & spell points)
+				const FAuraLevelUpRewards& Rewards = IPlayerInterface::Execute_GetLevelUpRewards(
+					Props.Source.Character,
+					CurrentLevel + Idx
+				);
+				// Apply rewards
+				IPlayerInterface::Execute_ApplyLevelUpRewards(
+					Props.Source.Character,
+					1,
+					Rewards
+				);
+			}
+			// TODO - there are complications here that will be addressed later.
+			SetHealth(GetMaxHealth());
+			SetMana(GetMaxMana());
+			IPlayerInterface::Execute_LevelUp(Props.Source.Character);
+		}
+		IPlayerInterface::Execute_AddToXP(Props.Source.Character, IncomingXP);
+	}
 }
 
 

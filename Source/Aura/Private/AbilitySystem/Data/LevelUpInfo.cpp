@@ -30,6 +30,11 @@ int32 ULevelUpInfo::FindLevelByXP(const int32 XP) const
 	return 0;
 }
 
+FAuraLevelUpRewards ULevelUpInfo::GetRewardsByLevel(const int32 InLevel) const
+{
+	return LevelUpInfos[InLevel].GetRewards();
+}
+
 float ULevelUpInfo::GetLevelProgressPercentage(const int32 CurrentXP) const
 {
 	const int CurrentLevel = FindLevelByXP(CurrentXP);

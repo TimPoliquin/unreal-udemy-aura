@@ -68,6 +68,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOnAttributeChangedSignature OnXPPercentageChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Level")
+	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable> MessageDataTable;
@@ -82,6 +85,8 @@ protected:
 private:
 	UFUNCTION()
 	void OnPlayerXPChange(const int32 XP);
+	UFUNCTION()
+	void OnPlayerLevelChange(const int32 InLevel);
 };
 
 template <typename T>

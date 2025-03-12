@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
 #include "GameFramework/PlayerState.h"
 #include "AuraPlayerState.generated.h"
 
@@ -59,6 +60,8 @@ public:
 	}
 
 	float GetXPToNextLevelPercentage() const;
+	int32 FindLevelByXP(const int32 InXP) const;
+	FAuraLevelUpRewards GetLevelUpRewards(int32 int32) const;
 
 	FOnPlayerStatChangeSignature OnXPChangeDelegate;
 	FOnPlayerStatChangeSignature OnLevelChangeDelegate;

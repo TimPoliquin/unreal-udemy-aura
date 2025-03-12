@@ -12,3 +12,8 @@ void IPlayerInterface::AddToXP(AActor* Actor, int32 InXP)
 		Execute_AddToXP(Actor, InXP);
 	}
 }
+
+bool IPlayerInterface::ImplementsPlayerInterface(const UObject* Object)
+{
+	return Object && Object->Implements<UPlayerInterface>();
+}

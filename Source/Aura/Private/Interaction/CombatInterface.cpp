@@ -6,24 +6,18 @@
 #include "Utils/ArrayUtils.h"
 
 
-// Add default functionality here for any ICombatInterface functions that are not pure virtual.
-int32 ICombatInterface::GetCharacterLevel() const
+int32 ICombatInterface::GetCharacterLevel(const UObject* Actor)
 {
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetCharacterLevel(Actor);
+	}
 	return 0;
 }
 
-int32 ICombatInterface::GetCharacterLevel(const AActor* Actor)
+bool ICombatInterface::IsAlive(const UObject* Actor)
 {
-	if (const ICombatInterface* CombatInterface = Cast<ICombatInterface>(Actor))
-	{
-		return CombatInterface->GetCharacterLevel();
-	}
-	return -1;
-}
-
-bool ICombatInterface::IsAlive(const AActor* Actor)
-{
-	if (Actor->Implements<UCombatInterface>())
+	if (Actor && Actor->Implements<UCombatInterface>())
 	{
 		return !Execute_IsDead(Actor);
 	}
@@ -31,36 +25,36 @@ bool ICombatInterface::IsAlive(const AActor* Actor)
 }
 
 
-bool ICombatInterface::IsDead(const AActor* Actor)
+bool ICombatInterface::IsDead(const UObject* Actor)
 {
-	if (Actor->Implements<UCombatInterface>())
+	if (Actor && Actor->Implements<UCombatInterface>())
 	{
 		return Execute_IsDead(Actor);
 	}
 	return false;
 }
 
-TArray<FTaggedMontage> ICombatInterface::GetAttackMontages(const AActor* Actor)
+TArray<FTaggedMontage> ICombatInterface::GetAttackMontages(const UObject* Actor)
 {
-	if (Actor->Implements<UCombatInterface>())
+	if (Actor && Actor->Implements<UCombatInterface>())
 	{
 		return Execute_GetAttackMontages(Actor);
 	}
 	return TArray<FTaggedMontage>();
 }
 
-TArray<FName> ICombatInterface::GetTargetTagsToIgnore(const AActor* Actor)
+TArray<FName> ICombatInterface::GetTargetTagsToIgnore(const UObject* Actor)
 {
-	if (Actor->Implements<UCombatInterface>())
+	if (Actor && Actor->Implements<UCombatInterface>())
 	{
 		return Execute_GetTargetTagsToIgnore(Actor);
 	}
 	return TArray<FName>();
 }
 
-int32 ICombatInterface::GetXPReward(const AActor* Actor)
+int32 ICombatInterface::GetXPReward(const UObject* Actor)
 {
-	if (Actor->Implements<UCombatInterface>())
+	if (Actor && Actor->Implements<UCombatInterface>())
 	{
 		return Execute_GetXPReward(Actor);
 	}

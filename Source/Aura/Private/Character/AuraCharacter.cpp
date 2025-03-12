@@ -2,14 +2,16 @@
 
 
 #include "Character/AuraCharacter.h"
-
 #include "AbilitySystemComponent.h"
-#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
+#include "NiagaraComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/HUD/AuraHUD.h"
 
 
@@ -24,6 +26,16 @@ AAuraCharacter::AAuraCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	LevelUpNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Level Up Effect"));
+	LevelUpNiagaraComponent->SetupAttachment(GetRootComponent());
+	LevelUpNiagaraComponent->SetAutoActivate(false);
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
+	SpringArmComponent->SetupAttachment(GetRootComponent());
+	SpringArmComponent->SetUsingAbsoluteRotation(true);
+	SpringArmComponent->bDoCollisionTest = false;
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
+	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
+	CameraComponent->bUsePawnControlRotation = false;
 }
 
 void AAuraCharacter::BeginPlay()
@@ -84,7 +96,7 @@ void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* PlayerCont
 	}
 }
 
-int32 AAuraCharacter::GetCharacterLevel() const
+int32 AAuraCharacter::GetCharacterLevel_Implementation() const
 {
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
@@ -98,9 +110,62 @@ TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation() const
 	return IgnoreTags;
 }
 
+int32 AAuraCharacter::GetXP_Implementation()
+{
+	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetXP();
+}
+
 void AAuraCharacter::AddToXP_Implementation(int32 InXP)
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
 	AuraPlayerState->AddToXP(InXP);
+}
+
+void AAuraCharacter::LevelUp_Implementation()
+{
+	Multicast_LevelUpParticles();
+}
+
+void AAuraCharacter::Multicast_LevelUpParticles_Implementation() const
+{
+	if (IsValid(LevelUpNiagaraComponent))
+	{
+		const FVector CameraLocation = CameraComponent->GetComponentLocation();
+		const FVector EffectLocation = LevelUpNiagaraComponent->GetComponentLocation();
+		const FRotator ToCameraRotation = (CameraLocation - EffectLocation).Rotation();
+		LevelUpNiagaraComponent->Activate(true);
+		LevelUpNiagaraComponent->SetWorldRotation(ToCameraRotation);
+	}
+	if (LevelUpSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, LevelUpSound, GetActorLocation(), GetActorRotation());
+	}
+}
+
+int32 AAuraCharacter::FindLevelForXP_Implementation(const int32 InXP) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->FindLevelByXP(InXP);
+}
+
+FAuraLevelUpRewards AAuraCharacter::GetLevelUpRewards_Implementation(const int32 InLevel) const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetLevelUpRewards(InLevel);
+}
+
+void AAuraCharacter::ApplyLevelUpRewards_Implementation(
+	const int32 LevelIncrement,
+	const FAuraLevelUpRewards& InLevelUpRewards
+)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	// TODO - do something with the rewards
+	AuraPlayerState->AddToLevel(LevelIncrement);
 }

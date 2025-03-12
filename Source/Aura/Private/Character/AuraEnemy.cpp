@@ -96,7 +96,7 @@ void AAuraEnemy::InitializeStartupAbilities() const
 			this,
 			AbilitySystemComponent,
 			CharacterClass,
-			GetCharacterLevel()
+			GetCharacterLevel(this)
 		);
 	}
 }

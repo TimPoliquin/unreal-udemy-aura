@@ -24,6 +24,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	if (AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState))
 	{
 		AuraPlayerState->OnXPChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerXPChange);
+		AuraPlayerState->OnLevelChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerLevelChange);
 	}
 	const UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute())
@@ -115,4 +116,9 @@ void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)
 	{
 		OnXPPercentageChanged.Broadcast(AuraPlayerState->GetXPToNextLevelPercentage());
 	}
+}
+
+void UOverlayWidgetController::OnPlayerLevelChange(const int32 InLevel)
+{
+	OnPlayerLevelChangedDelegate.Broadcast(InLevel);
 }

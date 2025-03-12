@@ -39,3 +39,15 @@ float AAuraPlayerState::GetXPToNextLevelPercentage() const
 	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))
 	return LevelUpInfo->GetLevelProgressPercentage(XP);
 }
+
+int32 AAuraPlayerState::FindLevelByXP(const int32 InXP) const
+{
+	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))
+	return LevelUpInfo->FindLevelByXP(InXP);
+}
+
+FAuraLevelUpRewards AAuraPlayerState::GetLevelUpRewards(int32 CurrentLevel) const
+{
+	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))
+	return LevelUpInfo->GetRewardsByLevel(CurrentLevel);
+}

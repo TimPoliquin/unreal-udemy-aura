@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
 #include "PlayerInterface.generated.h"
 
 // This class does not need to be modified.
@@ -24,6 +25,20 @@ class AURA_API IPlayerInterface
 public:
 	UFUNCTION(BlueprintNativeEvent)
 	void AddToXP(int32 InXP);
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetXP();
+	UFUNCTION(BlueprintNativeEvent)
+	int32 FindLevelForXP(const int32 CurrentXP) const;
+
+
+	UFUNCTION(BlueprintNativeEvent)
+	FAuraLevelUpRewards GetLevelUpRewards(const int32 CurrentLevel) const;
+	UFUNCTION(BlueprintNativeEvent)
+	void ApplyLevelUpRewards(const int32 LevelIncrement, const FAuraLevelUpRewards& InLevelUpRewards);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void LevelUp();
 
 	static void AddToXP(AActor* Actor, int32 InXP);
+	static bool ImplementsPlayerInterface(const UObject* Object);
 };

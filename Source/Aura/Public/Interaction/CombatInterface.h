@@ -48,7 +48,8 @@ class AURA_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual int32 GetCharacterLevel() const;
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetCharacterLevel() const;
 	virtual void Die() = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -79,23 +80,23 @@ public:
 	 * @param Actor 
 	 * @return Get the level of the actor if it implements ICombatInterface. -1 otherwise.
 	 */
-	static int32 GetCharacterLevel(const AActor* Actor);
+	static int32 GetCharacterLevel(const UObject* Actor);
 	/**
 	 * 
 	 * @param Actor 
 	 * @return true if the provided actor implements ICombatInterface and is alive (not dead).
 	 */
-	static bool IsAlive(const AActor* Actor);
+	static bool IsAlive(const UObject* Actor);
 	/**
 	 * 
 	 * @param Actor
 	 * @return true if the provided actor implements ICombatInterface and is dead.
 	 */
-	static bool IsDead(const AActor* Actor);
+	static bool IsDead(const UObject* Actor);
 
-	static TArray<FTaggedMontage> GetAttackMontages(const AActor* Actor);
+	static TArray<FTaggedMontage> GetAttackMontages(const UObject* Actor);
 
-	static TArray<FName> GetTargetTagsToIgnore(const AActor* Actor);
+	static TArray<FName> GetTargetTagsToIgnore(const UObject* Actor);
 
-	static int32 GetXPReward(const AActor* Actor);
+	static int32 GetXPReward(const UObject* Actor);
 };

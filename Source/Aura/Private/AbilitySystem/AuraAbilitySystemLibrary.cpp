@@ -113,14 +113,7 @@ bool UAuraAbilitySystemLibrary::IsInstantEffect(const FGameplayEffectSpecHandle&
 
 int UAuraAbilitySystemLibrary::GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent)
 {
-	if (AbilitySystemComponent)
-	{
-		if (const ICombatInterface* CombatInterface = Cast<ICombatInterface>(AbilitySystemComponent->GetAvatarActor()))
-		{
-			return CombatInterface->GetCharacterLevel();
-		}
-	}
-	return 0;
+	return ICombatInterface::GetCharacterLevel(AbilitySystemComponent->GetAvatarActor());
 }
 
 FGameplayTag UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)

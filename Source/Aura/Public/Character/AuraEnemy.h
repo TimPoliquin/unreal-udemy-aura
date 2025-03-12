@@ -30,7 +30,7 @@ public:
 	virtual void HighlightActor() override;
 	virtual void UnHighlightActor() override;
 	// ICombatInterface
-	FORCEINLINE virtual int GetCharacterLevel() const override
+	FORCEINLINE virtual int GetCharacterLevel_Implementation() const override
 	{
 		return Level;
 	}
