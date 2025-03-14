@@ -213,12 +213,12 @@ void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const flo
 				UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle)
 			);
 		}
-		else if (AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(
+		else if (AAuraPlayerController* TargetPlayerController = Cast<AAuraPlayerController>(
 			Props.Target.Character->GetController()
 		))
 		{
 			// show damage on player
-			PlayerController->ShowDamageNumber(
+			TargetPlayerController->ShowDamageNumber(
 				Props.Target.Character,
 				IncomingDamage,
 				UAuraAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle),

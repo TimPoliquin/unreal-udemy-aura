@@ -112,7 +112,7 @@ private:
 
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 	void Dissolve(
-		UMeshComponent* Mesh,
+		UMeshComponent* InMesh,
 		UMaterialInstance* MaterialInstance,
 		void (AAuraBaseCharacter::*Callback)(UMaterialInstanceDynamic*)
 	);

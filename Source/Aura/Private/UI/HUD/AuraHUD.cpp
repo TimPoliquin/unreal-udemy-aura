@@ -32,7 +32,7 @@ void AAuraHUD::InitializeWidgets(
 	UAttributeSet* InAttributeSet
 )
 {
-	OverlayWidget = CreateWidget(
+	OverlayWidget = CreateAuraWidget(
 		OverlayWidgetClass,
 		OverlayWidgetControllerClass,
 		InPlayerController,
@@ -58,7 +58,7 @@ UAttributeMenuWidgetController* AAuraHUD::GetAttributeMenuWidgetController(
 	return AttributeMenuWidgetController;
 }
 
-UAuraUserWidget* AAuraHUD::CreateWidget(
+UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 	TSubclassOf<UAuraUserWidget> WidgetClass,
 	TSubclassOf<UAuraWidgetController> WidgetControllerClass,
 	APlayerController* InPlayerController,

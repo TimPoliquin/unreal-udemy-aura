@@ -56,7 +56,7 @@ private:
 	TObjectPtr<USoundBase> LevelUpSound;
 
 	virtual void InitializeAbilityActorInfo() override;
-	void InitializePlayerControllerHUD(APlayerController* PlayerController, APlayerState* PlayerState) const;
+	void InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState) const;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_LevelUpParticles() const;

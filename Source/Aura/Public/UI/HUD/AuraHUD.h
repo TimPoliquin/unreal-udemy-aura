@@ -58,7 +58,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
 
-	UAuraUserWidget* CreateWidget(
+	UAuraUserWidget* CreateAuraWidget(
 		TSubclassOf<UAuraUserWidget> WidgetClass,
 		TSubclassOf<UAuraWidgetController> WidgetControllerClass,
 		APlayerController* InPlayerController,

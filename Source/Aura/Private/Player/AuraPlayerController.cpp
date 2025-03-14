@@ -132,9 +132,9 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	if (bTargeting || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
-		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+		if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
 		{
-			AuraAbilitySystemComponent->AbilityInputTagHeld(InputTag);
+			LocalAbilitySystem->AbilityInputTagHeld(InputTag);
 		}
 	}
 	else if (!bTargeting)
@@ -156,9 +156,9 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	if (bTargeting || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
-		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+		if (UAuraAbilitySystemComponent* LocalAbilitySystemComponent = GetAuraAbilitySystemComponent())
 		{
-			AuraAbilitySystemComponent->AbilityInputTagReleased(InputTag);
+			LocalAbilitySystemComponent->AbilityInputTagReleased(InputTag);
 		}
 	}
 	else if (!bTargeting)

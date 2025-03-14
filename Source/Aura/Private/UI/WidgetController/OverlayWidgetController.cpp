@@ -90,9 +90,9 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	}
 }
 
-void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AbilitySystemComponent)
+void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemComponent* InAbilitySystemComponent)
 {
-	if (!AbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
+	if (!InAbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
 	{
 		return;
 	}
@@ -107,7 +107,7 @@ void UOverlayWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemCo
 			AbilityInfoDelegate.Broadcast(Info);
 		}
 	);
-	AbilitySystemComponent->ForEachAbility(BroadcastDelegate);
+	InAbilitySystemComponent->ForEachAbility(BroadcastDelegate);
 }
 
 void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)

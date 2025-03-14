@@ -180,18 +180,18 @@ void AAuraBaseCharacter::Dissolve()
 }
 
 void AAuraBaseCharacter::Dissolve(
-	UMeshComponent* Mesh,
+	UMeshComponent* InMesh,
 	UMaterialInstance* MaterialInstance,
 	void (AAuraBaseCharacter::*Callback)(UMaterialInstanceDynamic*)
 )
 {
-	if (IsValid(Mesh) && IsValid(MaterialInstance))
+	if (IsValid(InMesh) && IsValid(MaterialInstance))
 	{
 		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
 			MaterialInstance,
 			this
 		);
-		Mesh->SetMaterial(0, DynamicMaterialInstance);
+		InMesh->SetMaterial(0, DynamicMaterialInstance);
 		(this->*Callback)(DynamicMaterialInstance);
 	}
 }

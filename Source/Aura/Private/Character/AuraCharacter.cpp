@@ -83,13 +83,13 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	InitializeDefaultAttributes();
 }
 
-void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* PlayerController, APlayerState* PlayerState) const
+void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState) const
 {
-	if (AAuraHUD* HUD = Cast<AAuraHUD>(PlayerController->GetHUD()))
+	if (AAuraHUD* HUD = Cast<AAuraHUD>(InPlayerController->GetHUD()))
 	{
 		HUD->InitializeWidgets(
-			PlayerController,
-			PlayerState,
+			InPlayerController,
+			InPlayerState,
 			AbilitySystemComponent,
 			AttributeSet
 		);
