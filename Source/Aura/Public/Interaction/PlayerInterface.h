@@ -35,10 +35,18 @@ public:
 	FAuraLevelUpRewards GetLevelUpRewards(const int32 CurrentLevel) const;
 	UFUNCTION(BlueprintNativeEvent)
 	void ApplyLevelUpRewards(const int32 LevelIncrement, const FAuraLevelUpRewards& InLevelUpRewards);
+	UFUNCTION(BlueprintNativeEvent)
+	void SpendAttributePoints(int32 SpentPoints);
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetAttributePoints() const;
+	UFUNCTION(BlueprintNativeEvent)
+	int32 GetSpellPoints() const;
 
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUp();
 
 	static void AddToXP(AActor* Actor, int32 InXP);
 	static bool ImplementsPlayerInterface(const UObject* Object);
+	static int32 GetAttributePoints(const UObject* Object);
+	static void SpendAttributePoints(UObject* Object, int32 SpentPoints);
 };

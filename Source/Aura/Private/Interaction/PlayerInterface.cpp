@@ -17,3 +17,20 @@ bool IPlayerInterface::ImplementsPlayerInterface(const UObject* Object)
 {
 	return Object && Object->Implements<UPlayerInterface>();
 }
+
+int32 IPlayerInterface::GetAttributePoints(const UObject* Object)
+{
+	if (Object && Object->Implements<UPlayerInterface>())
+	{
+		return Execute_GetAttributePoints(Object);
+	}
+	return 0;
+}
+
+void IPlayerInterface::SpendAttributePoints(UObject* Object, int32 SpentPoints)
+{
+	if (Object && Object->Implements<UPlayerInterface>())
+	{
+		Execute_SpendAttributePoints(Object, SpentPoints);
+	}
+}

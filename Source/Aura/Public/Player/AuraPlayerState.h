@@ -59,12 +59,46 @@ public:
 		SetXP(InXP + XP);
 	}
 
+	FORCEINLINE int32 GetAttributePoints() const
+	{
+		return AttributePoints;
+	}
+
+	FORCEINLINE void SetAttributePoints(const int32 InAttributePoints)
+	{
+		AttributePoints = InAttributePoints;
+		OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
+	}
+
+	FORCEINLINE void AddAttributePoints(const int32 InAttributePoints)
+	{
+		SetAttributePoints(AttributePoints + InAttributePoints);
+	}
+
+	FORCEINLINE int32 GetSpellPoints() const
+	{
+		return SpellPoints;
+	}
+
+	FORCEINLINE void SetSpellPoints(const int32 InSpellPoints)
+	{
+		SpellPoints = InSpellPoints;
+		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
+	}
+
+	FORCEINLINE void AddSpellPoints(const int32 InSpellPoints)
+	{
+		SetSpellPoints(SpellPoints + InSpellPoints);
+	}
+
 	float GetXPToNextLevelPercentage() const;
 	int32 FindLevelByXP(const int32 InXP) const;
 	FAuraLevelUpRewards GetLevelUpRewards(int32 int32) const;
 
 	FOnPlayerStatChangeSignature OnXPChangeDelegate;
 	FOnPlayerStatChangeSignature OnLevelChangeDelegate;
+	FOnPlayerStatChangeSignature OnAttributePointsChangeDelegate;
+	FOnPlayerStatChangeSignature OnSpellPointsChangeDelegate;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -79,6 +113,10 @@ private:
 	int32 Level = 1;
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_XP)
 	int32 XP = 0;
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_AttributePoints)
+	int32 AttributePoints;
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_SpellPoints)
+	int32 SpellPoints;
 
 	UFUNCTION()
 	FORCEINLINE void OnRep_Level(int32 OldLevel) const
@@ -90,5 +128,17 @@ private:
 	FORCEINLINE void OnRep_XP(int32 OldXP) const
 	{
 		OnXPChangeDelegate.Broadcast(OldXP);
+	}
+
+	UFUNCTION()
+	FORCEINLINE void OnRep_AttributePoints(int32 InAttributePoints) const
+	{
+		OnAttributePointsChangeDelegate.Broadcast(InAttributePoints);
+	}
+
+	UFUNCTION()
+	FORCEINLINE void OnRep_SpellPoints(int32 InSpellPoints) const
+	{
+		OnSpellPointsChangeDelegate.Broadcast(InSpellPoints);
 	}
 };

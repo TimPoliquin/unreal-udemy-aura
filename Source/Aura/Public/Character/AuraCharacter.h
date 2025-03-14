@@ -38,6 +38,9 @@ public:
 		const int32 LevelIncrement,
 		const FAuraLevelUpRewards& InLevelUpRewards
 	) override;
+	virtual int32 GetAttributePoints_Implementation() const override;
+	virtual int32 GetSpellPoints_Implementation() const override;
+	virtual void SpendAttributePoints_Implementation(int32 SpentPoints) override;
 
 protected:
 	virtual void BeginPlay() override;

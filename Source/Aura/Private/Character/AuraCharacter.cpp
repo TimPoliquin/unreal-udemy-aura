@@ -166,6 +166,28 @@ void AAuraCharacter::ApplyLevelUpRewards_Implementation(
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
 	check(AuraPlayerState);
-	// TODO - do something with the rewards
+	AuraPlayerState->AddAttributePoints(InLevelUpRewards.AttributePoints);
+	AuraPlayerState->AddSpellPoints(InLevelUpRewards.SpellPoints);
 	AuraPlayerState->AddToLevel(LevelIncrement);
+}
+
+int32 AAuraCharacter::GetAttributePoints_Implementation() const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetAttributePoints();
+}
+
+int32 AAuraCharacter::GetSpellPoints_Implementation() const
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	return AuraPlayerState->GetSpellPoints();
+}
+
+void AAuraCharacter::SpendAttributePoints_Implementation(int32 SpentPoints)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddAttributePoints(-1 * SpentPoints);
 }
