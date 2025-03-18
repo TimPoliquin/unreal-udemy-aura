@@ -4,9 +4,12 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Interaction/PlayerInterface.h"
+#include "Tags/AuraGameplayTags.h"
 
 
 void UAuraAbilitySystemComponent::ForEachAbility(const FForEachAbility& ForEachAbilityDelegate)
@@ -39,6 +42,46 @@ void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FG
 	IPlayerInterface::SpendAttributePoints(GetAvatarActor(), 1);
 }
 
+void UAuraAbilitySystemComponent::ServerUpdateAbilityStatuses(const int32 Level)
+{
+	const FGameplayTag& EligibleStatusTag = FAuraGameplayTags::Get().Abilities_Status_Eligible;
+	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	for (const FAuraAbilityInfo& Info : AbilityInfo->AbilityInformation)
+	{
+		if (Level < Info.LevelRequirement || !Info.AbilityTag.IsValid())
+		{
+			continue;
+		}
+		if (GetSpecFromAbilityTag(Info.AbilityTag) == nullptr)
+		{
+			// TODO - this level is wrong. 
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.Ability, 1);
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(EligibleStatusTag);
+			GiveAbility(AbilitySpec);
+			// Force replication immediately
+			MarkAbilitySpecDirty(AbilitySpec);
+			// Broadcast to clients
+			ClientUpdateAbilityStatus(Info.AbilityTag, EligibleStatusTag);
+		}
+	}
+}
+
+FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		for (const FGameplayTag& Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if (Tag.MatchesTagExact(AbilityTag))
+			{
+				return &AbilitySpec;
+			}
+		}
+	}
+	return nullptr;
+}
+
 void UAuraAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -46,6 +89,14 @@ void UAuraAbilitySystemComponent::BeginPlay()
 		this,
 		&UAuraAbilitySystemComponent::Client_EffectApplied
 	);
+}
+
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(
+	const FGameplayTag& AbilityTag,
+	const FGameplayTag& StatusTag
+)
+{
+	OnAbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag);
 }
 
 void UAuraAbilitySystemComponent::Client_EffectApplied_Implementation(
@@ -67,12 +118,14 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(
 	for (const TSubclassOf AbilityClass : StartupAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		FGameplayTag EquippedTag = FAuraGameplayTags::Get().Abilities_Status_Equipped;
 		if (const UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec.Ability))
 		{
 			for (FGameplayTag StartupTag : AuraAbility->GetStartupInputTag())
 			{
 				AbilitySpec.GetDynamicSpecSourceTags().AddTag(StartupTag);
 			}
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(EquippedTag);
 			GiveAbility(AbilitySpec);
 		}
 	}
@@ -83,7 +136,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(
 	}
 	// NOTE: This is client-side only! OnRep_ActivateAbilities handles server-side.
 	bAbilitiesGiven = true;
-	OnAbilitiesGivenDelegate.Broadcast(this);
+	OnAbilitiesGivenDelegate.Broadcast();
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -126,6 +179,6 @@ void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()
 	if (!bAbilitiesGiven)
 	{
 		bAbilitiesGiven = true;
-		OnAbilitiesGivenDelegate.Broadcast(this);
+		OnAbilitiesGivenDelegate.Broadcast();
 	}
 }

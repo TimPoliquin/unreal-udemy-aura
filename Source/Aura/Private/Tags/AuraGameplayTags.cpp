@@ -122,6 +122,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.Action4"),
 		FString("Input tag for Action 4")
 	);
+	Instance.InputTag_Passive1 = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Passive1"),
+		FString("Input tag for Passive Ability 1")
+	);
+	Instance.InputTag_Passive2 = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Passive2"),
+		FString("Input tag for Passive Ability 2")
+	);
 
 	// Effect Tags
 	Instance.Effect_HitReact = TagManager.AddNativeGameplayTag(
@@ -182,8 +190,12 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	/** Ability Tags */
 	Instance.Abilities = TagManager.AddNativeGameplayTag(FName("Abilities"), FString("Abilities root tag"));
+	Instance.Abilities_HitReact = TagManager.AddNativeGameplayTag(
+		FName("Abilities.HitReact"),
+		FString("Tag applied when character is reacting to a hit")
+	);
 	Instance.Abilities_Attack = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Attack"),
+		FName("Abilities.HitReact"),
 		FString("Attack Abilities parent tag")
 	);
 	Instance.Abilities_Summon = TagManager.AddNativeGameplayTag(
@@ -194,10 +206,70 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Fire.FireBolt"),
 		FString("FireBolt ability tag")
 	);
+	Instance.Abilities_Lightning_Electrocute = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Lightning.Electrocute"),
+		FString("Electrocute ability tag")
+	);
+	Instance.Abilities_Passive = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive"),
+		FString("Passive ability tag")
+	);
+	Instance.Abilities_Passive_1 = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.1"),
+		FString("Passive 1 ability tag")
+	);
+	Instance.Abilities_Passive_2 = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.2"),
+		FString("Passive 2 ability tag")
+	);
+	Instance.Abilities_Passive_3 = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.3"),
+		FString("Passive 3 ability tag")
+	);
+	Instance.Abilities_Status = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Status"),
+		FString("Status Ability root")
+	);
+	Instance.Abilities_Status_Locked = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Status.Locked"),
+		FString("Locked Status")
+	);
+	Instance.Abilities_Status_Eligible = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Status.Eligible"),
+		FString("Eligible Status")
+	);
+	Instance.Abilities_Status_Unlocked = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Status.Unlocked"),
+		FString("Unlocked Status")
+	);
+	Instance.Abilities_Status_Equipped = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Status.Equipped"),
+		FString("Equipped Status")
+	);
+	Instance.Abilities_Type = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Type"),
+		FString("Ability Types root")
+	);
+	Instance.Abilities_Type_Offensive = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Type.Offensive"),
+		FString("Offensive Type")
+	);
+	Instance.Abilities_Type_Passive = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Type.Passive"),
+		FString("Passive Type")
+	);
+	Instance.Abilities_Type_None = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Type.None"),
+		FString("None Type")
+	);
 	/** Cooldown Tags **/
-	Instance.Cooldown_Fire_FireBullet = TagManager.AddNativeGameplayTag(
+	Instance.Cooldown_Fire_FireBolt = TagManager.AddNativeGameplayTag(
 		FName("Cooldown.Fire.FireBolt"),
 		FString("FireBolt ability cooldown tag")
+	);
+	Instance.Cooldown_Lightning_Electrocute = TagManager.AddNativeGameplayTag(
+		FName("Cooldown.Lightning.Electrocute"),
+		FString("Electrocute ability cooldown tag")
 	);
 
 

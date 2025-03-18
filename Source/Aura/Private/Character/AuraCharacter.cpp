@@ -9,6 +9,7 @@
 #include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -83,7 +84,10 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	InitializeDefaultAttributes();
 }
 
-void AAuraCharacter::InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState) const
+void AAuraCharacter::InitializePlayerControllerHUD(
+	APlayerController* InPlayerController,
+	APlayerState* InPlayerState
+) const
 {
 	if (AAuraHUD* HUD = Cast<AAuraHUD>(InPlayerController->GetHUD()))
 	{
@@ -169,6 +173,13 @@ void AAuraCharacter::ApplyLevelUpRewards_Implementation(
 	AuraPlayerState->AddAttributePoints(InLevelUpRewards.AttributePoints);
 	AuraPlayerState->AddSpellPoints(InLevelUpRewards.SpellPoints);
 	AuraPlayerState->AddToLevel(LevelIncrement);
+
+	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+		GetAbilitySystemComponent()
+	))
+	{
+		AuraAbilitySystemComponent->ServerUpdateAbilityStatuses(AuraPlayerState->GetCharacterLevel());
+	}
 }
 
 int32 AAuraCharacter::GetAttributePoints_Implementation() const

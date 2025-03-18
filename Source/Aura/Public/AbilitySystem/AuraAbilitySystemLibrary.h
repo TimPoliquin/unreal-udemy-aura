@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpec.h"
 #include "GameplayTagContainer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class UAbilityInfo;
+class USpellMenuWidgetController;
 struct FGameplayAbilitySpec;
 class UGameplayAbility;
 struct FGameplayEffectSpecHandle;
@@ -28,10 +31,24 @@ class AURA_API UAuraAbilitySystemLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category= "AuraAbilitySystemLibrary|WidgetController")
+	UFUNCTION(
+		BlueprintPure,
+		Category= "AuraAbilitySystemLibrary|WidgetController",
+		meta = (DefaultToSelf = "WorldContextObject")
+	)
 	static UOverlayWidgetController* GetOverlayWidgetController(const UObject* WorldContextObject);
-	UFUNCTION(BlueprintPure, Category= "AuraAbilitySystemLibrary|WidgetController")
+	UFUNCTION(
+		BlueprintPure,
+		Category= "AuraAbilitySystemLibrary|WidgetController",
+		meta = (DefaultToSelf = "WorldContextObject")
+	)
 	static UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const UObject* WorldContextObject);
+	UFUNCTION(
+		BlueprintPure,
+		Category= "AuraAbilitySystemLibrary|WidgetController",
+		meta = (DefaultToSelf = "WorldContextObject")
+	)
+	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category= "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static void InitializeDefaultAttributes(
@@ -50,6 +67,8 @@ public:
 	);
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|AbilityInfo")
+	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static bool IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle);
@@ -72,6 +91,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static int32 GetXPReward(const UObject* WorldContextObject, const ECharacterClass& CharacterClass, int32 Level);
@@ -87,7 +107,7 @@ public:
 	);
 
 private:
-	static void GetWidgetControllerParams(
+	static bool GetWidgetControllerParams(
 		const UObject* WorldContextObject,
 		FWidgetControllerParams& FWidgetControllerParams
 	);

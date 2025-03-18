@@ -3,10 +3,12 @@
 
 #include "UI/Library/AuraWidgetFunctionLibrary.h"
 
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/OverlaySlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Brushes/SlateColorBrush.h"
+#include "UI/Panel/PanelInterface.h"
 
 void UAuraWidgetFunctionLibrary::SetBoxSizeOverride(USizeBox* SizeBox, float Height, float Width)
 {

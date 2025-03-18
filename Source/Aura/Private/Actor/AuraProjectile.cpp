@@ -43,6 +43,9 @@ void AAuraProjectile::BeginPlay()
 	if (TravelSound)
 	{
 		TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
+	}
+	if (TravelSoundComponent)
+	{
 		TravelSoundComponent->SetSound(TravelSound);
 		TravelSoundComponent->Play();
 	}

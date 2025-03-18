@@ -57,6 +57,8 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_Action2;
 	FGameplayTag InputTag_Action3;
 	FGameplayTag InputTag_Action4;
+	FGameplayTag InputTag_Passive1;
+	FGameplayTag InputTag_Passive2;
 
 	/** Effect Tags **/
 	FGameplayTag Effect_HitReact;
@@ -77,11 +79,28 @@ struct FAuraGameplayTags
 	/** Abilities **/
 	FGameplayTag Abilities;
 	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_HitReact;
 	FGameplayTag Abilities_Summon;
+
 	FGameplayTag Abilities_Fire_FireBolt;
+	FGameplayTag Abilities_Lightning_Electrocute;
+	FGameplayTag Abilities_Passive;
+	FGameplayTag Abilities_Passive_1;
+	FGameplayTag Abilities_Passive_2;
+	FGameplayTag Abilities_Passive_3;
+	FGameplayTag Abilities_Status;
+	FGameplayTag Abilities_Status_Locked;
+	FGameplayTag Abilities_Status_Eligible;
+	FGameplayTag Abilities_Status_Unlocked;
+	FGameplayTag Abilities_Status_Equipped;
+	FGameplayTag Abilities_Type;
+	FGameplayTag Abilities_Type_Offensive;
+	FGameplayTag Abilities_Type_Passive;
+	FGameplayTag Abilities_Type_None;
 
 	/** Cooldown **/
-	FGameplayTag Cooldown_Fire_FireBullet;
+	FGameplayTag Cooldown_Fire_FireBolt;
+	FGameplayTag Cooldown_Lightning_Electrocute;
 
 	/** Combat Socket Tags */
 	FGameplayTag Combat_Socket_Weapon;

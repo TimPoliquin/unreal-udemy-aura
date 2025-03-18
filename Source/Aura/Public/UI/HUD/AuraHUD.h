@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraHUD.generated.h"
 
+class USpellMenuWidgetController;
 class UAuraWidgetController;
 class UAttributeMenuWidgetController;
 class UAttributeSet;
@@ -35,6 +37,9 @@ public:
 	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(
 		const FWidgetControllerParams& WidgetControllerParams
 	);
+	USpellMenuWidgetController* GetSpellMenuWidgetController(
+		const FWidgetControllerParams& WidgetControllerParams
+	);
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,9 +55,8 @@ private:
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
 	UPROPERTY()
 	TObjectPtr<UOverlayWidgetController> OverlayWidgetController;
+
 	/** Attribute Menu Controller **/
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAuraUserWidget> AttributeMenuWidgetClass;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UAttributeMenuWidgetController> AttributeMenuWidgetControllerClass;
 	UPROPERTY()
@@ -66,4 +70,33 @@ private:
 		UAbilitySystemComponent* InAbilitySystemComponent,
 		UAttributeSet* InAttributeSet
 	);
+
+	/** Spell Menu Widget Controller */
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass;
+	UPROPERTY()
+	TObjectPtr<USpellMenuWidgetController> SpellMenuWidgetController;
+
+	template <typename T>
+	T* InitializeWidgetController(
+		const TSubclassOf<T>& WidgetControllerClass,
+		const FWidgetControllerParams& WidgetControllerParams
+	);
 };
+
+template <typename T>
+T* AAuraHUD::InitializeWidgetController(
+	const TSubclassOf<T>& WidgetControllerClass,
+	const FWidgetControllerParams& WidgetControllerParams
+)
+{
+	T* WidgetController = Cast<T>(
+		NewObject<UAuraWidgetController>(
+			this,
+			WidgetControllerClass
+		)
+	);
+	WidgetController->SetWidgetControllerParams(WidgetControllerParams);
+	WidgetController->BindCallbacksToDependencies();
+	return WidgetController;
+}

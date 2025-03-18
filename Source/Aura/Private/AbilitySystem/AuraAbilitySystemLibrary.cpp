@@ -18,11 +18,15 @@
 
 UOverlayWidgetController* UAuraAbilitySystemLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
 {
-	FWidgetControllerParams WidgetControllerParams;
-	GetWidgetControllerParams(WorldContextObject, WidgetControllerParams);
-	if (AAuraHUD* AuraHUD = GetAuraHUD(WorldContextObject))
+	if (FWidgetControllerParams WidgetControllerParams; GetWidgetControllerParams(
+		WorldContextObject,
+		WidgetControllerParams
+	))
 	{
-		return AuraHUD->GetOverlayWidgetController(WidgetControllerParams);
+		if (AAuraHUD* AuraHUD = GetAuraHUD(WorldContextObject))
+		{
+			return AuraHUD->GetOverlayWidgetController(WidgetControllerParams);
+		}
 	}
 	return nullptr;
 }
@@ -31,11 +35,32 @@ UAttributeMenuWidgetController* UAuraAbilitySystemLibrary::GetAttributeMenuWidge
 	const UObject* WorldContextObject
 )
 {
-	FWidgetControllerParams WidgetControllerParams;
-	GetWidgetControllerParams(WorldContextObject, WidgetControllerParams);
-	if (AAuraHUD* AuraHUD = GetAuraHUD(WorldContextObject))
+	if (FWidgetControllerParams WidgetControllerParams; GetWidgetControllerParams(
+		WorldContextObject,
+		WidgetControllerParams
+	))
 	{
-		return AuraHUD->GetAttributeMenuWidgetController(WidgetControllerParams);
+		if (AAuraHUD* AuraHUD = GetAuraHUD(WorldContextObject))
+		{
+			return AuraHUD->GetAttributeMenuWidgetController(WidgetControllerParams);
+		}
+	}
+	return nullptr;
+}
+
+USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellMenuWidgetController(
+	const UObject* WorldContextObject
+)
+{
+	if (FWidgetControllerParams WidgetControllerParams; GetWidgetControllerParams(
+		WorldContextObject,
+		WidgetControllerParams
+	))
+	{
+		if (AAuraHUD* AuraHUD = GetAuraHUD(WorldContextObject))
+		{
+			return AuraHUD->GetSpellMenuWidgetController(WidgetControllerParams);
+		}
 	}
 	return nullptr;
 }
@@ -95,6 +120,15 @@ UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObj
 	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
 	{
 		return GameMode->GetCharacterClassInfo();
+	}
+	return nullptr;
+}
+
+UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContextObject)
+{
+	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	{
+		return GameMode->GetAbilityInfo();
 	}
 	return nullptr;
 }
@@ -201,7 +235,22 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 	}
 }
 
-void UAuraAbilitySystemLibrary::GetWidgetControllerParams(
+FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability)
+	{
+		for (const FGameplayTag& Tag : AbilitySpec.GetDynamicSpecSourceTags())
+		{
+			if (Tag.MatchesTag(FAuraGameplayTags::Get().Abilities_Status))
+			{
+				return Tag;
+			}
+		}
+	}
+	return FGameplayTag();
+}
+
+bool UAuraAbilitySystemLibrary::GetWidgetControllerParams(
 	const UObject* WorldContextObject,
 	FWidgetControllerParams& FWidgetControllerParams
 )
@@ -215,7 +264,9 @@ void UAuraAbilitySystemLibrary::GetWidgetControllerParams(
 		FWidgetControllerParams.PlayerState = PlayerState;
 		FWidgetControllerParams.AbilitySystemComponent = AbilitySystemComponent;
 		FWidgetControllerParams.AttributeSet = AttributeSet;
+		return true;
 	}
+	return false;
 }
 
 AAuraHUD* UAuraAbilitySystemLibrary::GetAuraHUD(const UObject* WorldContextObject)

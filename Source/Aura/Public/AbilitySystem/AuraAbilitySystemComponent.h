@@ -9,8 +9,13 @@
 class UAuraAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*Asset Tags*/)
-DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven, UAuraAbilitySystemComponent*);
+DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(
+	FAbilityStatusChanged,
+	const FGameplayTag& /* Ability Tag*/,
+	const FGameplayTag& /* Status Tag */
+)
 
 /**
  * 
@@ -41,6 +46,10 @@ public:
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
 	UFUNCTION(Server, Reliable)
 	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag);
+	void ServerUpdateAbilityStatuses(const int32 Level);
+	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
+
+	FAbilityStatusChanged OnAbilityStatusChangedDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,4 +63,7 @@ protected:
 
 private:
 	bool bAbilitiesGiven = false;
+
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag);
 };
