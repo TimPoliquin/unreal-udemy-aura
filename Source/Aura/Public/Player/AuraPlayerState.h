@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
+#include "Aura/AuraLogChannels.h"
 #include "GameFramework/PlayerState.h"
 #include "AuraPlayerState.generated.h"
-
 class ULevelUpInfo;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChangeSignature, const int32, Value);
 
 
 class UAttributeSet;
@@ -83,6 +83,7 @@ public:
 	FORCEINLINE void SetSpellPoints(const int32 InSpellPoints)
 	{
 		SpellPoints = InSpellPoints;
+		UE_LOG(LogAura, Warning, TEXT("SetSpellPoints: [%d]"), InSpellPoints);
 		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
 	}
 
@@ -95,10 +96,10 @@ public:
 	int32 FindLevelByXP(const int32 InXP) const;
 	FAuraLevelUpRewards GetLevelUpRewards(int32 int32) const;
 
-	FOnPlayerStatChangeSignature OnXPChangeDelegate;
-	FOnPlayerStatChangeSignature OnLevelChangeDelegate;
-	FOnPlayerStatChangeSignature OnAttributePointsChangeDelegate;
-	FOnPlayerStatChangeSignature OnSpellPointsChangeDelegate;
+	FOnPlayerStatChangedSignature OnXPChangeDelegate;
+	FOnPlayerStatChangedSignature OnLevelChangeDelegate;
+	FOnPlayerStatChangedSignature OnAttributePointsChangeDelegate;
+	FOnPlayerStatChangedSignature OnSpellPointsChangeDelegate;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -121,24 +122,26 @@ private:
 	UFUNCTION()
 	FORCEINLINE void OnRep_Level(int32 OldLevel) const
 	{
-		OnLevelChangeDelegate.Broadcast(OldLevel);
+		OnLevelChangeDelegate.Broadcast(Level);
 	}
 
 	UFUNCTION()
 	FORCEINLINE void OnRep_XP(int32 OldXP) const
 	{
-		OnXPChangeDelegate.Broadcast(OldXP);
+		UE_LOG(LogAura, Warning, TEXT("OnRep_XP: [%d]"), XP)
+		OnXPChangeDelegate.Broadcast(XP);
 	}
 
 	UFUNCTION()
 	FORCEINLINE void OnRep_AttributePoints(int32 InAttributePoints) const
 	{
-		OnAttributePointsChangeDelegate.Broadcast(InAttributePoints);
+		OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
 	}
 
 	UFUNCTION()
 	FORCEINLINE void OnRep_SpellPoints(int32 InSpellPoints) const
 	{
-		OnSpellPointsChangeDelegate.Broadcast(InSpellPoints);
+		UE_LOG(LogAura, Warning, TEXT("OnRep_SpellPoints: [%d]"), SpellPoints);
+		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
 	}
 };

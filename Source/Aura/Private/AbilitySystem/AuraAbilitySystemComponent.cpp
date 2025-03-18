@@ -5,11 +5,13 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
+#include "UI/WidgetController/SpellMenuWidgetController.h"
 
 
 void UAuraAbilitySystemComponent::ForEachAbility(const FForEachAbility& ForEachAbilityDelegate)
@@ -46,6 +48,7 @@ void UAuraAbilitySystemComponent::ServerUpdateAbilityStatuses(const int32 Level)
 {
 	const FGameplayTag& EligibleStatusTag = FAuraGameplayTags::Get().Abilities_Status_Eligible;
 	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	TArray<FAbilityTagStatus> EligibleAbilities;
 	for (const FAuraAbilityInfo& Info : AbilityInfo->AbilityInformation)
 	{
 		if (Level < Info.LevelRequirement || !Info.AbilityTag.IsValid())
@@ -61,9 +64,10 @@ void UAuraAbilitySystemComponent::ServerUpdateAbilityStatuses(const int32 Level)
 			// Force replication immediately
 			MarkAbilitySpecDirty(AbilitySpec);
 			// Broadcast to clients
-			ClientUpdateAbilityStatus(Info.AbilityTag, EligibleStatusTag);
+			EligibleAbilities.Add(FAbilityTagStatus::Create(Info.AbilityTag, EligibleStatusTag));
 		}
 	}
+	ClientUpdateAbilityStatus(Level, EligibleAbilities);
 }
 
 FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
@@ -71,7 +75,7 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const F
 	FScopedAbilityListLock ActiveScopeLock(*this);
 	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
-		for (const FGameplayTag& Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		for (const FGameplayTag& Tag : AbilitySpec.Ability.Get()->GetAssetTags())
 		{
 			if (Tag.MatchesTagExact(AbilityTag))
 			{
@@ -92,11 +96,11 @@ void UAuraAbilitySystemComponent::BeginPlay()
 }
 
 void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(
-	const FGameplayTag& AbilityTag,
-	const FGameplayTag& StatusTag
+	const int32 PlayerLevel,
+	const TArray<FAbilityTagStatus>& AbilityStatuses
 )
 {
-	OnAbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag);
+	OnPlayerLevelChangedDelegate.Broadcast(PlayerLevel, AbilityStatuses);
 }
 
 void UAuraAbilitySystemComponent::Client_EffectApplied_Implementation(

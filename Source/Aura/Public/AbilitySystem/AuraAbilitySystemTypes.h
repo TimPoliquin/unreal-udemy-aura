@@ -67,3 +67,22 @@ struct TStructOpsTypeTraits<FAuraGameplayEffectContext> : TStructOpsTypeTraitsBa
 		WithCopy = true,
 	};
 };
+
+USTRUCT()
+struct FAbilityTagStatus
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FGameplayTag AbilityTag;
+	UPROPERTY()
+	FGameplayTag StatusTag;
+
+	static FAbilityTagStatus Create(const FGameplayTag AbilityTag, const FGameplayTag StatusTag)
+	{
+		FAbilityTagStatus AbilityStatus;
+		AbilityStatus.AbilityTag = AbilityTag;
+		AbilityStatus.StatusTag = StatusTag;
+		return AbilityStatus;
+	}
+};

@@ -4,8 +4,11 @@
 #include "UI/WidgetController/SpellMenuWidgetController.h"
 
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Player/AuraPlayerState.h"
+#include "Tags/AuraGameplayTags.h"
 
 void USpellMenuWidgetController::BroadcastInitialValues()
 {
@@ -17,16 +20,9 @@ void USpellMenuWidgetController::BroadcastInitialValues()
 void USpellMenuWidgetController::BindCallbacksToDependencies()
 {
 	Super::BindCallbacksToDependencies();
-	GetAuraAbilitySystemComponent()->OnAbilityStatusChangedDelegate.AddLambda(
-		[this](const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag)
-		{
-			if (AbilityInfo)
-			{
-				FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
-				Info.StatusTag = StatusTag;
-				AbilityInfoDelegate.Broadcast(Info);
-			}
-		}
+	GetAuraAbilitySystemComponent()->OnPlayerLevelChangedDelegate.AddDynamic(
+		this,
+		&USpellMenuWidgetController::OnPlayerLevelChanged
 	);
 	GetAuraPlayerState()->OnSpellPointsChangeDelegate.AddDynamic(
 		this,
@@ -34,12 +30,67 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	);
 }
 
-int32 USpellMenuWidgetController::GetSpellPoints()
+int32 USpellMenuWidgetController::GetAvailableSpellPoints()
 {
 	return GetAuraPlayerState()->GetSpellPoints();
+}
+
+FGameplayTag USpellMenuWidgetController::GetAbilityStatusTag(const FGameplayTag AbilityTag)
+{
+	if (const FGameplayAbilitySpec* AbilitySpec = GetAuraAbilitySystemComponent()->GetSpecFromAbilityTag(AbilityTag))
+	{
+		const FGameplayTag StatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec);
+		return StatusTag;
+	}
+	return FAuraGameplayTags::Get().Abilities_Status_Locked;
+}
+
+bool USpellMenuWidgetController::HasAvailableSpellPoints()
+{
+	return GetAvailableSpellPoints() > 0;
+}
+
+bool USpellMenuWidgetController::CanEquipAbility(const FGameplayTag& AbilityTag)
+{
+	const FGameplayTag StatusTag = GetAbilityStatusTag(AbilityTag);
+	FGameplayTagContainer EquippableStatuses;
+	EquippableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Unlocked);
+	EquippableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+	return StatusTag.MatchesAny(EquippableStatuses);
+}
+
+bool USpellMenuWidgetController::CanPurchaseAbility(const FGameplayTag& AbilityTag)
+{
+	if (HasAvailableSpellPoints())
+	{
+		const FGameplayTag StatusTag = GetAbilityStatusTag(AbilityTag);
+		FGameplayTagContainer PurchasableStatuses;
+		PurchasableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Eligible);
+		PurchasableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Unlocked);
+		PurchasableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+		return StatusTag.MatchesAny(PurchasableStatuses);
+	}
+	return false;
 }
 
 void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
 {
 	OnSpellMenuSpellPointsChangedDelegate.Broadcast(SpellPoints);
+}
+
+void USpellMenuWidgetController::OnPlayerLevelChanged(
+	const int32 Level,
+	const TArray<FAbilityTagStatus> AbilityStatuses
+)
+{
+	if (AbilityInfo)
+	{
+		for (const FAbilityTagStatus& AbilityStatus : AbilityStatuses)
+		{
+			FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityStatus.AbilityTag);
+			Info.StatusTag = AbilityStatus.StatusTag;
+			AbilityInfoDelegate.Broadcast(Info);
+		}
+	}
+	OnSpellMenuPlayerLevelChangedDelegate.Broadcast(Level);
 }

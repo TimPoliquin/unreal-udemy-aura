@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "AttributeChangeDelegates.h"
+#include "AuraAbilitySystemTypes.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
 class UAuraAbilitySystemComponent;
@@ -11,11 +13,6 @@ class UAuraAbilitySystemComponent;
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*Asset Tags*/)
 DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&);
-DECLARE_MULTICAST_DELEGATE_TwoParams(
-	FAbilityStatusChanged,
-	const FGameplayTag& /* Ability Tag*/,
-	const FGameplayTag& /* Status Tag */
-)
 
 /**
  * 
@@ -49,7 +46,7 @@ public:
 	void ServerUpdateAbilityStatuses(const int32 Level);
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
-	FAbilityStatusChanged OnAbilityStatusChangedDelegate;
+	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -65,5 +62,5 @@ private:
 	bool bAbilitiesGiven = false;
 
 	UFUNCTION(Client, Reliable)
-	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag);
+	void ClientUpdateAbilityStatus(const int32 PlayerLevel, const TArray<FAbilityTagStatus>& AbilityStatuses);
 };
