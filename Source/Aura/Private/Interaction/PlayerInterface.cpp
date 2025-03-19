@@ -27,10 +27,27 @@ int32 IPlayerInterface::GetAttributePoints(const UObject* Object)
 	return 0;
 }
 
+int32 IPlayerInterface::GetSpellPoints(const UObject* Object)
+{
+	if (Object && Object->Implements<UPlayerInterface>())
+	{
+		return Execute_GetSpellPoints(Object);
+	}
+	return 0;
+}
+
 void IPlayerInterface::SpendAttributePoints(UObject* Object, int32 SpentPoints)
 {
 	if (Object && Object->Implements<UPlayerInterface>())
 	{
 		Execute_SpendAttributePoints(Object, SpentPoints);
+	}
+}
+
+void IPlayerInterface::SpendSpellPoints(UObject* Object, const int32 SpentPoints)
+{
+	if (Object && Object->Implements<UPlayerInterface>())
+	{
+		Execute_SpendSpellPoints(Object, SpentPoints);
 	}
 }

@@ -41,6 +41,7 @@ public:
 	virtual int32 GetAttributePoints_Implementation() const override;
 	virtual int32 GetSpellPoints_Implementation() const override;
 	virtual void SpendAttributePoints_Implementation(int32 SpentPoints) override;
+	virtual void SpendSpellPoints_Implementation(int32 SpentPoints) override;
 
 protected:
 	virtual void BeginPlay() override;

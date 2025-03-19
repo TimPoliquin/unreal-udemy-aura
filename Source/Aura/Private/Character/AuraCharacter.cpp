@@ -202,3 +202,10 @@ void AAuraCharacter::SpendAttributePoints_Implementation(int32 SpentPoints)
 	check(AuraPlayerState);
 	AuraPlayerState->AddAttributePoints(-1 * SpentPoints);
 }
+
+void AAuraCharacter::SpendSpellPoints_Implementation(const int32 SpentPoints)
+{
+	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState);
+	AuraPlayerState->AddSpellPoints(-1 * SpentPoints);
+}

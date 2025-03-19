@@ -44,6 +44,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag);
 	void ServerUpdateAbilityStatuses(const int32 Level);
+	UFUNCTION(Server, Reliable)
+	void ServerSpendSpellPoint(const FGameplayTag& AbilityTag);
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
@@ -62,5 +64,8 @@ private:
 	bool bAbilitiesGiven = false;
 
 	UFUNCTION(Client, Reliable)
-	void ClientUpdateAbilityStatus(const int32 PlayerLevel, const TArray<FAbilityTagStatus>& AbilityStatuses);
+	void ClientUpdateAbilityStatus(
+		const int32 PlayerLevel,
+		const TArray<FAbilityTagStatus>& AbilityStatuses
+	);
 };

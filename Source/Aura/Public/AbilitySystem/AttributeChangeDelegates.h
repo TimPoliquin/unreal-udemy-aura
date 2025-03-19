@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChangedSignature, int32
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FOnPlayerAbilityStatusChangedSignature,
 	const int32,
-	Level,
-	const TArray<FAbilityTagStatus>,
+	PlayerLevel,
+	const TArray<FAbilityTagStatus>&,
 	AbilityStatuses
 );

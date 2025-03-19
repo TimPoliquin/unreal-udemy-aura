@@ -9,6 +9,7 @@
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
+#include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
 #include "UI/WidgetController/SpellMenuWidgetController.h"
@@ -64,10 +65,48 @@ void UAuraAbilitySystemComponent::ServerUpdateAbilityStatuses(const int32 Level)
 			// Force replication immediately
 			MarkAbilitySpecDirty(AbilitySpec);
 			// Broadcast to clients
-			EligibleAbilities.Add(FAbilityTagStatus::Create(Info.AbilityTag, EligibleStatusTag));
+			EligibleAbilities.Add(FAbilityTagStatus::Create(Info.AbilityTag, EligibleStatusTag, AbilitySpec.Level));
 		}
 	}
 	ClientUpdateAbilityStatus(Level, EligibleAbilities);
+}
+
+void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
+{
+	if (IPlayerInterface::GetSpellPoints(GetAvatarActor()) <= 0)
+	{
+		UE_LOG(LogAura, Warning, TEXT("No spell points to spend points on ability [%s]"), *AbilityTag.ToString())
+		return;
+	}
+	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		IPlayerInterface::SpendSpellPoints(GetAvatarActor(), 1);
+		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+		if (const FGameplayTag StatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec);
+			StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
+		{
+			// unlock ability
+			AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Eligible);
+			AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Unlocked);
+		}
+		else if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped) || StatusTag.MatchesTagExact(
+			GameplayTags.Abilities_Status_Unlocked
+		))
+		{
+			// upgrade ability
+			AbilitySpec->Level += 1;
+			// TODO Cancel and reactivate the ability if it is passive
+		}
+		ClientUpdateAbilityStatus(
+			ICombatInterface::GetCharacterLevel(GetAvatarActor()),
+			FAbilityTagStatus::CreateArray(
+				AbilityTag,
+				UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec),
+				AbilitySpec->Level
+			)
+		);
+		MarkAbilitySpecDirty(*AbilitySpec);
+	}
 }
 
 FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)

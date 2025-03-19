@@ -34,6 +34,8 @@ public:
 	bool CanEquipAbility(const FGameplayTag& AbilityTag);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanPurchaseAbility(const FGameplayTag& AbilityTag);
+	UFUNCTION(BlueprintCallable)
+	void SpendPointOnAbility(const FGameplayTag& AbilityTag);
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuSpellPointsChangedDelegate;
@@ -44,5 +46,5 @@ private:
 	UFUNCTION()
 	void OnSpellPointsChanged(const int32 SpellPoints);
 	UFUNCTION()
-	void OnPlayerLevelChanged(const int32 level, const TArray<FAbilityTagStatus> ability_statuses);
+	void OnPlayerLevelChanged(const int32 Level, const TArray<FAbilityTagStatus>& AbilityStatuses);
 };

@@ -77,12 +77,30 @@ struct FAbilityTagStatus
 	FGameplayTag AbilityTag;
 	UPROPERTY()
 	FGameplayTag StatusTag;
+	UPROPERTY()
+	int32 AbilityLevel;
 
-	static FAbilityTagStatus Create(const FGameplayTag AbilityTag, const FGameplayTag StatusTag)
+	static FAbilityTagStatus Create(
+		const FGameplayTag AbilityTag,
+		const FGameplayTag StatusTag,
+		const int32 AbilityLevel
+	)
 	{
 		FAbilityTagStatus AbilityStatus;
 		AbilityStatus.AbilityTag = AbilityTag;
 		AbilityStatus.StatusTag = StatusTag;
+		AbilityStatus.AbilityLevel = AbilityLevel;
+		return AbilityStatus;
+	}
+
+	static TArray<FAbilityTagStatus> CreateArray(
+		const FGameplayTag AbilityTag,
+		const FGameplayTag StatusTag,
+		const int32 AbilityLevel
+	)
+	{
+		TArray<FAbilityTagStatus> AbilityStatus;
+		AbilityStatus.Add(Create(AbilityTag, StatusTag, AbilityLevel));
 		return AbilityStatus;
 	}
 };

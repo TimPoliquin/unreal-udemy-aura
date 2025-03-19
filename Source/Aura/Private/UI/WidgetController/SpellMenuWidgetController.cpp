@@ -73,6 +73,12 @@ bool USpellMenuWidgetController::CanPurchaseAbility(const FGameplayTag& AbilityT
 	return false;
 }
 
+void USpellMenuWidgetController::SpendPointOnAbility(const FGameplayTag& AbilityTag)
+{
+	GetAuraAbilitySystemComponent()->ServerSpendSpellPoint(AbilityTag);
+}
+
+
 void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
 {
 	OnSpellMenuSpellPointsChangedDelegate.Broadcast(SpellPoints);
@@ -80,7 +86,7 @@ void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
 
 void USpellMenuWidgetController::OnPlayerLevelChanged(
 	const int32 Level,
-	const TArray<FAbilityTagStatus> AbilityStatuses
+	const TArray<FAbilityTagStatus>& AbilityStatuses
 )
 {
 	if (AbilityInfo)
