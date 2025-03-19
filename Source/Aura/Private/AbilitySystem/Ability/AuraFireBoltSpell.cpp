@@ -7,21 +7,34 @@
 
 FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
 {
+	const float ManaCost = GetManaCost(AbilityLevel);
+	const float Cooldown = GetCooldown(AbilityLevel);
 	const int32 Damage = GetDamageByTypeAtLevel(FAuraGameplayTags::Get().Damage_Fire, AbilityLevel);
-	const FString Title = URichTextUtils::Title(GetAbilityName());
-	const FString Footer = URichTextUtils::Small("Level: ") + URichTextUtils::Level(AbilityLevel);
-	const FString DamageText = URichTextUtils::Damage(Damage) + URichTextUtils::Default(
-		" fire damage with a chance to burn"
-	);
 	const FString Bolts = AbilityLevel == 1
-		                      ? URichTextUtils::Default(
-			                      TEXT("Launches a bolt of fire, exploding on impact and dealing:")
-		                      )
-		                      : URichTextUtils::Default(
-			                      FString::Printf(
-				                      TEXT("Launches %d bolts of fire, exploding on impact and dealing:"),
-				                      FMath::Min(AbilityLevel, NumProjectiles)
-			                      )
+		                      ? FString::Printf(TEXT("a bolt"))
+		                      : FString::Printf(
+			                      TEXT("%d bolts"),
+			                      FMath::Min(AbilityLevel, NumProjectiles)
 		                      );
-	return FString::Printf(TEXT("%s\n\n%s %s\n\n%s"), *Title, *Bolts, *DamageText, *Footer);
+	return FString::Printf(
+		TEXT(
+			// Title
+			"" RICH_TITLE("%s") "\n\n"
+			// Details
+			RICH_SMALL("Level: ") RICH_LEVEL("%d") "\n" // Level
+			RICH_SMALL("Mana Cost: ") RICH_MANA_COST("%.1f") "\n" // Mana Cost
+			RICH_SMALL("Cooldown: ") RICH_COOLDOWN("%.1f") "\n\n" // Cooldown
+			// Description
+			RICH_DEFAULT("Launches %s of fire, exploding on impact and dealing ") RICH_DAMAGE("%d")
+			RICH_DEFAULT(
+				"fire damage with a chance to burn."
+			) "\n\n"
+		),
+		*GetAbilityName(),
+		AbilityLevel,
+		FMath::Abs(ManaCost),
+		FMath::Abs(Cooldown),
+		*Bolts,
+		Damage
+	);
 }

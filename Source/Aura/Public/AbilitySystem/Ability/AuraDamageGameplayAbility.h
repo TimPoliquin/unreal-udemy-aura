@@ -28,4 +28,7 @@ protected:
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
 
 	int32 GetDamageByTypeAtLevel(const FGameplayTag& DamageType, const int32 AbilityLevel) const;
+
+	float GetManaCost(const float InLevel = 1.f) const;
+	float GetCooldown(const float InLevel = 1.f) const;
 };

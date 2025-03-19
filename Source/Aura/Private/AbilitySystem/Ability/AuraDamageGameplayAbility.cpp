@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 #include "Interaction/CombatInterface.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
@@ -45,5 +46,40 @@ int32 UAuraDamageGameplayAbility::GetDamageByTypeAtLevel(
 	const int32 AbilityLevel
 ) const
 {
+	checkf(
+		DamageTypes.Contains(DamageType),
+		TEXT("GameplayAbility %s does not contain damage type [%s]"),
+		*GetNameSafe(this),
+		*DamageType.ToString()
+	)
 	return DamageTypes[DamageType].GetValueAtLevel(AbilityLevel);
+}
+
+float UAuraDamageGameplayAbility::GetManaCost(const float InLevel) const
+{
+	if (GetCostGameplayEffect())
+	{
+		for (const FGameplayModifierInfo Mod : GetCostGameplayEffect()->Modifiers)
+		{
+			if (Mod.Attribute == UAuraAttributeSet::GetManaAttribute())
+			{
+				float ManaCost = 0.f;
+				// TODO this assumes a static value.
+				Mod.ModifierMagnitude.GetStaticMagnitudeIfPossible(InLevel, ManaCost);
+				return ManaCost;
+			}
+		}
+	}
+	return 0.f;
+}
+
+float UAuraDamageGameplayAbility::GetCooldown(const float InLevel) const
+{
+	if (const UGameplayEffect* CooldownEffect = GetCooldownGameplayEffect())
+	{
+		float Cooldown = 0.f;
+		CooldownEffect->DurationMagnitude.GetStaticMagnitudeIfPossible(InLevel, Cooldown);
+		return Cooldown;
+	}
+	return 0.f;
 }

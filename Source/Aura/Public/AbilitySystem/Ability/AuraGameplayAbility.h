@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "Utils/RichTextUtils.h"
+#include "Utils/RichTextMacros.h"
 #include "AuraGameplayAbility.generated.h"
 
 /**
@@ -28,12 +28,17 @@ public:
 
 	virtual FString GetDescription(const int32 AbilityLevel) const
 	{
-		return URichTextUtils::Default(TEXT("Unimplemented"));
+		return FString(TEXT(RICH_DEFAULT("Unimplemented")));
 	};
 
 	static FString GetLockedDescription(const int32 LevelRequirement)
 	{
-		return URichTextUtils::Default(TEXT("Spell Locked Until Level %s")) + URichTextUtils::Level(LevelRequirement);
+		return FString::Printf(
+			TEXT(
+				RICH_DEFAULT("Spell Locked Until Level") RICH_LEVEL("%d")
+			),
+			LevelRequirement
+		);
 	}
 
 private:
