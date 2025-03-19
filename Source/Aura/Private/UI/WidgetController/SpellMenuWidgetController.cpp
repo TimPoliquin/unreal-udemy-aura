@@ -85,6 +85,11 @@ FAuraAbilityDescription USpellMenuWidgetController::GetAbilityDescription(const 
 	return AbilityDescription;
 }
 
+FGameplayTag USpellMenuWidgetController::GetAbilityType(const FGameplayTag& AbilityTag) const
+{
+	return AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType;
+}
+
 
 void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
 {

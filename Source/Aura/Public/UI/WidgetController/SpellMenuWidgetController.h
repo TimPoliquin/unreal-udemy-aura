@@ -38,6 +38,8 @@ public:
 	void SpendPointOnAbility(const FGameplayTag& AbilityTag);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FAuraAbilityDescription GetAbilityDescription(const FGameplayTag AbilityTag);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FGameplayTag GetAbilityType(const FGameplayTag& AbilityTag) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuSpellPointsChangedDelegate;
