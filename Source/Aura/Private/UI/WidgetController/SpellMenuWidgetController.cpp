@@ -24,6 +24,10 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 		this,
 		&USpellMenuWidgetController::OnPlayerLevelChanged
 	);
+	GetAuraAbilitySystemComponent()->OnAbilityEquippedDelegate.AddDynamic(
+		this,
+		&USpellMenuWidgetController::OnAbilityEquipped
+	);
 	GetAuraPlayerState()->OnSpellPointsChangeDelegate.AddDynamic(
 		this,
 		&USpellMenuWidgetController::OnSpellPointsChanged
@@ -37,12 +41,7 @@ int32 USpellMenuWidgetController::GetAvailableSpellPoints()
 
 FGameplayTag USpellMenuWidgetController::GetAbilityStatusTag(const FGameplayTag AbilityTag)
 {
-	if (const FGameplayAbilitySpec* AbilitySpec = GetAuraAbilitySystemComponent()->GetSpecFromAbilityTag(AbilityTag))
-	{
-		const FGameplayTag StatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec);
-		return StatusTag;
-	}
-	return FAuraGameplayTags::Get().Abilities_Status_Locked;
+	return UAuraAbilitySystemLibrary::GetStatusTagByAbilityTag(GetAuraAbilitySystemComponent(), AbilityTag);
 }
 
 bool USpellMenuWidgetController::HasAvailableSpellPoints()
@@ -52,11 +51,7 @@ bool USpellMenuWidgetController::HasAvailableSpellPoints()
 
 bool USpellMenuWidgetController::CanEquipAbility(const FGameplayTag& AbilityTag)
 {
-	const FGameplayTag StatusTag = GetAbilityStatusTag(AbilityTag);
-	FGameplayTagContainer EquippableStatuses;
-	EquippableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Unlocked);
-	EquippableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
-	return StatusTag.MatchesAny(EquippableStatuses);
+	return UAuraAbilitySystemLibrary::CanEquipAbility(GetAuraAbilitySystemComponent(), AbilityTag);
 }
 
 bool USpellMenuWidgetController::CanPurchaseAbility(const FGameplayTag& AbilityTag)
@@ -85,9 +80,40 @@ FAuraAbilityDescription USpellMenuWidgetController::GetAbilityDescription(const 
 	return AbilityDescription;
 }
 
-FGameplayTag USpellMenuWidgetController::GetAbilityType(const FGameplayTag& AbilityTag) const
+FGameplayTag USpellMenuWidgetController::GetAbilityTypeTag(const FGameplayTag& AbilityTag) const
 {
 	return AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityType;
+}
+
+FGameplayTag USpellMenuWidgetController::GetAbilityInputTag(const FGameplayTag AbilityTag)
+{
+	return UAuraAbilitySystemLibrary::GetInputTagByAbilityTag(GetAuraAbilitySystemComponent(), AbilityTag);
+}
+
+void USpellMenuWidgetController::EquipAbility(
+	const FGameplayTag& AbilityTag,
+	const FGameplayTag& SlotTag,
+	const FGameplayTag& SelectedAbilityTypeTag
+)
+{
+	const FGameplayTag AbilityType = GetAbilityTypeTag(AbilityTag);
+	const FGameplayTag StatusTag = GetAbilityStatusTag(AbilityTag);
+	const FGameplayTag CurrentInputTag = GetAbilityInputTag(AbilityTag);
+	if (!SelectedAbilityTypeTag.MatchesTagExact(AbilityType))
+	{
+		UE_LOG(
+			LogAura,
+			Warning,
+			TEXT("Attempted to assign an ability to an invalid slot. [%s] x-> [%s]"),
+			*AbilityTag.ToString(),
+			*SlotTag.ToString()
+		)
+		return;
+	}
+	GetAuraAbilitySystemComponent()->ServerEquipAbility(
+		AbilityTag,
+		SlotTag
+	);
 }
 
 
@@ -111,4 +137,15 @@ void USpellMenuWidgetController::OnPlayerLevelChanged(
 		}
 	}
 	OnSpellMenuPlayerLevelChangedDelegate.Broadcast(Level);
+}
+
+void USpellMenuWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload)
+{
+	// clear the previously occupied slot
+	OnSpellMenuSlotClearedDelegate.Broadcast(EquipPayload.PreviousSlotTag);
+
+	FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(EquipPayload.AbilityTag);
+	Info.StatusTag = EquipPayload.StatusTag;
+	Info.InputTag = EquipPayload.SlotTag;
+	AbilityInfoDelegate.Broadcast(Info);
 }

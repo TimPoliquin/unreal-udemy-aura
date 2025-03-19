@@ -114,3 +114,32 @@ struct FAuraAbilityDescription
 	UPROPERTY(BlueprintReadOnly)
 	FString NextLevelDescription = FString();
 };
+
+USTRUCT(BlueprintType)
+struct FAuraEquipAbilityPayload
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FGameplayTag AbilityTag;
+	UPROPERTY()
+	FGameplayTag StatusTag;
+	UPROPERTY()
+	FGameplayTag SlotTag;
+	UPROPERTY()
+	FGameplayTag PreviousSlotTag;
+
+	static FAuraEquipAbilityPayload Create(
+		const FGameplayTag& AbilityTag,
+		const FGameplayTag& StatusTag,
+		const FGameplayTag& SlotTag,
+		const FGameplayTag& PreviousSlotTag
+	)
+	{
+		FAuraEquipAbilityPayload EquipPayload;
+		EquipPayload.AbilityTag = AbilityTag;
+		EquipPayload.StatusTag = StatusTag;
+		EquipPayload.SlotTag = SlotTag;
+		EquipPayload.PreviousSlotTag = PreviousSlotTag;
+		return EquipPayload;
+	}
+};

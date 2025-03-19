@@ -4,6 +4,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
@@ -235,6 +236,30 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 	}
 }
 
+bool UAuraAbilitySystemLibrary::CanEquipAbility(
+	UAuraAbilitySystemComponent* AbilitySystemComponent,
+	const FGameplayTag& AbilityTag
+)
+{
+	const FGameplayTag StatusTag = GetStatusTagByAbilityTag(AbilitySystemComponent, AbilityTag);
+	FGameplayTagContainer EquippableStatuses;
+	EquippableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Unlocked);
+	EquippableStatuses.AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
+	return StatusTag.MatchesAny(EquippableStatuses);
+}
+
+bool UAuraAbilitySystemLibrary::AbilityHasSlotTag(const FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& SlotTag)
+{
+	for (const FGameplayTag& Tag : AbilitySpec.GetDynamicSpecSourceTags())
+	{
+		if (Tag.MatchesTagExact(SlotTag))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
 	if (AbilitySpec.Ability)
@@ -246,6 +271,30 @@ FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagFromSpec(const FGameplayAbil
 				return Tag;
 			}
 		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagByAbilityTag(
+	UAuraAbilitySystemComponent* AbilitySystemComponent,
+	const FGameplayTag& AbilityTag
+)
+{
+	if (const FGameplayAbilitySpec* Spec = AbilitySystemComponent->GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetStatusTagFromSpec(*Spec);
+	}
+	return FAuraGameplayTags::Get().Abilities_Status_Locked;
+}
+
+FGameplayTag UAuraAbilitySystemLibrary::GetInputTagByAbilityTag(
+	UAuraAbilitySystemComponent* AbilitySystemComponent,
+	const FGameplayTag& AbilityTag
+)
+{
+	if (const FGameplayAbilitySpec* Spec = AbilitySystemComponent->GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetInputTagFromSpec(*Spec);
 	}
 	return FGameplayTag();
 }

@@ -12,7 +12,8 @@ class UAuraAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*Asset Tags*/)
 DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
-DECLARE_DELEGATE_OneParam(FForEachAbility, const FGameplayAbilitySpec&);
+DECLARE_DELEGATE_OneParam(FForEachAbility, FGameplayAbilitySpec&);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityEquippedSignature, const FAuraEquipAbilityPayload&, EquipPayload);
 
 /**
  * 
@@ -46,12 +47,19 @@ public:
 	void ServerUpdateAbilityStatuses(const int32 Level);
 	UFUNCTION(Server, Reliable)
 	void ServerSpendSpellPoint(const FGameplayTag& AbilityTag);
+	UFUNCTION(Server, Reliable)
+	void ServerEquipAbility(const FGameplayTag& AbilityTag, const FGameplayTag& SlotTag);
+	UFUNCTION(Client, Reliable)
+	void ClientEquipAbility(const FAuraEquipAbilityPayload& EquipPayload);
+	void ClearAbilitySlot(FGameplayAbilitySpec& AbilitySpec);
+	void ClearAbilitiesUsingSlot(const FGameplayTag& SlotTag);
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
 	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FAuraAbilityDescription& OutDescription);
 
 
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
+	FAbilityEquippedSignature OnAbilityEquippedDelegate;
 
 protected:
 	virtual void BeginPlay() override;

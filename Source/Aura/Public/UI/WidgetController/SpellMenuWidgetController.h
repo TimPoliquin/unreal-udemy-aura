@@ -10,6 +10,8 @@
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "SpellMenuWidgetController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FClearSlotSignature, const FGameplayTag&, SlotTag);
+
 class FOnPlayerStatChangedSignature;
 /**
  * 
@@ -25,8 +27,6 @@ public:
 	virtual void BindCallbacksToDependencies() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FGameplayTag GetAbilityStatusTag(const FGameplayTag AbilityTag);
-	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetAvailableSpellPoints();
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasAvailableSpellPoints();
@@ -39,16 +39,32 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FAuraAbilityDescription GetAbilityDescription(const FGameplayTag AbilityTag);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FGameplayTag GetAbilityType(const FGameplayTag& AbilityTag) const;
+	FGameplayTag GetAbilityStatusTag(const FGameplayTag AbilityTag);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FGameplayTag GetAbilityTypeTag(const FGameplayTag& AbilityTag) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FGameplayTag GetAbilityInputTag(const FGameplayTag AbilityTag);
+
+	UFUNCTION(BlueprintCallable)
+	void EquipAbility(
+		const FGameplayTag& AbilityTag,
+		const FGameplayTag& SlotTag,
+		const FGameplayTag& SelectedAbilityTypeTag
+	);
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuSpellPointsChangedDelegate;
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuPlayerLevelChangedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
+	FClearSlotSignature OnSpellMenuSlotClearedDelegate;
 
 private:
 	UFUNCTION()
 	void OnSpellPointsChanged(const int32 SpellPoints);
 	UFUNCTION()
 	void OnPlayerLevelChanged(const int32 Level, const TArray<FAbilityTagStatus>& AbilityStatuses);
+
+	UFUNCTION()
+	void OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload);
 };

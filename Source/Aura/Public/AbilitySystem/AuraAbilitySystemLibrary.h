@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class UAuraAbilitySystemComponent;
 class UAbilityInfo;
 class USpellMenuWidgetController;
 struct FGameplayAbilitySpec;
@@ -92,6 +93,14 @@ public:
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	static FGameplayTag GetStatusTagByAbilityTag(
+		UAuraAbilitySystemComponent* AbilitySystemComponent,
+		const FGameplayTag& AbilityTag
+	);
+	static FGameplayTag GetInputTagByAbilityTag(
+		UAuraAbilitySystemComponent* AbilitySystemComponent,
+		const FGameplayTag& AbilityTag
+	);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static int32 GetXPReward(const UObject* WorldContextObject, const ECharacterClass& CharacterClass, int32 Level);
@@ -105,6 +114,9 @@ public:
 		float Radius,
 		TArray<AActor*>& OutOverlappingActors
 	);
+
+	static bool CanEquipAbility(UAuraAbilitySystemComponent* AbilitySystemComponent, const FGameplayTag& AbilityTag);
+	static bool AbilityHasSlotTag(const FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& SlotTag);
 
 private:
 	static bool GetWidgetControllerParams(
