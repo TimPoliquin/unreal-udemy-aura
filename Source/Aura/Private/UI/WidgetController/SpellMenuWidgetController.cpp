@@ -78,6 +78,13 @@ void USpellMenuWidgetController::SpendPointOnAbility(const FGameplayTag& Ability
 	GetAuraAbilitySystemComponent()->ServerSpendSpellPoint(AbilityTag);
 }
 
+FAuraAbilityDescription USpellMenuWidgetController::GetAbilityDescription(const FGameplayTag AbilityTag)
+{
+	FAuraAbilityDescription AbilityDescription;
+	GetAuraAbilitySystemComponent()->GetDescriptionsByAbilityTag(AbilityTag, AbilityDescription);
+	return AbilityDescription;
+}
+
 
 void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
 {

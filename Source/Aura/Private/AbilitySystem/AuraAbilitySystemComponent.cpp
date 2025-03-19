@@ -125,6 +125,33 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromAbilityTag(const F
 	return nullptr;
 }
 
+bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(
+	const FGameplayTag& AbilityTag,
+	FAuraAbilityDescription& OutDescription
+)
+{
+	if (!AbilityTag.MatchesTag(FAuraGameplayTags::Get().Abilities))
+	{
+		return false;
+	}
+	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		if (UAuraGameplayAbility* AuraAbility = Cast<UAuraGameplayAbility>(AbilitySpec->Ability))
+		{
+			OutDescription.Description = AuraAbility->GetDescription(AbilitySpec->Level);
+			OutDescription.NextLevelDescription = AuraAbility->GetDescription(AbilitySpec->Level + 1);
+			return true;
+		}
+		UE_LOG(LogAura, Error, TEXT("Ability not set for AbilitySpec assigned to [%s]"), *AbilityTag.ToString())
+	}
+	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	OutDescription.Description = UAuraGameplayAbility::GetLockedDescription(
+		AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement
+	);
+	OutDescription.NextLevelDescription = FString();
+	return false;
+}
+
 void UAuraAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();

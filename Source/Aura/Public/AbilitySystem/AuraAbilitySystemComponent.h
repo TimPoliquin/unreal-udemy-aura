@@ -48,6 +48,9 @@ public:
 	void ServerSpendSpellPoint(const FGameplayTag& AbilityTag);
 	FGameplayAbilitySpec* GetSpecFromAbilityTag(const FGameplayTag& AbilityTag);
 
+	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FAuraAbilityDescription& OutDescription);
+
+
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
 
 protected:

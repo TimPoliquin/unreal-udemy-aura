@@ -104,3 +104,13 @@ struct FAbilityTagStatus
 		return AbilityStatus;
 	}
 };
+
+USTRUCT(BlueprintType)
+struct FAuraAbilityDescription
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly)
+	FString Description = FString();
+	UPROPERTY(BlueprintReadOnly)
+	FString NextLevelDescription = FString();
+};

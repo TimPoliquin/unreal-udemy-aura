@@ -36,6 +36,8 @@ public:
 	bool CanPurchaseAbility(const FGameplayTag& AbilityTag);
 	UFUNCTION(BlueprintCallable)
 	void SpendPointOnAbility(const FGameplayTag& AbilityTag);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FAuraAbilityDescription GetAbilityDescription(const FGameplayTag AbilityTag);
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuSpellPointsChangedDelegate;

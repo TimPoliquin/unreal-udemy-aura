@@ -39,3 +39,11 @@ FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontage() const
 	UE_LOG(LogTemp, Warning, TEXT("No attack montage tags associated for %s"), *AvatarActor->GetName());
 	return FTaggedMontage();
 }
+
+int32 UAuraDamageGameplayAbility::GetDamageByTypeAtLevel(
+	const FGameplayTag& DamageType,
+	const int32 AbilityLevel
+) const
+{
+	return DamageTypes[DamageType].GetValueAtLevel(AbilityLevel);
+}

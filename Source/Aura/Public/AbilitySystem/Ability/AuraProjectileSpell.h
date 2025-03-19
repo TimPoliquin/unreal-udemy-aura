@@ -34,13 +34,15 @@ protected:
 		const FGameplayTag& SocketTag
 	);
 
-private:
 	/**
 	 * Angle (y) for projectile to be fired.
 	 * Defaults to 0 to allow projectile to travel parallel to the ground. 
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float Pitch = 0.f;
+	UPROPERTY(EditDefaultsOnly, Category ="Projectile")
+	int32 NumProjectiles;
 
+private:
 	FGameplayEffectSpecHandle MakeDamageEffectSpecHandle(AActor* SourceObject, const FVector& TargetLocation) const;
 };
