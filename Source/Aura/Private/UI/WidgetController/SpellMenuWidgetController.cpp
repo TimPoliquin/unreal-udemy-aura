@@ -116,6 +116,14 @@ void USpellMenuWidgetController::EquipAbility(
 	);
 }
 
+void USpellMenuWidgetController::UnbindAll(const UObject* BoundObject)
+{
+	OnSpellMenuSpellPointsChangedDelegate.RemoveAll(BoundObject);
+	OnSpellMenuPlayerLevelChangedDelegate.RemoveAll(BoundObject);
+	OnSpellMenuSlotClearedDelegate.RemoveAll(BoundObject);
+	OnAbilityAssigned.RemoveAll(BoundObject);
+}
+
 
 void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
 {
@@ -148,4 +156,5 @@ void USpellMenuWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayloa
 	Info.StatusTag = EquipPayload.StatusTag;
 	Info.InputTag = EquipPayload.SlotTag;
 	AbilityInfoDelegate.Broadcast(Info);
+	OnAbilityAssigned.Broadcast(EquipPayload.AbilityTag);
 }

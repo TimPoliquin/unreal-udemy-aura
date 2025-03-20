@@ -12,6 +12,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FClearSlotSignature, const FGameplayTag&, SlotTag);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityAssigned, const FGameplayTag&, AbilityTag);
+
 class FOnPlayerStatChangedSignature;
 /**
  * 
@@ -52,12 +54,17 @@ public:
 		const FGameplayTag& SelectedAbilityTypeTag
 	);
 
+	UFUNCTION(BlueprintCallable, meta=(DefaultToSelf="BoundObject"))
+	void UnbindAll(const UObject* BoundObject);
+
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuSpellPointsChangedDelegate;
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuPlayerLevelChangedDelegate;
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FClearSlotSignature OnSpellMenuSlotClearedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
+	FAbilityAssigned OnAbilityAssigned;
 
 private:
 	UFUNCTION()

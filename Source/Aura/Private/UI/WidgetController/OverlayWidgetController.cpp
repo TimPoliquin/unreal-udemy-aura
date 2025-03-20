@@ -67,6 +67,10 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 			}
 		}
 	);
+	GetAuraAbilitySystemComponent()->OnAbilityEquippedDelegate.AddDynamic(
+		this,
+		&UOverlayWidgetController::OnAbilityEquipped
+	);
 	if (GetAuraAbilitySystemComponent()->HasFiredOnAbilitiesGivenDelegate())
 	{
 		BroadcastAbilityInfo();
@@ -88,4 +92,15 @@ void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)
 void UOverlayWidgetController::OnPlayerLevelChange(const int32 InLevel)
 {
 	OnPlayerLevelChangedDelegate.Broadcast(InLevel);
+}
+
+void UOverlayWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload)
+{
+	// clear the previously occupied slot
+	OnClearSlot.Broadcast(EquipPayload.PreviousSlotTag);
+
+	FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(EquipPayload.AbilityTag);
+	Info.StatusTag = EquipPayload.StatusTag;
+	Info.InputTag = EquipPayload.SlotTag;
+	AbilityInfoDelegate.Broadcast(Info);
 }

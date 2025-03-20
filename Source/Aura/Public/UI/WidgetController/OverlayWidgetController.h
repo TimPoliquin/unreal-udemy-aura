@@ -31,6 +31,8 @@ struct FUIWidgetRow : public FTableRowBase
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOverlayClearSlotSignature, const FGameplayTag&, SlotTag);
+
 
 /**
  * 
@@ -65,6 +67,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Level")
 	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
+	FOverlayClearSlotSignature OnClearSlot;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable> MessageDataTable;
@@ -77,6 +82,8 @@ private:
 	void OnPlayerXPChange(const int32 XP);
 	UFUNCTION()
 	void OnPlayerLevelChange(const int32 InLevel);
+	UFUNCTION()
+	void OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload);
 };
 
 template <typename T>
