@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
@@ -120,7 +121,6 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 		SetMana(GetMaxMana());
 		bTopOffMana = false;
 	}
-	
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
@@ -202,6 +202,12 @@ void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 					1,
 					Rewards
 				);
+			}
+			if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+				Props.Source.AbilitySystemComponent
+			))
+			{
+				AuraAbilitySystemComponent->ServerUpdateAbilityStatuses(NewLevel);
 			}
 			// TODO - there are complications here that will be addressed later.
 			SetHealth(GetMaxHealth());
