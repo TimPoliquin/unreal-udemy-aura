@@ -127,6 +127,11 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(
 			ClearAbilitySlot(*AbilitySpec);
 			// Assign this slot to this ability
 			AbilitySpec->GetDynamicSpecSourceTags().AddTag(SlotTag);
+			if (SlotTag.MatchesTagExact(GameplayTags.InputTag_LeftMouseButton))
+			{
+				// This is a special tag that binds to Shift + Left Click.
+				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.InputTag_AttackTarget);
+			}
 			if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
 			{
 				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
@@ -151,8 +156,11 @@ void UAuraAbilitySystemComponent::ClientEquipAbility_Implementation(const FAuraE
 
 void UAuraAbilitySystemComponent::ClearAbilitySlot(FGameplayAbilitySpec& AbilitySpec)
 {
-	const FGameplayTag Slot = UAuraAbilitySystemLibrary::GetInputTagFromSpec(AbilitySpec);
-	AbilitySpec.GetDynamicSpecSourceTags().RemoveTag(Slot);
+	for (const FGameplayTag& Slot : UAuraAbilitySystemLibrary::GetInputTagsFromSpec(AbilitySpec))
+	{
+		AbilitySpec.GetDynamicSpecSourceTags().RemoveTag(Slot);
+	}
+
 	MarkAbilitySpecDirty(AbilitySpec);
 }
 

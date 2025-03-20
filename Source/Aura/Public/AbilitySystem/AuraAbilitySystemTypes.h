@@ -1,5 +1,6 @@
 #pragma once
 #include "GameplayEffectTypes.h"
+#include "Aura/AuraLogChannels.h"
 #include "AuraAbilitySystemTypes.generated.h"
 
 USTRUCT(BlueprintType)

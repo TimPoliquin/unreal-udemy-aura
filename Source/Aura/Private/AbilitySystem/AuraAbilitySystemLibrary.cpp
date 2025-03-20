@@ -180,6 +180,21 @@ FGameplayTag UAuraAbilitySystemLibrary::GetInputTagFromSpec(const FGameplayAbili
 	}
 	return FGameplayTag();
 }
+TArray<FGameplayTag> UAuraAbilitySystemLibrary::GetInputTagsFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	TArray<FGameplayTag> InputTags;
+	if (AbilitySpec.Ability)
+	{
+		for (const FGameplayTag& Tag : AbilitySpec.GetDynamicSpecSourceTags())
+		{
+			if (Tag.MatchesTag(FAuraGameplayTags::Get().InputTag))
+			{
+				InputTags.Add(Tag);
+			}
+		}
+	}
+	return InputTags;
+}
 
 int32 UAuraAbilitySystemLibrary::GetXPReward(
 	const UObject* WorldContextObject,

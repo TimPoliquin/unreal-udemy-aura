@@ -97,8 +97,6 @@ void USpellMenuWidgetController::EquipAbility(
 )
 {
 	const FGameplayTag AbilityType = GetAbilityTypeTag(AbilityTag);
-	const FGameplayTag StatusTag = GetAbilityStatusTag(AbilityTag);
-	const FGameplayTag CurrentInputTag = GetAbilityInputTag(AbilityTag);
 	if (!SelectedAbilityTypeTag.MatchesTagExact(AbilityType))
 	{
 		UE_LOG(
