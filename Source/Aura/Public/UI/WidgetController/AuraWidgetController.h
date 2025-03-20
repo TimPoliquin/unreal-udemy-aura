@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interaction/UnbindableInterface.h"
 #include "Player/AuraPlayerController.h"
 #include "UObject/Object.h"
 #include "AuraWidgetController.generated.h"
@@ -53,7 +54,7 @@ struct FWidgetControllerParams
  * 
  */
 UCLASS()
-class AURA_API UAuraWidgetController : public UObject
+class AURA_API UAuraWidgetController : public UObject, public IUnbindableInterface
 {
 	GENERATED_BODY()
 
@@ -70,6 +71,7 @@ public:
 	}
 
 	virtual void BroadcastAbilityInfo();
+	virtual void UnbindAll_Implementation(const UObject* BoundObject) override;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FAbilityInfoSignature AbilityInfoDelegate;

@@ -116,8 +116,9 @@ void USpellMenuWidgetController::EquipAbility(
 	);
 }
 
-void USpellMenuWidgetController::UnbindAll(const UObject* BoundObject)
+void USpellMenuWidgetController::UnbindAll_Implementation(const UObject* BoundObject)
 {
+	Super::UnbindAll_Implementation(BoundObject);
 	OnSpellMenuSpellPointsChangedDelegate.RemoveAll(BoundObject);
 	OnSpellMenuPlayerLevelChangedDelegate.RemoveAll(BoundObject);
 	OnSpellMenuSlotClearedDelegate.RemoveAll(BoundObject);

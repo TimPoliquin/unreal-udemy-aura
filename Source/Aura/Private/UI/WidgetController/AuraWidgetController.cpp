@@ -44,6 +44,11 @@ void UAuraWidgetController::BroadcastAbilityInfo()
 	GetAuraAbilitySystemComponent()->ForEachAbility(BroadcastDelegate);
 }
 
+void UAuraWidgetController::UnbindAll_Implementation(const UObject* BoundObject)
+{
+	AbilityInfoDelegate.RemoveAll(BoundObject);
+}
+
 AAuraPlayerController* UAuraWidgetController::GetAuraPlayerController()
 {
 	if (AuraPlayerController == nullptr)

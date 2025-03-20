@@ -54,8 +54,7 @@ public:
 		const FGameplayTag& SelectedAbilityTypeTag
 	);
 
-	UFUNCTION(BlueprintCallable, meta=(DefaultToSelf="BoundObject"))
-	void UnbindAll(const UObject* BoundObject);
+	virtual void UnbindAll_Implementation(const UObject* BoundObject) override;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FOnPlayerStatChangedSignature OnSpellMenuSpellPointsChangedDelegate;
