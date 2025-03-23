@@ -9,7 +9,7 @@ FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
 {
 	const float ManaCost = GetManaCost(AbilityLevel);
 	const float Cooldown = GetCooldown(AbilityLevel);
-	const int32 Damage = GetDamageByTypeAtLevel(FAuraGameplayTags::Get().Damage_Fire, AbilityLevel);
+	const int32 Damage = GetDamageAtLevel(AbilityLevel);
 	const FString Bolts = AbilityLevel == 1
 		                      ? FString::Printf(TEXT("a bolt"))
 		                      : FString::Printf(

@@ -14,15 +14,11 @@ void UAuraDamageGameplayAbility::DealDamage(AActor* TargetActor)
 {
 	const FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1);
 	const int32 Level = GetAbilityLevel();
-	for (const FGameplayTag& DamageTag : FAuraGameplayTags::Get().GetDamageTypes())
-	{
-		float DamageMagnitude = 0.f;
-		if (DamageTypes.Contains(DamageTag))
-		{
-			DamageMagnitude = DamageTypes[DamageTag].GetValueAtLevel(Level);
-		}
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageTag, DamageMagnitude);
-	}
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		DamageConfig.DamageTypeTag,
+		DamageConfig.Amount.GetValueAtLevel(Level)
+	);
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(
 		*SpecHandle.Data.Get(),
 		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor)
@@ -41,18 +37,26 @@ FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontage() const
 	return FTaggedMontage();
 }
 
-int32 UAuraDamageGameplayAbility::GetDamageByTypeAtLevel(
-	const FGameplayTag& DamageType,
+FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor) const
+{
+	FDamageEffectParams DamageEffectParams;
+	DamageEffectParams.FillFromDamageConfig(DamageConfig);
+	DamageEffectParams.WorldContextObject = GetAvatarActorFromActorInfo();
+	DamageEffectParams.DamageGameplayEffectClass = DamageEffectClass;
+	DamageEffectParams.SourceAbilitySystemComponent = GetAbilitySystemComponentFromActorInfo();
+	DamageEffectParams.TargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	);
+	DamageEffectParams.BaseDamage = GetDamageAtLevel(GetAbilityLevel());
+	DamageEffectParams.AbilityLevel = GetAbilityLevel();
+	return DamageEffectParams;
+}
+
+int32 UAuraDamageGameplayAbility::GetDamageAtLevel(
 	const int32 AbilityLevel
 ) const
 {
-	checkf(
-		DamageTypes.Contains(DamageType),
-		TEXT("GameplayAbility %s does not contain damage type [%s]"),
-		*GetNameSafe(this),
-		*DamageType.ToString()
-	)
-	return DamageTypes[DamageType].GetValueAtLevel(AbilityLevel);
+	return DamageConfig.Amount.GetValueAtLevel(AbilityLevel);
 }
 
 float UAuraDamageGameplayAbility::GetManaCost(const float InLevel) const

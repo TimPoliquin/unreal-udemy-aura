@@ -1,6 +1,7 @@
 #pragma once
+#include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
-#include "Aura/AuraLogChannels.h"
+#include "ScalableFloat.h"
 #include "AuraAbilitySystemTypes.generated.h"
 
 USTRUCT(BlueprintType)
@@ -142,5 +143,64 @@ struct FAuraEquipAbilityPayload
 		EquipPayload.SlotTag = SlotTag;
 		EquipPayload.PreviousSlotTag = PreviousSlotTag;
 		return EquipPayload;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FAuraDamageConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag DamageTypeTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat Amount;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffChance = 20.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffDamage = 5.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffFrequency = 1.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffDuration = 5.f;
+};
+
+USTRUCT(BlueprintType)
+struct FDamageEffectParams
+{
+	GENERATED_BODY()
+	FDamageEffectParams()
+	{
+	}
+
+	UPROPERTY()
+	TObjectPtr<UObject> WorldContextObject = nullptr;
+	UPROPERTY()
+	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent = nullptr;
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent = nullptr;
+	UPROPERTY()
+	float BaseDamage = 0.f;
+	UPROPERTY()
+	float AbilityLevel = 1.f;
+	UPROPERTY()
+	FGameplayTag DamageType = FGameplayTag::EmptyTag;
+	UPROPERTY()
+	float DebuffChance = 0.f;
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+
+	void FillFromDamageConfig(const FAuraDamageConfig& DamageConfig)
+	{
+		DamageType = DamageConfig.DamageTypeTag;
+		DebuffChance = DamageConfig.DebuffChance;
+		DebuffDamage = DamageConfig.DebuffDamage;
+		DebuffDuration = DamageConfig.DebuffDuration;
+		DebuffFrequency = DamageConfig.DebuffFrequency;
 	}
 };

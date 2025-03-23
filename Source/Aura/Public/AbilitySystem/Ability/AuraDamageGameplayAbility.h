@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "AuraGameplayAbility.h"
+#include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
 struct FTaggedMontage;
+
 /**
  * 
  */
@@ -21,13 +23,15 @@ class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomAttackMontage() const;
 
+	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor = nullptr) const;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	TMap<FGameplayTag, FScalableFloat> DamageTypes;
+	FAuraDamageConfig DamageConfig;
 
-	int32 GetDamageByTypeAtLevel(const FGameplayTag& DamageType, const int32 AbilityLevel) const;
+	int32 GetDamageAtLevel(const int32 AbilityLevel) const;
 
 	float GetManaCost(const float InLevel = 1.f) const;
 	float GetCooldown(const float InLevel = 1.f) const;
