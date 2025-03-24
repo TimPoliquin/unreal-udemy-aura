@@ -48,6 +48,14 @@ void UDebuffNiagaraComponent::BeginPlay()
 
 void UDebuffNiagaraComponent::OnDebuffTagChanged(FGameplayTag GameplayTag, const int StackCount)
 {
+	if (!IsValid(GetOwner()))
+	{
+		return;
+	}
+	if (ICombatInterface::IsDead(GetOwner()))
+	{
+		return;
+	}
 	if (StackCount > 0)
 	{
 		Activate(false);

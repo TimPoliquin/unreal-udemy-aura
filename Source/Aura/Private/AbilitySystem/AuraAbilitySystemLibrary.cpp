@@ -293,6 +293,7 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 		DamageEffectParams.AbilityLevel,
 		EffectContextHandle
 	);
+	SetDeathImpulse(EffectContextHandle, DamageEffectParams.DeathImpulse);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
 		SpecHandle,
 		DamageEffectParams.DamageType,
@@ -485,6 +486,16 @@ FGameplayTag UAuraAbilitySystemLibrary::GetDamageTypeTag(const FGameplayEffectCo
 	return FGameplayTag();
 }
 
+FVector UAuraAbilitySystemLibrary::GetDeathImpulse(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(
+		EffectContextHandle.Get()))
+	{
+		return AuraEffectContext->GetDeathImpulse();
+	}
+	return FVector::ZeroVector;
+}
+
 void UAuraAbilitySystemLibrary::SetIsBlockedHit(
 	FGameplayEffectContextHandle& EffectContextHandle,
 	const bool InIsBlocked
@@ -597,5 +608,17 @@ void UAuraAbilitySystemLibrary::SetDamageTypeTag(
 		EffectContextHandle.Get()))
 	{
 		AuraEffectContext->SetDamageTypeTag(MakeShared<FGameplayTag>(InDamageTypeTag));
+	}
+}
+
+void UAuraAbilitySystemLibrary::SetDeathImpulse(
+	FGameplayEffectContextHandle& EffectContextHandle,
+	const FVector& InDeathImpulse
+)
+{
+	if (FAuraGameplayEffectContext* AuraEffectContext = static_cast<FAuraGameplayEffectContext*>(
+		EffectContextHandle.Get()))
+	{
+		AuraEffectContext->SetDeathImpulse(InDeathImpulse);
 	}
 }

@@ -150,6 +150,15 @@ void AAuraBaseCharacter::ChangeMinionCount_Implementation(const int32 Delta)
 	MinionCount += Delta;
 }
 
+void AAuraBaseCharacter::ApplyDeathImpulse(const FVector& DeathImpulse)
+{
+	GetMesh()->AddImpulse(DeathImpulse, NAME_None, true);
+	if (Weapon)
+	{
+		Weapon->AddImpulse(DeathImpulse, NAME_None, true);
+	}
+}
+
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 {
 	bDead = true;

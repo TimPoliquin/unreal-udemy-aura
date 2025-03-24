@@ -77,6 +77,7 @@ void AAuraProjectile::OnSphereOverlap(
 			OtherActor
 		))
 		{
+			DamageEffectParams.DeathImpulse = GetActorForwardVector() * DamageEffectParams.DeathImpulseMagnitude;
 			DamageEffectParams.TargetAbilitySystemComponent = OtherAbilitySystem;
 			UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
