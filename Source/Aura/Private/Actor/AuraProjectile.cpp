@@ -9,6 +9,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
 #include "Interaction/CombatInterface.h"
@@ -60,13 +61,12 @@ void AAuraProjectile::OnSphereOverlap(
 	const FHitResult& SweepResult
 )
 {
-	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() ==
-		OtherActor)
+	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	if (SourceAvatarActor == OtherActor)
 	{
 		return;
 	}
-	const AActor* EffectCauser = DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser();
-	if (TagUtils::HasAnyTag(OtherActor, ICombatInterface::GetTargetTagsToIgnore(EffectCauser)))
+	if (TagUtils::HasAnyTag(OtherActor, ICombatInterface::GetTargetTagsToIgnore(SourceAvatarActor)))
 	{
 		return;
 	}
@@ -77,7 +77,8 @@ void AAuraProjectile::OnSphereOverlap(
 			OtherActor
 		))
 		{
-			OtherAbilitySystem->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
+			DamageEffectParams.TargetAbilitySystemComponent = OtherAbilitySystem;
+			UAuraAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
 		Destroy();
 	}
