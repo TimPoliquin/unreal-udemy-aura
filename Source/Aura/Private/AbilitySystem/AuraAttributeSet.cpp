@@ -16,7 +16,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
-#include "GameplayEffectComponents/AssetTagsGameplayEffectComponent.h"
+#include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -248,8 +248,6 @@ void UAuraAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	Effect->Period = DebuffFrequency;
 	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
 
-	Effect->InheritableOwnedTagsContainer.AddTag(DebuffTypeTag);
-
 	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
 	Effect->StackLimitCount = 1;
 
@@ -261,10 +259,11 @@ void UAuraAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
 	ModifierInfo.Attribute = GetMeta_IncomingDamageAttribute();
 
-	UAssetTagsGameplayEffectComponent& TagsComponent = Effect->AddComponent<UAssetTagsGameplayEffectComponent>();
-	FInheritedTagContainer InheritedTagContainer = TagsComponent.GetConfiguredAssetTagChanges();
-	InheritedTagContainer.AddTag(DebuffTypeTag);
-	TagsComponent.SetAndApplyAssetTagChanges(InheritedTagContainer);
+	UTargetTagsGameplayEffectComponent& TagsComponent = Effect->FindOrAddComponent<
+		UTargetTagsGameplayEffectComponent>();
+	FInheritedTagContainer InheritedTagContainer = FInheritedTagContainer();
+	InheritedTagContainer.Added.AddTag(DebuffTypeTag);
+	TagsComponent.SetAndApplyTargetTagChanges(InheritedTagContainer);
 
 	if (const FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContext, 1.f))
 	{
