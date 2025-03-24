@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
+class UDebuffNiagaraComponent;
 class UNiagaraSystem;
 struct FGameplayTag;
 class UGameplayAbility;
@@ -36,6 +37,16 @@ public:
 	virtual bool IsDead_Implementation() const override;
 	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 	virtual int32 GetXPReward_Implementation() const override;
+
+	virtual FOnDeathSignature GetOnDeathDelegate() override
+	{
+		return OnDeathDelegate;
+	}
+
+	virtual FOnAbilitySystemComponentRegisteredSignature GetOnAbilitySystemRegisteredDelegate() const override
+	{
+		return OnAbilitySystemComponentRegisteredDelegate;
+	}
 
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override
 	{
@@ -73,6 +84,7 @@ protected:
 	virtual void InitializeDefaultAttributes() const;
 
 	void AddCharacterAbilities();
+	UFUNCTION()
 	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
@@ -96,6 +108,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	TObjectPtr<USoundBase> DeathSound;
 
+	UPROPERTY(VisibleAnywhere, Category="Combat")
+	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
+
 	/** Minions **/
 	int32 MinionCount = 0;
 
@@ -109,6 +124,8 @@ private:
 	TObjectPtr<UAnimMontage> HitReactMontage;
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TArray<FTaggedMontage> AttackMontages;
+	FOnAbilitySystemComponentRegisteredSignature OnAbilitySystemComponentRegisteredDelegate;
+	FOnDeathSignature OnDeathDelegate;
 
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 	void Dissolve(
@@ -116,4 +133,6 @@ private:
 		UMaterialInstance* MaterialInstance,
 		void (AAuraBaseCharacter::*Callback)(UMaterialInstanceDynamic*)
 	);
+	UFUNCTION()
+	void OnDebuffBurn(FGameplayTag GameplayTag, int StackCount);
 };

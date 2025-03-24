@@ -36,6 +36,72 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 		this->bIsBlockedHit = bIn;
 	}
 
+	bool IsSuccessfullDebuff() const
+	{
+		return bIsSuccessfulDebuff;
+	}
+
+	float GetDebuffDamage() const
+	{
+		return DebuffDamage;
+	}
+
+	float GetDebuffDuration() const
+	{
+		return DebuffDuration;
+	}
+
+	float GetDebuffFrequency() const
+	{
+		return DebuffFrequency;
+	}
+
+	FGameplayTag* GetDebuffTypeTag() const
+	{
+		if (DebuffType.IsValid())
+		{
+			return DebuffType.Get();
+		}
+		return new FGameplayTag();
+	}
+
+	FGameplayTag* GetDamageTypeTag() const
+	{
+		return DamageType.IsValid()
+			       ? DamageType.Get()
+			       : new FGameplayTag();
+	}
+
+	void SetIsSuccessfulDebuff(const bool InIsSuccessfulDebuff)
+	{
+		bIsSuccessfulDebuff = InIsSuccessfulDebuff;
+	}
+
+	void SetDebuffDamage(const float InDebuffDamage)
+	{
+		DebuffDamage = InDebuffDamage;
+	}
+
+	void SetDebuffDuration(const float InDebuffDuration)
+	{
+		DebuffDuration = InDebuffDuration;
+	}
+
+	void SetDebuffFrequency(const float InDebuffFrequency)
+	{
+		DebuffFrequency = InDebuffFrequency;
+	}
+
+	void SetDebuffTypeTag(TSharedPtr<FGameplayTag> InDebuffType)
+	{
+		DebuffType = InDebuffType;
+	}
+
+	void SetDamageTypeTag(TSharedPtr<FGameplayTag> InDamageType)
+	{
+		DamageType = InDamageType;
+	}
+
 	/** Creates a copy of this context, used to duplicate for later modifications */
 	virtual FAuraGameplayEffectContext* Duplicate() const override
 	{
@@ -54,6 +120,17 @@ protected:
 	bool bIsBlockedHit = false;
 	UPROPERTY()
 	bool bIsCriticalHit = false;
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+
+	TSharedPtr<FGameplayTag> DebuffType;
+	TSharedPtr<FGameplayTag> DamageType;
 
 private:
 	void GetSavingBits(uint32& RepBits) const;

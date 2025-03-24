@@ -82,6 +82,8 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 		InitializePlayerControllerHUD(PlayerController, AuraPlayerState);
 	}
 	InitializeDefaultAttributes();
+	// Broadcast Ability System Setup
+	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
 }
 
 void AAuraCharacter::InitializePlayerControllerHUD(

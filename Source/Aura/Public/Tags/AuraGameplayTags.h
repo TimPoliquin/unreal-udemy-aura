@@ -143,9 +143,15 @@ struct FAuraGameplayTags
 		return DamageTypesToDebuffs[DamageType];
 	}
 
+	FORCEINLINE FGameplayTag GetDebuffTypeDamageTypeTag(const FGameplayTag& DebuffType) const
+	{
+		return DebuffTypeToDamageType[DebuffType];
+	}
+
 private:
 	static FAuraGameplayTags Instance;
 	TArray<FGameplayTag> DamageTypes;
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToDebuffs;
+	TMap<FGameplayTag, FGameplayTag> DebuffTypeToDamageType;
 };

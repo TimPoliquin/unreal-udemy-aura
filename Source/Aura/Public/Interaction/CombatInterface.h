@@ -7,6 +7,10 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
+class UAbilitySystemComponent;
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAbilitySystemComponentRegisteredSignature, UAbilitySystemComponent*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathSignature, AActor*, DeadActor);
+
 class UNiagaraSystem;
 
 USTRUCT(BlueprintType)
@@ -74,7 +78,8 @@ public:
 	void ChangeMinionCount(const int32 Delta);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	int32 GetXPReward() const;
-
+	virtual FOnAbilitySystemComponentRegisteredSignature GetOnAbilitySystemRegisteredDelegate() const = 0;
+	virtual FOnDeathSignature GetOnDeathDelegate() = 0;
 	/**
 	 * 
 	 * @param Actor 

@@ -217,6 +217,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.DamageTypesToDebuffs.Add(Instance.Damage_Lightning, Instance.Debuff_Type_Shock);
 	Instance.DamageTypesToDebuffs.Add(Instance.Damage_Physical, Instance.Debuff_Type_Bleed);
 
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Bleed, Instance.Damage_Physical);
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Burn, Instance.Damage_Fire);
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Curse, Instance.Damage_Arcane);
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Shock, Instance.Damage_Lightning);
+
 	Instance.Debuff_Stat = TagManager.AddNativeGameplayTag(
 		FName("Debuff.Stat"),
 		FString("Root tag for debuff stat tags")

@@ -6,12 +6,13 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/Aura.h"
+#include "Aura/AuraLogChannels.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
-#include "Utils/ArrayUtils.h"
 
 AAuraBaseCharacter::AAuraBaseCharacter()
 {
@@ -24,6 +25,9 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>(TEXT("Burn Debuff Niagara Component"));
+	BurnDebuffComponent->SetupAttachment(GetRootComponent());
+	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Type_Burn;
 }
 
 
@@ -163,6 +167,7 @@ void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
+	OnDeathDelegate.Broadcast(this);
 }
 
 void AAuraBaseCharacter::Dissolve()
@@ -194,6 +199,11 @@ void AAuraBaseCharacter::Dissolve(
 		InMesh->SetMaterial(0, DynamicMaterialInstance);
 		(this->*Callback)(DynamicMaterialInstance);
 	}
+}
+
+void AAuraBaseCharacter::OnDebuffBurn(FGameplayTag GameplayTag, int StackCount)
+{
+	UE_LOG(LogAura, Warning, TEXT("AAuraBaseCharacter::OnDebuffBurn"));
 }
 
 
