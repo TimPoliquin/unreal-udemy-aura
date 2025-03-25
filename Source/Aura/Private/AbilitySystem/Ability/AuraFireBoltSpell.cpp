@@ -3,6 +3,10 @@
 
 #include "AbilitySystem/Ability/AuraFireBoltSpell.h"
 
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Interaction/HighlightInterface.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Tags/AuraGameplayTags.h"
 
 FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
@@ -14,7 +18,7 @@ FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
 		                      ? FString::Printf(TEXT("a bolt"))
 		                      : FString::Printf(
 			                      TEXT("%d bolts"),
-			                      FMath::Min(AbilityLevel, NumProjectiles)
+			                      GetNumProjectiles(AbilityLevel)
 		                      );
 	return FString::Printf(
 		TEXT(
@@ -37,4 +41,62 @@ FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
 		*Bolts,
 		Damage
 	);
+}
+
+void UAuraFireBoltSpell::SpawnProjectiles(
+	const FVector& ProjectileTargetLocation,
+	const FGameplayTag& SocketTag,
+	const AActor* Target
+)
+{
+	if (!GetAvatarActorFromActorInfo()->HasAuthority())
+	{
+		return;
+	}
+	const FVector SpawnLocation = GetProjectileSpawnLocation(SocketTag);
+	const FRotator Rotation = GetProjectileSpawnRotation(ProjectileTargetLocation, SpawnLocation, Target);
+	const FVector Forward = Rotation.Vector();
+	const TArray<FRotator> Rotations = UAuraAbilitySystemLibrary::EvenlySpacedRotators(
+		Forward,
+		FVector::UpVector,
+		ProjectileSpread,
+		GetNumProjectiles(GetAbilityLevel())
+	);
+	FOnSpawnProjectileFinishedSignature OnSpawnFinish;
+	OnSpawnFinish.BindLambda(
+		[this, ProjectileTargetLocation, Target](AAuraProjectile* SpawnedProjectile)
+		{
+			if (IsValid(Target) && Target->Implements<UHighlightInterface>())
+			{
+				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = Target->GetRootComponent();
+			}
+			else
+			{
+				SpawnedProjectile->HomingTargetSceneComponent = NewObject<USceneComponent>(
+					USceneComponent::StaticClass()
+				);
+				SpawnedProjectile->HomingTargetSceneComponent->SetWorldLocation(ProjectileTargetLocation);
+				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = SpawnedProjectile->
+					HomingTargetSceneComponent;
+			}
+			SpawnedProjectile->GetProjectileMovementComponent()->HomingAccelerationMagnitude = FMath::FRandRange(
+				HomingAccelerationMin,
+				HomingAccelerationMax
+			);
+			SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = true;
+		}
+	);
+	for (const FRotator& ProjectileRotation : Rotations)
+	{
+		SpawnProjectile(
+			SpawnLocation,
+			ProjectileRotation,
+			&OnSpawnFinish
+		);
+	}
+}
+
+int32 UAuraFireBoltSpell::GetNumProjectiles(const int32 AbilityLevel) const
+{
+	return FMath::Min(AbilityLevel, MaxNumProjectiles);
 }

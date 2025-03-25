@@ -36,6 +36,11 @@ AAuraProjectile::AAuraProjectile()
 	ProjectileMovement->ProjectileGravityScale = 0.f;
 }
 
+UProjectileMovementComponent* AAuraProjectile::GetProjectileMovementComponent() const
+{
+	return ProjectileMovement;
+}
+
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();

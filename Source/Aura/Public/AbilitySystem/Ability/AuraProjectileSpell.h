@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "AuraDamageGameplayAbility.h"
+#include "Actor/AuraProjectile.h"
 #include "AuraProjectileSpell.generated.h"
 
 class AAuraProjectile;
 class UGameplayEffect;
+
+DECLARE_DELEGATE_OneParam(FOnSpawnProjectileFinishedSignature, AAuraProjectile*);
+
+
 /**
  * 
  */
@@ -34,14 +39,25 @@ protected:
 		const FGameplayTag& SocketTag
 	);
 
+	FVector GetProjectileSpawnLocation(const FGameplayTag& SocketTag) const;
+	FRotator GetProjectileSpawnRotation(
+		const FVector& TargetLocation,
+		const FVector& SpawnLocation,
+		const AActor* TargetActor
+	) const;
+
+	AAuraProjectile* SpawnProjectile(
+		const FVector& SpawnLocation,
+		const FRotator& SpawnRotation,
+		FOnSpawnProjectileFinishedSignature* BeforeFinishSpawning = nullptr
+	) const;
+
 	/**
 	 * Angle (y) for projectile to be fired.
 	 * Defaults to 0 to allow projectile to travel parallel to the ground. 
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float Pitch = 0.f;
-	UPROPERTY(EditDefaultsOnly, Category ="Projectile")
-	int32 NumProjectiles;
 
 private:
 	FGameplayEffectSpecHandle MakeDamageEffectSpecHandle(AActor* SourceObject, const FVector& TargetLocation) const;
