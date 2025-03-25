@@ -60,3 +60,27 @@ int32 ICombatInterface::GetXPReward(const UObject* Actor)
 	}
 	return 0;
 }
+
+void ICombatInterface::SetActiveAbilityTag(UObject* Actor, const FGameplayTag& ActiveAbilityTag)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		Execute_SetActiveAbilityTag(Actor, ActiveAbilityTag);
+	}
+}
+
+void ICombatInterface::ClearActiveAbilityTag(UObject* Actor)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		Execute_ClearActiveAbilityTag(Actor);
+	}
+}
+
+void ICombatInterface::UpdateFacingTarget(UObject* Actor, const FVector& FacingTarget)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		Execute_UpdateFacingTarget(Actor, FacingTarget);
+	}
+}

@@ -41,6 +41,9 @@ public:
 		);
 	}
 
+protected:
+	void ExecuteTask(UAbilityTask* Task) const;
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	FName AbilityName;

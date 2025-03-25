@@ -203,6 +203,7 @@ public:
 		const float Spread,
 		const int32 Count
 	);
+	static FPredictionKey GetPredictionKeyFromAbilitySpec(const FGameplayAbilitySpec& AbilitySpec);
 
 private:
 	static bool GetWidgetControllerParams(

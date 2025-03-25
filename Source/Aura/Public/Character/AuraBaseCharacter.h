@@ -55,6 +55,17 @@ public:
 	virtual int32 GetMinionCount_Implementation() const override;
 	virtual void ChangeMinionCount_Implementation(const int32 Delta) override;
 	virtual void ApplyDeathImpulse(const FVector& DeathImpulse) override;
+
+	virtual void SetActiveAbilityTag_Implementation(const FGameplayTag& InActiveAbilityTag) override
+	{
+		ActiveAbilityTag = InActiveAbilityTag;
+	}
+
+	virtual void ClearActiveAbilityTag_Implementation() override
+	{
+		ActiveAbilityTag = FGameplayTag::EmptyTag;
+	}
+
 	/** Combat Interface End **/
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -114,6 +125,8 @@ protected:
 
 	/** Minions **/
 	int32 MinionCount = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	FGameplayTag ActiveAbilityTag;
 
 private:
 	bool bDead = false;

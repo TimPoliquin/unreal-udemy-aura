@@ -123,6 +123,7 @@ void AAuraProjectile::PlayImpactEffect()
 	if (TravelSoundComponent)
 	{
 		TravelSoundComponent->Stop();
+		TravelSoundComponent->DestroyComponent();
 	}
 	bHit = true;
 }

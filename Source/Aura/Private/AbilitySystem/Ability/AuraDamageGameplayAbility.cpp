@@ -10,6 +10,36 @@
 #include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 
+void UAuraDamageGameplayAbility::ActivateAbility(
+	const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo,
+	const FGameplayEventData* TriggerEventData
+)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	if (bAutoActivateAbilityTag)
+	{
+		ICombatInterface::SetActiveAbilityTag(GetAvatarActorFromActorInfo(), GetDefaultAbilityTag());
+	}
+}
+
+void UAuraDamageGameplayAbility::EndAbility(
+	const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo,
+	bool bReplicateEndAbility,
+	bool bWasCancelled
+)
+{
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	if (bAutoDeactivateAbilityTag)
+	{
+		ICombatInterface::ClearActiveAbilityTag(GetAvatarActorFromActorInfo());
+	}
+}
+
+
 void UAuraDamageGameplayAbility::DealDamage(AActor* TargetActor)
 {
 	const FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1);
@@ -97,4 +127,9 @@ float UAuraDamageGameplayAbility::GetCooldown(const float InLevel) const
 		return Cooldown;
 	}
 	return 0.f;
+}
+
+FGameplayTag UAuraDamageGameplayAbility::GetDefaultAbilityTag() const
+{
+	return AbilityTags.First();
 }

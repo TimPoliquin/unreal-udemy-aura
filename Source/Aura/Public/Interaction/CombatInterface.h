@@ -81,6 +81,12 @@ public:
 	virtual FOnAbilitySystemComponentRegisteredSignature GetOnAbilitySystemRegisteredDelegate() const = 0;
 	virtual FOnDeathSignature GetOnDeathDelegate() = 0;
 	virtual void ApplyDeathImpulse(const FVector& DeathImpulse) = 0;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetActiveAbilityTag(const FGameplayTag& ActiveAbilityTag);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ClearActiveAbilityTag();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void UpdateFacingTarget(const FVector& FacingTarget);
 	/**
 	 * 
 	 * @param Actor 
@@ -105,4 +111,8 @@ public:
 	static TArray<FName> GetTargetTagsToIgnore(const UObject* Actor);
 
 	static int32 GetXPReward(const UObject* Actor);
+
+	static void SetActiveAbilityTag(UObject* Actor, const FGameplayTag& ActiveAbilityTag);
+	static void ClearActiveAbilityTag(UObject* Actor);
+	static void UpdateFacingTarget(UObject* Actor, const FVector& FacingTarget);
 };

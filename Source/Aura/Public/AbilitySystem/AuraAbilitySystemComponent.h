@@ -31,6 +31,7 @@ public:
 		const TArray<TSubclassOf<UGameplayAbility>>& StartupPassiveAbilities
 	);
 
+	void AbilityInputTagPressed(const FGameplayTag& InputTag);
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
 	virtual void OnRep_ActivateAbilities() override;

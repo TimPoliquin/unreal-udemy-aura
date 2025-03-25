@@ -375,6 +375,16 @@ TArray<FVector> UAuraAbilitySystemLibrary::EvenlyRotatedVectors(
 	return Vectors;
 }
 
+FPredictionKey UAuraAbilitySystemLibrary::GetPredictionKeyFromAbilitySpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances(); Instances.Num() > 0)
+	{
+		const FGameplayAbilityActivationInfo& ActivationInfo = Instances.Last()->GetCurrentActivationInfoRef();
+		return ActivationInfo.GetActivationPredictionKey();
+	}
+	return FPredictionKey();
+}
+
 FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
 	if (AbilitySpec.Ability)

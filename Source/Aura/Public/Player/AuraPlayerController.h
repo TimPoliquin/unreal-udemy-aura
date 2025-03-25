@@ -37,6 +37,14 @@ struct FHighlightContext
 		}
 	}
 
+	void Clear()
+	{
+		UnHighlightCurrent();
+		UnHighlightLast();
+		CurrentActor = nullptr;
+		LastActor = nullptr;
+	}
+
 	bool HasCurrentTarget() const
 	{
 		return CurrentActor != nullptr;
@@ -52,6 +60,14 @@ struct FHighlightContext
 		if (CurrentActor != nullptr)
 		{
 			CurrentActor->HighlightActor();
+		}
+	}
+
+	void UnHighlightCurrent() const
+	{
+		if (CurrentActor != nullptr)
+		{
+			CurrentActor->UnHighlightActor();
 		}
 	}
 
