@@ -1,6 +1,7 @@
 #pragma once
+#include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
-#include "Aura/AuraLogChannels.h"
+#include "ScalableFloat.h"
 #include "AuraAbilitySystemTypes.generated.h"
 
 USTRUCT(BlueprintType)
@@ -35,6 +36,92 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 		this->bIsBlockedHit = bIn;
 	}
 
+	bool IsSuccessfullDebuff() const
+	{
+		return bIsSuccessfulDebuff;
+	}
+
+	float GetDebuffDamage() const
+	{
+		return DebuffDamage;
+	}
+
+	float GetDebuffDuration() const
+	{
+		return DebuffDuration;
+	}
+
+	float GetDebuffFrequency() const
+	{
+		return DebuffFrequency;
+	}
+
+	FGameplayTag* GetDebuffTypeTag() const
+	{
+		if (DebuffType.IsValid())
+		{
+			return DebuffType.Get();
+		}
+		return new FGameplayTag();
+	}
+
+	FGameplayTag* GetDamageTypeTag() const
+	{
+		return DamageType.IsValid()
+			       ? DamageType.Get()
+			       : new FGameplayTag();
+	}
+
+	void SetIsSuccessfulDebuff(const bool InIsSuccessfulDebuff)
+	{
+		bIsSuccessfulDebuff = InIsSuccessfulDebuff;
+	}
+
+	void SetDebuffDamage(const float InDebuffDamage)
+	{
+		DebuffDamage = InDebuffDamage;
+	}
+
+	void SetDebuffDuration(const float InDebuffDuration)
+	{
+		DebuffDuration = InDebuffDuration;
+	}
+
+	void SetDebuffFrequency(const float InDebuffFrequency)
+	{
+		DebuffFrequency = InDebuffFrequency;
+	}
+
+	void SetDebuffTypeTag(TSharedPtr<FGameplayTag> InDebuffType)
+	{
+		DebuffType = InDebuffType;
+	}
+
+	void SetDamageTypeTag(TSharedPtr<FGameplayTag> InDamageType)
+	{
+		DamageType = InDamageType;
+	}
+
+	FVector GetDeathImpulse() const
+	{
+		return DeathImpulse;
+	}
+
+	void SetDeathImpulse(const FVector& InDeathImpulse)
+	{
+		DeathImpulse = InDeathImpulse;
+	}
+
+	FVector GetKnockbackVector() const
+	{
+		return KnockbackVector;
+	}
+
+	void SetKnockbackVector(const FVector& InKnockbackVector)
+	{
+		KnockbackVector = InKnockbackVector;
+	}
+
 	/** Creates a copy of this context, used to duplicate for later modifications */
 	virtual FAuraGameplayEffectContext* Duplicate() const override
 	{
@@ -53,6 +140,22 @@ protected:
 	bool bIsBlockedHit = false;
 	UPROPERTY()
 	bool bIsCriticalHit = false;
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+	UPROPERTY()
+	FVector DeathImpulse = FVector::ZeroVector;
+	UPROPERTY()
+	FVector KnockbackVector = FVector::ZeroVector;
+
+
+	TSharedPtr<FGameplayTag> DebuffType;
+	TSharedPtr<FGameplayTag> DamageType;
 
 private:
 	void GetSavingBits(uint32& RepBits) const;
@@ -142,5 +245,83 @@ struct FAuraEquipAbilityPayload
 		EquipPayload.SlotTag = SlotTag;
 		EquipPayload.PreviousSlotTag = PreviousSlotTag;
 		return EquipPayload;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FAuraDamageConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag DamageTypeTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat Amount;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffChance = 20.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffDamage = 5.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffFrequency = 1.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DebuffDuration = 5.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float DeathImpulseMagnitude = 6000.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float KnockbackForceMagnitude = 500.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float KnockbackChance = 0.f;
+};
+
+USTRUCT(BlueprintType)
+struct FDamageEffectParams
+{
+	GENERATED_BODY()
+	FDamageEffectParams()
+	{
+	}
+
+	UPROPERTY()
+	TObjectPtr<UObject> WorldContextObject = nullptr;
+	UPROPERTY()
+	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent = nullptr;
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent = nullptr;
+	UPROPERTY()
+	float BaseDamage = 0.f;
+	UPROPERTY()
+	float AbilityLevel = 1.f;
+	UPROPERTY()
+	FGameplayTag DamageType = FGameplayTag::EmptyTag;
+	UPROPERTY()
+	float DebuffChance = 0.f;
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+	UPROPERTY()
+	float DeathImpulseMagnitude = 0.f;
+	UPROPERTY()
+	FVector DeathImpulse = FVector::ZeroVector;
+	UPROPERTY()
+	float KnockbackChance = 0.f;
+	UPROPERTY()
+	float KnockbackForceMagnitude = 0.f;
+	UPROPERTY()
+	FVector KnockbackForce = FVector::ZeroVector;
+
+	void FillFromDamageConfig(const FAuraDamageConfig& DamageConfig)
+	{
+		DamageType = DamageConfig.DamageTypeTag;
+		DebuffChance = DamageConfig.DebuffChance;
+		DebuffDamage = DamageConfig.DebuffDamage;
+		DebuffDuration = DamageConfig.DebuffDuration;
+		DebuffFrequency = DamageConfig.DebuffFrequency;
+		DeathImpulseMagnitude = DamageConfig.DeathImpulseMagnitude;
+		KnockbackChance = DamageConfig.KnockbackChance;
+		KnockbackForceMagnitude = DamageConfig.KnockbackForceMagnitude;
 	}
 };

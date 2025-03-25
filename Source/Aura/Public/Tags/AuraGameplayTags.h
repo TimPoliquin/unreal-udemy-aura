@@ -76,6 +76,20 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Resistance_Lightning;
 	FGameplayTag Attributes_Resistance_Physical;
 
+	/** Debuff Tags **/
+	FGameplayTag Debuff;
+	FGameplayTag Debuff_Type;
+	FGameplayTag Debuff_Type_Burn;
+	FGameplayTag Debuff_Type_Shock;
+	FGameplayTag Debuff_Type_Curse;
+	FGameplayTag Debuff_Type_Bleed;
+	FGameplayTag Debuff_Stat;
+	FGameplayTag Debuff_Stat_Chance;
+	FGameplayTag Debuff_Stat_Damage;
+	FGameplayTag Debuff_Stat_Frequency;
+	FGameplayTag Debuff_Stat_Duration;
+
+
 	/** Abilities **/
 	FGameplayTag Abilities;
 	FGameplayTag Abilities_Attack;
@@ -124,8 +138,20 @@ struct FAuraGameplayTags
 		return DamageTypesToResistances[DamageType];
 	}
 
+	FORCEINLINE FGameplayTag GetDamageTypeDebuffTag(const FGameplayTag& DamageType) const
+	{
+		return DamageTypesToDebuffs[DamageType];
+	}
+
+	FORCEINLINE FGameplayTag GetDebuffTypeDamageTypeTag(const FGameplayTag& DebuffType) const
+	{
+		return DebuffTypeToDamageType[DebuffType];
+	}
+
 private:
 	static FAuraGameplayTags Instance;
 	TArray<FGameplayTag> DamageTypes;
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToDebuffs;
+	TMap<FGameplayTag, FGameplayTag> DebuffTypeToDamageType;
 };

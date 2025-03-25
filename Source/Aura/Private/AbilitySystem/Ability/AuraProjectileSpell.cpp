@@ -57,29 +57,7 @@ void UAuraProjectileSpell::SpawnProjectile(
 		Cast<APawn>(OwningActor),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 	);
-
-	SpawnedProjectile->SetInstigator(Cast<APawn>(OwningActor));
-	FGameplayEffectSpecHandle DamageSpecHandle = MakeDamageEffectSpecHandle(
-		SpawnedProjectile,
-		ProjectileTargetLocation
-	);
-	DamageSpecHandle.Data.Get()->GetContext().AddSourceObject(SpawnedProjectile);
-	for (const FGameplayTag& DamageTag : FAuraGameplayTags::Get().GetDamageTypes())
-	{
-		float DamageValue = 0.f;
-		if (DamageTypes.Contains(DamageTag))
-		{
-			DamageValue = DamageTypes[DamageTag].GetValueAtLevel(GetAbilityLevel());
-		}
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-			DamageSpecHandle,
-			// Damage Type
-			DamageTag,
-			// Damage Value
-			DamageValue
-		);
-	}
-	SpawnedProjectile->DamageEffectSpecHandle = DamageSpecHandle;
+	SpawnedProjectile->DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
 	SpawnedProjectile->FinishSpawning(SpawnTransform);
 }
 

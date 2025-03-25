@@ -7,7 +7,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	{
 		GetSavingBits(RepBits);
 	}
-	Ar.SerializeBits(&RepBits, 9);
+	Ar.SerializeBits(&RepBits, 16);
 	AssignValuesToArchive(Ar, Map, RepBits, bOutSuccess);
 	if (Ar.IsLoading())
 	{
@@ -54,6 +54,38 @@ void FAuraGameplayEffectContext::GetSavingBits(uint32& RepBits) const
 	if (bIsCriticalHit)
 	{
 		RepBits |= 1 << 8;
+	}
+	if (bIsSuccessfulDebuff)
+	{
+		RepBits |= 1 << 9;
+		if (DebuffDamage > 0.f)
+		{
+			RepBits |= 1 << 10;
+		}
+		if (DebuffDuration > 0.f)
+		{
+			RepBits |= 1 << 11;
+		}
+		if (DebuffFrequency > 0.f)
+		{
+			RepBits |= 1 << 12;
+		}
+	}
+	if (DebuffType.IsValid())
+	{
+		RepBits |= 1 << 13;
+	}
+	if (DamageType.IsValid())
+	{
+		RepBits |= 1 << 14;
+	}
+	if (!DeathImpulse.IsZero())
+	{
+		RepBits |= 1 << 15;
+	}
+	if (!KnockbackVector.IsZero())
+	{
+		RepBits |= 1 << 16;
 	}
 }
 
@@ -111,5 +143,51 @@ void FAuraGameplayEffectContext::AssignValuesToArchive(
 	if (RepBits & (1 << 8))
 	{
 		Ar << bIsCriticalHit;
+	}
+	if (RepBits & (1 << 9))
+	{
+		Ar << bIsSuccessfulDebuff;
+	}
+	if (RepBits & (1 << 10))
+	{
+		Ar << DebuffDamage;
+	}
+	if (RepBits & (1 << 11))
+	{
+		Ar << DebuffDuration;
+	}
+	if (RepBits & (1 << 12))
+	{
+		Ar << DebuffFrequency;
+	}
+	if (RepBits & (1 << 13))
+	{
+		if (Ar.IsLoading())
+		{
+			if (!DebuffType.IsValid())
+			{
+				DebuffType = MakeShared<FGameplayTag>();
+			}
+		}
+		DebuffType->NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 14))
+	{
+		if (Ar.IsLoading())
+		{
+			if (!DamageType.IsValid())
+			{
+				DamageType = MakeShared<FGameplayTag>();
+			}
+		}
+		DamageType->NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 15))
+	{
+		DeathImpulse.NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 16))
+	{
+		KnockbackVector.NetSerialize(Ar, Map, bOutSuccess);
 	}
 }

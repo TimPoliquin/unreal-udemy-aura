@@ -3,7 +3,10 @@
 
 #include "AbilitySystem/Calculations/ExecCalc_Damage.h"
 
+#include <rapidjson/schema.h>
+
 #include "AbilitySystemComponent.h"
+#include "NativeGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/AuraAttributeSet.h"
@@ -87,11 +90,15 @@ void UExecCalc_Damage::Execute_Implementation(
 	EvaluateParameters.SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
 	EvaluateParameters.TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
 
+	// Debuff
+	DetermineDebuff(ExecutionParams, EvaluateParameters);
+
 	// Get Damage Set by Caller Magnitude
 	float Damage = 0.f;
 	for (const auto& DamageType : FAuraGameplayTags::Get().GetDamageTypes())
 	{
 		Damage += GetDamageTypeDamage(ExecutionParams, EvaluateParameters, DamageType);
+		UAuraAbilitySystemLibrary::SetDamageTypeTag(EffectContextHandle, DamageType);
 	}
 
 	// If the attack was blocked (based on BlockChance), cut the damage in half.
@@ -238,4 +245,57 @@ float UExecCalc_Damage::GetEffectiveCriticalHitDamage(
 		SourceCriticalHitDamage
 	);
 	return SourceCriticalHitDamage;
+}
+
+bool UExecCalc_Damage::IsDebuffApplied(
+	const FGameplayTag& DamageTypeTag,
+	const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	const FAggregatorEvaluateParameters& EvaluateParameters
+)
+{
+	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
+	const FGameplayEffectSpec Spec = ExecutionParams.GetOwningSpec();
+	if (Spec.GetSetByCallerMagnitude(DamageTypeTag, false, -1.f) > 0.f)
+	{
+		const FGameplayTag& ResistanceTag = GameplayTags.GetDamageTypeResistanceTag(DamageTypeTag);
+		const float SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stat_Chance, false, -1.f);
+		float TargetDebuffResistance = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
+			DamageStatics().TagsToCaptureDefs[ResistanceTag],
+			EvaluateParameters,
+			TargetDebuffResistance
+		);
+		TargetDebuffResistance = FMath::Max<float>(TargetDebuffResistance, 0.f);
+		// DEVNOTE - this was a shorthand hack by the course instructor to make each point of resistance reduce debuff chance by 1%.
+		// In a real project, this would probably be done via game config (curve table, etc)
+		const float EffectiveDebuffChance = SourceDebuffChance * (100 - TargetDebuffResistance) / 100.f;
+		return FMath::RandRange(1, 100) < EffectiveDebuffChance;
+	}
+	return false;
+}
+
+void UExecCalc_Damage::DetermineDebuff(
+	const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	const FAggregatorEvaluateParameters& EvaluateParams
+)
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	const FGameplayEffectSpec Spec = ExecutionParams.GetOwningSpec();
+
+	for (const FGameplayTag& DamageTypeTag : GameplayTags.GetDamageTypes())
+	{
+		if (IsDebuffApplied(DamageTypeTag, ExecutionParams, EvaluateParams))
+		{
+			FGameplayEffectContextHandle EffectContext = Spec.GetContext();
+			FGameplayTag DebuffTypeTag = GameplayTags.GetDamageTypeDebuffTag(DamageTypeTag);
+			UAuraAbilitySystemLibrary::SetDebuff(
+				EffectContext,
+				DebuffTypeTag,
+				Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stat_Damage, false, -1.f),
+				Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stat_Duration, false, -1.f),
+				Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stat_Frequency, false, -1.f)
+			);
+			break;
+		}
+	}
 }

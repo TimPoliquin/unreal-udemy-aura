@@ -47,4 +47,15 @@ public:
 		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 		const FAggregatorEvaluateParameters& EvaluateParameters
 	);
+
+	static bool IsDebuffApplied(
+		const FGameplayTag& DamageTypeTag,
+		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+		const FAggregatorEvaluateParameters& EvaluateParameters
+	);
+
+	static void DetermineDebuff(
+		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+		const FAggregatorEvaluateParameters& EvaluateParams
+	);
 };

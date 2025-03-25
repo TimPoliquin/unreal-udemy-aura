@@ -188,6 +188,60 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 
 	Instance.DamageTypesToResistances.GenerateKeyArray(Instance.DamageTypes);
 
+	Instance.Debuff = TagManager.AddNativeGameplayTag(
+		FName("Debuff"),
+		FString("Root tag for all debuff related tags")
+	);
+	Instance.Debuff_Type = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Type"),
+		FString("Root tag for all types of debuffs")
+	);
+	Instance.Debuff_Type_Burn = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Type.Burn"),
+		FString("Burns target for damage for a duration")
+	);
+	Instance.Debuff_Type_Shock = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Type.Shock"),
+		FString("Shocks target for damage for a duration")
+	);
+	Instance.Debuff_Type_Curse = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Type.Curse"),
+		FString("Curse target for damage for a duration")
+	);
+	Instance.Debuff_Type_Bleed = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Type.Bleed"),
+		FString("Bleed target for damage for a duration")
+	);
+	Instance.DamageTypesToDebuffs.Add(Instance.Damage_Arcane, Instance.Debuff_Type_Curse);
+	Instance.DamageTypesToDebuffs.Add(Instance.Damage_Fire, Instance.Debuff_Type_Burn);
+	Instance.DamageTypesToDebuffs.Add(Instance.Damage_Lightning, Instance.Debuff_Type_Shock);
+	Instance.DamageTypesToDebuffs.Add(Instance.Damage_Physical, Instance.Debuff_Type_Bleed);
+
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Bleed, Instance.Damage_Physical);
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Burn, Instance.Damage_Fire);
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Curse, Instance.Damage_Arcane);
+	Instance.DebuffTypeToDamageType.Add(Instance.Debuff_Type_Shock, Instance.Damage_Lightning);
+
+	Instance.Debuff_Stat = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Stat"),
+		FString("Root tag for debuff stat tags")
+	);
+	Instance.Debuff_Stat_Chance = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Stat.Chance"),
+		FString("Debuff chance")
+	);
+	Instance.Debuff_Stat_Damage = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Stat.Damage"),
+		FString("Debuff Damage")
+	);
+	Instance.Debuff_Stat_Frequency = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Stat.Frequency"),
+		FString("Debuff Frequency")
+	);
+	Instance.Debuff_Stat_Duration = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Stat.Duration"),
+		FString("Debuff Duration")
+	);
 	/** Ability Tags */
 	Instance.Abilities = TagManager.AddNativeGameplayTag(FName("Abilities"), FString("Abilities root tag"));
 	Instance.Abilities_HitReact = TagManager.AddNativeGameplayTag(

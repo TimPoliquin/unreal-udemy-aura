@@ -83,7 +83,6 @@ public:
 	FORCEINLINE void SetSpellPoints(const int32 InSpellPoints)
 	{
 		SpellPoints = InSpellPoints;
-		UE_LOG(LogAura, Warning, TEXT("SetSpellPoints: [%d]"), InSpellPoints);
 		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
 	}
 
