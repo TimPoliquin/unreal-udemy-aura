@@ -9,6 +9,7 @@
 #include "Interaction/CombatInterface.h"
 #include "Interaction/HighlightInterface.h"
 #include "Tags/AuraGameplayTags.h"
+#include "Templates/Function.h"
 
 void UAuraProjectileSpell::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -36,29 +37,58 @@ void UAuraProjectileSpell::SpawnProjectile(
 		return;
 	}
 	check(ProjectileClass);
-	FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(
-		OwningActor,
+	const FVector SpawnLocation = GetProjectileSpawnLocation(SocketTag);
+	const FRotator Rotation = GetProjectileSpawnRotation(ProjectileTargetLocation, SpawnLocation, HitActor);
+	SpawnProjectile(SpawnLocation, Rotation);
+}
+
+FVector UAuraProjectileSpell::GetProjectileSpawnLocation(const FGameplayTag& SocketTag) const
+{
+	return ICombatInterface::Execute_GetCombatSocketLocation(
+		GetAvatarActorFromActorInfo(),
 		SocketTag
 	);
-	FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
-	if (!HitActor || !HitActor->Implements<UHighlightInterface>())
+}
+
+FRotator UAuraProjectileSpell::GetProjectileSpawnRotation(
+	const FVector& TargetLocation,
+	const FVector& SpawnLocation,
+	const AActor* TargetActor
+) const
+{
+	FRotator Rotation = (TargetLocation - SpawnLocation).Rotation();
+	if (!IsValid(TargetActor) || !TargetActor->Implements<UHighlightInterface>())
 	{
 		// reset pitch if the hit actor is not something that can be targeted
 		Rotation.Pitch = Pitch;
 	}
+	return Rotation;
+}
+
+AAuraProjectile* UAuraProjectileSpell::SpawnProjectile(
+	const FVector& SpawnLocation,
+	const FRotator& SpawnRotation,
+	FOnSpawnProjectileFinishedSignature* BeforeFinishSpawning
+) const
+{
 	FTransform SpawnTransform;
 	SpawnTransform.SetLocation(SpawnLocation);
-	SpawnTransform.SetRotation(Rotation.Quaternion());
+	SpawnTransform.SetRotation(SpawnRotation.Quaternion());
 
 	AAuraProjectile* SpawnedProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 		ProjectileClass,
 		SpawnTransform,
-		OwningActor,
-		Cast<APawn>(OwningActor),
+		GetAvatarActorFromActorInfo(),
+		Cast<APawn>(GetAvatarActorFromActorInfo()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 	);
 	SpawnedProjectile->DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
+	if (BeforeFinishSpawning)
+	{
+		BeforeFinishSpawning->ExecuteIfBound(SpawnedProjectile);
+	}
 	SpawnedProjectile->FinishSpawning(SpawnTransform);
+	return SpawnedProjectile;
 }
 
 FGameplayEffectSpecHandle UAuraProjectileSpell::MakeDamageEffectSpecHandle(

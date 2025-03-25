@@ -9,6 +9,7 @@
 #include "MovieSceneTracksComponentTypes.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
@@ -183,7 +184,6 @@ void AAuraPlayerController::AutoMove_Start()
 			for (const FVector& PathPoint : NavPath->PathPoints)
 			{
 				Spline->AddSplinePoint(PathPoint, ESplineCoordinateSpace::World);
-				DrawDebugSphere(GetWorld(), PathPoint, 8.f, 8, FColor::Green, false, 5.f);
 			}
 			//
 			if (NavPath->PathPoints.Num() > 0)
@@ -191,6 +191,10 @@ void AAuraPlayerController::AutoMove_Start()
 				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
 				bAutoRunning = true;
 			}
+		}
+		if (ClickNiagaraSystem)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
 		}
 	}
 	FollowTime = 0.f;

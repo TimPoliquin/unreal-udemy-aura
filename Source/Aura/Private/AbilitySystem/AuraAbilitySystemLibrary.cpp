@@ -324,6 +324,57 @@ FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const 
 	return EffectContextHandle;
 }
 
+TArray<FRotator> UAuraAbilitySystemLibrary::EvenlySpacedRotators(
+	const FVector& Forward,
+	const FVector& Axis,
+	const float Spread,
+	const int32 Count
+)
+{
+	TArray<FRotator> Rotators;
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	if (Count > 1)
+	{
+		const float DeltaSpread = Spread / (Count - 1);
+		for (int32 i = 0; i < Count; i++)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, Axis);
+			Rotators.Add(Direction.Rotation());
+		}
+	}
+	else
+	{
+		Rotators.Add(Forward.Rotation());
+	}
+	return Rotators;
+}
+
+TArray<FVector> UAuraAbilitySystemLibrary::EvenlyRotatedVectors(
+	const FVector& Forward,
+	const FVector& Axis,
+	const float Spread,
+	const int32 Count
+)
+{
+	TArray<FVector> Vectors;
+
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	if (Count > 1)
+	{
+		const float DeltaSpread = Spread / (Count - 1);
+		for (int32 i = 0; i < Count; i++)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, Axis);
+			Vectors.Add(Direction);
+		}
+	}
+	else
+	{
+		Vectors.Add(Forward);
+	}
+	return Vectors;
+}
+
 FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
 	if (AbilitySpec.Ability)

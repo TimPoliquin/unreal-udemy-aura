@@ -7,6 +7,7 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPlayerController.generated.h"
 
+class UNiagaraSystem;
 class UDamageTextComponent;
 class USplineComponent;
 class UAuraAbilitySystemComponent;
@@ -126,6 +127,8 @@ private:
 	float AutoRunAcceptanceRadius = 50.f;
 	UPROPERTY(VisibleAnywhere, Category = "Movement")
 	TObjectPtr<USplineComponent> Spline;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
 
 	FHitResult CursorHit;
 
