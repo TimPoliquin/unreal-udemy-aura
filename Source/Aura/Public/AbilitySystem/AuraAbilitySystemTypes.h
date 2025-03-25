@@ -112,6 +112,16 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 		DeathImpulse = InDeathImpulse;
 	}
 
+	FVector GetKnockbackVector() const
+	{
+		return KnockbackVector;
+	}
+
+	void SetKnockbackVector(const FVector& InKnockbackVector)
+	{
+		KnockbackVector = InKnockbackVector;
+	}
+
 	/** Creates a copy of this context, used to duplicate for later modifications */
 	virtual FAuraGameplayEffectContext* Duplicate() const override
 	{
@@ -140,6 +150,9 @@ protected:
 	float DebuffFrequency = 0.f;
 	UPROPERTY()
 	FVector DeathImpulse = FVector::ZeroVector;
+	UPROPERTY()
+	FVector KnockbackVector = FVector::ZeroVector;
+
 
 	TSharedPtr<FGameplayTag> DebuffType;
 	TSharedPtr<FGameplayTag> DamageType;
@@ -253,6 +266,10 @@ struct FAuraDamageConfig
 	float DebuffDuration = 5.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float DeathImpulseMagnitude = 6000.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float KnockbackForceMagnitude = 500.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float KnockbackChance = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -289,6 +306,12 @@ struct FDamageEffectParams
 	float DeathImpulseMagnitude = 0.f;
 	UPROPERTY()
 	FVector DeathImpulse = FVector::ZeroVector;
+	UPROPERTY()
+	float KnockbackChance = 0.f;
+	UPROPERTY()
+	float KnockbackForceMagnitude = 0.f;
+	UPROPERTY()
+	FVector KnockbackForce = FVector::ZeroVector;
 
 	void FillFromDamageConfig(const FAuraDamageConfig& DamageConfig)
 	{
@@ -298,5 +321,7 @@ struct FDamageEffectParams
 		DebuffDuration = DamageConfig.DebuffDuration;
 		DebuffFrequency = DamageConfig.DebuffFrequency;
 		DeathImpulseMagnitude = DamageConfig.DeathImpulseMagnitude;
+		KnockbackChance = DamageConfig.KnockbackChance;
+		KnockbackForceMagnitude = DamageConfig.KnockbackForceMagnitude;
 	}
 };

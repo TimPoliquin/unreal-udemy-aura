@@ -80,7 +80,7 @@ public:
 	int32 GetXPReward() const;
 	virtual FOnAbilitySystemComponentRegisteredSignature GetOnAbilitySystemRegisteredDelegate() const = 0;
 	virtual FOnDeathSignature GetOnDeathDelegate() = 0;
-	virtual void ApplyDeathImpulse(const FVector& DeathImpulse) = 0;;
+	virtual void ApplyDeathImpulse(const FVector& DeathImpulse) = 0;
 	/**
 	 * 
 	 * @param Actor 

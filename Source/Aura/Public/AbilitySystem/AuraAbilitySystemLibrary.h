@@ -99,6 +99,8 @@ public:
 	static FGameplayTag GetDamageTypeTag(const FGameplayEffectContextHandle& EffectContextHandle);
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static FVector GetDeathImpulse(const FGameplayEffectContextHandle& EffectContextHandle);
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static FVector GetKnockbackVector(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetIsBlockedHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool InIsBlocked);
@@ -146,6 +148,11 @@ public:
 	static void SetDeathImpulse(
 		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
 		const FVector& InDeathImpulse
+	);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static void SetKnockbackVector(
+		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		const FVector& InKnockbackVector
 	);
 
 	static int GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent);

@@ -49,6 +49,14 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassD
 	);
 	DamageEffectParams.BaseDamage = GetDamageAtLevel(GetAbilityLevel());
 	DamageEffectParams.AbilityLevel = GetAbilityLevel();
+	if (IsValid(TargetActor))
+	{
+		FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation()).
+			Rotation();
+		Rotation.Pitch = 25.f;
+		DamageEffectParams.DeathImpulse = Rotation.Vector() * DamageEffectParams.DeathImpulseMagnitude;
+		DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackForceMagnitude;
+	}
 	return DamageEffectParams;
 }
 

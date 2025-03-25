@@ -24,6 +24,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomAttackMontage() const;
 
+	UFUNCTION(BlueprintPure)
 	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor = nullptr) const;
 
 protected:

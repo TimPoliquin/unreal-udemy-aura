@@ -176,6 +176,11 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 			Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
 				TagContainer
 			);
+			if (FVector KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackVector(Props.EffectContextHandle); !
+				KnockbackForce.IsNearlyZero(1.f))
+			{
+				Props.Target.Character->LaunchCharacter(KnockbackForce, true, true);
+			}
 		}
 		else
 		{

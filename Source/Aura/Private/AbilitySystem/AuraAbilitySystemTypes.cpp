@@ -7,7 +7,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	{
 		GetSavingBits(RepBits);
 	}
-	Ar.SerializeBits(&RepBits, 15);
+	Ar.SerializeBits(&RepBits, 16);
 	AssignValuesToArchive(Ar, Map, RepBits, bOutSuccess);
 	if (Ar.IsLoading())
 	{
@@ -82,6 +82,10 @@ void FAuraGameplayEffectContext::GetSavingBits(uint32& RepBits) const
 	if (!DeathImpulse.IsZero())
 	{
 		RepBits |= 1 << 15;
+	}
+	if (!KnockbackVector.IsZero())
+	{
+		RepBits |= 1 << 16;
 	}
 }
 
@@ -181,5 +185,9 @@ void FAuraGameplayEffectContext::AssignValuesToArchive(
 	if (RepBits & (1 << 15))
 	{
 		DeathImpulse.NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 16))
+	{
+		KnockbackVector.NetSerialize(Ar, Map, bOutSuccess);
 	}
 }
