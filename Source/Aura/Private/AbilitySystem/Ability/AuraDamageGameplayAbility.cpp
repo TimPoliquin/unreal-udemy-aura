@@ -55,7 +55,10 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassD
 			Rotation();
 		Rotation.Pitch = 25.f;
 		DamageEffectParams.DeathImpulse = Rotation.Vector() * DamageEffectParams.DeathImpulseMagnitude;
-		DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackForceMagnitude;
+		if (FMath::RandRange(1, 100) < DamageEffectParams.KnockbackChance)
+		{
+			DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackForceMagnitude;
+		}
 	}
 	return DamageEffectParams;
 }
