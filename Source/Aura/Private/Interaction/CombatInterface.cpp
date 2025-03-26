@@ -84,3 +84,12 @@ void ICombatInterface::UpdateFacingTarget(UObject* Actor, const FVector& FacingT
 		Execute_UpdateFacingTarget(Actor, FacingTarget);
 	}
 }
+
+USkeletalMeshComponent* ICombatInterface::GetWeapon(const UObject* Actor)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetWeapon(Actor);
+	}
+	return nullptr;
+}

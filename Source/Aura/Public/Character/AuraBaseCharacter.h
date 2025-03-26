@@ -55,6 +55,7 @@ public:
 	virtual int32 GetMinionCount_Implementation() const override;
 	virtual void ChangeMinionCount_Implementation(const int32 Delta) override;
 	virtual void ApplyDeathImpulse(const FVector& DeathImpulse) override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
 
 	virtual void SetActiveAbilityTag_Implementation(const FGameplayTag& InActiveAbilityTag) override
 	{
@@ -125,7 +126,7 @@ protected:
 
 	/** Minions **/
 	int32 MinionCount = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", Replicated)
 	FGameplayTag ActiveAbilityTag;
 
 private:

@@ -159,6 +159,11 @@ void AAuraBaseCharacter::ApplyDeathImpulse(const FVector& DeathImpulse)
 	}
 }
 
+USkeletalMeshComponent* AAuraBaseCharacter::GetWeapon_Implementation() const
+{
+	return Weapon;
+}
+
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 {
 	bDead = true;

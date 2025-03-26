@@ -87,6 +87,8 @@ public:
 	void ClearActiveAbilityTag();
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateFacingTarget(const FVector& FacingTarget);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	USkeletalMeshComponent* GetWeapon() const;
 	/**
 	 * 
 	 * @param Actor 
@@ -115,4 +117,6 @@ public:
 	static void SetActiveAbilityTag(UObject* Actor, const FGameplayTag& ActiveAbilityTag);
 	static void ClearActiveAbilityTag(UObject* Actor);
 	static void UpdateFacingTarget(UObject* Actor, const FVector& FacingTarget);
+	static USkeletalMeshComponent* GetWeapon(const UObject* Actor);
+	static FName GetWeaponTipSocketName(const UObject* Actor);
 };

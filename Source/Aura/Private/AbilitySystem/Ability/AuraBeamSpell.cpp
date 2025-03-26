@@ -15,6 +15,8 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Interaction/CombatInterface.h"
 #include "Tags/AuraGameplayTags.h"
+#include "GameplayCueFunctionLibrary.h"
+
 
 void UAuraBeamSpell::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -34,6 +36,24 @@ void UAuraBeamSpell::ActivateAbility(
 		TargetDataUnderMouseTask->HasMouseTarget.AddDynamic(this, &UAuraBeamSpell::OnReceiveMouseData);
 		ExecuteTask(TargetDataUnderMouseTask);
 	}
+}
+
+void UAuraBeamSpell::EndAbility(
+	const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo,
+	bool bReplicateEndAbility,
+	bool bWasCancelled
+)
+{
+	SetMouseCursorVisible(true);
+	SetMovementEnabled(true);
+	UGameplayCueFunctionLibrary::RemoveGameplayCueOnActor(
+		GetAvatarActorFromActorInfo(),
+		LoopCueTag,
+		FGameplayCueParameters()
+	);
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UAuraBeamSpell::SetMouseCursorVisible(const bool Visible) const
@@ -81,6 +101,11 @@ void UAuraBeamSpell::OnMontageEventReceived(FGameplayEventData Payload)
 {
 	SetMovementEnabled(false);
 	ICombatInterface::SetActiveAbilityTag(GetAvatarActorFromActorInfo(), GetDefaultAbilityTag());
+
+	FGameplayCueParameters CueParams = FGameplayCueParameters();
+	CueParams.TargetAttachComponent = ICombatInterface::GetWeapon(GetAvatarActorFromActorInfo());
+	CueParams.Location = HitLocation;
+	UGameplayCueFunctionLibrary::AddGameplayCueOnActor(GetAvatarActorFromActorInfo(), LoopCueTag, CueParams);
 }
 
 void UAuraBeamSpell::ExecuteAbility(const FHitResult& HitResult)
@@ -90,8 +115,11 @@ void UAuraBeamSpell::ExecuteAbility(const FHitResult& HitResult)
 		WaitInputRelease->OnRelease.AddDynamic(this, &UAuraBeamSpell::OnInputRelease);
 		ExecuteTask(WaitInputRelease);
 	}
+	HitLocation = HitResult.ImpactPoint;
 	SetMouseCursorVisible(false);
 	ICombatInterface::UpdateFacingTarget(GetAvatarActorFromActorInfo(), HitResult.ImpactPoint);
+	FGameplayCueParameters CueParams = FGameplayCueParameters();
+	UGameplayCueFunctionLibrary::ExecuteGameplayCueOnActor(GetAvatarActorFromActorInfo(), SoundCueTag, CueParams);
 	if (UAbilityTask_PlayMontageAndWait* PlayMontageAndWait =
 		UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 			this,
@@ -116,7 +144,5 @@ void UAuraBeamSpell::ExecuteAbility(const FHitResult& HitResult)
 
 void UAuraBeamSpell::OnInputRelease(float TimeHeld)
 {
-	SetMouseCursorVisible(true);
-	SetMovementEnabled(true);
 	EndAbility(GetCurrentAbilitySpec()->Handle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }

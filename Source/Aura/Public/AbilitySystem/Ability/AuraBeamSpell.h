@@ -21,12 +21,26 @@ public:
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData
 	) override;
+	virtual void EndAbility(
+		const FGameplayAbilitySpecHandle Handle,
+		const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo,
+		bool bReplicateEndAbility,
+		bool bWasCancelled
+	) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Beam")
 	TObjectPtr<UAnimMontage> AbilityMontage;
-	UPROPERTY(EditDefaultsOnly, Category="Beam")
+	UPROPERTY(EditDefaultsOnly, Category="Beam", meta=(Categories = "Events.Montage"))
 	FGameplayTag EventTag;
+	UPROPERTY(EditDefaultsOnly, Category="Beam", meta=(Categories = "GameplayCue"))
+	FGameplayTag SoundCueTag;
+	UPROPERTY(EditDefaultsOnly, Category="Beam", meta=(Categories = "GameplayCue"))
+	FGameplayTag LoopCueTag;
+
+	FVector HitLocation;
+
 
 	UFUNCTION()
 	void OnInputRelease(float TimeHeld);
