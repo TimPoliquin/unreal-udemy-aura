@@ -13,6 +13,7 @@
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
 #include "Interaction/CombatInterface.h"
+#include "Net/UnrealNetwork.h"
 #include "Utils/TagUtils.h"
 
 AAuraProjectile::AAuraProjectile()
@@ -34,6 +35,12 @@ AAuraProjectile::AAuraProjectile()
 	ProjectileMovement->InitialSpeed = 550.f;
 	ProjectileMovement->MaxSpeed = 550.f;
 	ProjectileMovement->ProjectileGravityScale = 0.f;
+}
+
+void AAuraProjectile::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AAuraProjectile, DamageEffectParams);
 }
 
 UProjectileMovementComponent* AAuraProjectile::GetProjectileMovementComponent() const

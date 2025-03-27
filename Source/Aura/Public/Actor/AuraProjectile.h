@@ -20,8 +20,9 @@ class AURA_API AAuraProjectile : public AActor
 
 public:
 	AAuraProjectile();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true))
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Replicated)
 	FDamageEffectParams DamageEffectParams;
 
 	UProjectileMovementComponent* GetProjectileMovementComponent() const;

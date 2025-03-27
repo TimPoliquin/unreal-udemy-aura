@@ -96,8 +96,9 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_HitReact;
 	FGameplayTag Abilities_Summon;
 
-	FGameplayTag Abilities_Fire_FireBolt;
-	FGameplayTag Abilities_Lightning_Electrocute;
+	FGameplayTag Abilities_Offensive;
+	FGameplayTag Abilities_Offensive_Fire_FireBolt;
+	FGameplayTag Abilities_Offensive_Lightning_Electrocute;
 	FGameplayTag Abilities_Passive;
 	FGameplayTag Abilities_Passive_1;
 	FGameplayTag Abilities_Passive_2;

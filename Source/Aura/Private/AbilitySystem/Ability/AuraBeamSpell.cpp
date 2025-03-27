@@ -56,14 +56,7 @@ void UAuraBeamSpell::EndAbility(
 {
 	SetMouseCursorVisible(true);
 	SetMovementEnabled(true);
-	for (AActor* CueActor : CueActors)
-	{
-		UGameplayCueFunctionLibrary::RemoveGameplayCueOnActor(
-			CueActor,
-			LoopCueTag,
-			ActorGameplayCueParameters[CueActor]
-		);
-	}
+	EndAbilityOnTargets();
 	if (GetWorld()->GetTimerManager().IsTimerActive(TimerHandle))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
@@ -400,6 +393,35 @@ void UAuraBeamSpell::BindCascadeTargetDeath(AActor* Actor)
 		if (!CombatInterface->GetOnDeathDelegate().IsAlreadyBound(this, &UAuraBeamSpell::OnCascadeTargetDead))
 		{
 			CombatInterface->GetOnDeathDelegate().AddDynamic(this, &UAuraBeamSpell::OnCascadeTargetDead);
+		}
+	}
+}
+
+bool UAuraBeamSpell::IsTargetALivingEnemy(const AActor* TargetActor) const
+{
+	return ICombatInterface::IsAlive(TargetActor) && !TagUtils::HasAnyTag(
+		TargetActor,
+		ICombatInterface::GetTargetTagsToIgnore(GetAvatarActorFromActorInfo())
+	);
+}
+
+void UAuraBeamSpell::EndAbilityOnTargets()
+{
+	if (CueActors.Num() <= 0)
+	{
+		return;
+	}
+	for (TArray<AActor*> Targets(CueActors); AActor* CueActor : Targets)
+	{
+		UGameplayCueFunctionLibrary::RemoveGameplayCueOnActor(
+			CueActor,
+			LoopCueTag,
+			ActorGameplayCueParameters[CueActor]
+		);
+		if (IsTargetALivingEnemy(CueActor))
+		{
+			FDamageEffectParams LastHit = MakeDamageEffectParamsFromClassDefaults(CueActor);
+			UAuraAbilitySystemLibrary::ApplyDamageEffect(LastHit);
 		}
 	}
 }

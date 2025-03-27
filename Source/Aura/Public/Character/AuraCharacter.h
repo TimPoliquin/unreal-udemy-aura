@@ -24,6 +24,8 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+	virtual void OnRep_ActiveAbilityTag() override;
+	virtual void OnRep_StatusEffectTags() override;
 	// ICombatInterface
 	virtual int32 GetCharacterLevel_Implementation() const override;
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;

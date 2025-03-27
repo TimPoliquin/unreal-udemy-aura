@@ -256,12 +256,16 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Summon"),
 		FString("Summon Abilities parent tag")
 	);
-	Instance.Abilities_Fire_FireBolt = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Fire.FireBolt"),
+	Instance.Abilities_Offensive = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Offensive"),
+		FString("Root tag for offensive abilities")
+	);
+	Instance.Abilities_Offensive_Fire_FireBolt = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Offensive.Fire.FireBolt"),
 		FString("FireBolt ability tag")
 	);
-	Instance.Abilities_Lightning_Electrocute = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Lightning.Electrocute"),
+	Instance.Abilities_Offensive_Lightning_Electrocute = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Offensive.Lightning.Electrocute"),
 		FString("Electrocute ability tag")
 	);
 	Instance.Abilities_Passive = TagManager.AddNativeGameplayTag(

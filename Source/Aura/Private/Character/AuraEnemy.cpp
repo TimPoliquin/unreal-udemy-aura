@@ -89,6 +89,25 @@ void AAuraEnemy::InitializeDefaultAttributes()
 	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
 }
 
+void AAuraEnemy::OnStatusShockAdded()
+{
+	Super::OnStatusShockAdded();
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsStunned"), true);
+	}
+}
+
+void AAuraEnemy::OnStatusShockRemoved()
+{
+	Super::OnStatusShockRemoved();
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsStunned"), false);
+	}
+}
+
+
 void AAuraEnemy::InitializeStartupAbilities() const
 {
 	if (HasAuthority())

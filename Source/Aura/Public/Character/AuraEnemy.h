@@ -60,6 +60,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() override;
+	virtual void OnStatusShockAdded() override;
+	virtual void OnStatusShockRemoved() override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Highlight")
 	bool bHighlighted;
 

@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUD.h"
 
 
@@ -68,6 +69,35 @@ void AAuraCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	// Init ability actor info for the client
 	InitializeAbilityActorInfo();
+}
+
+void AAuraCharacter::OnRep_ActiveAbilityTag()
+{
+	Super::OnRep_ActiveAbilityTag();
+	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+		AbilitySystemComponent
+	))
+	{
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputHeld);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputPressed);
+		BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+		if (IsShocked())
+		{
+			AuraAbilitySystemComponent->AddLooseGameplayTags(BlockedTags);
+		}
+		else
+		{
+			AuraAbilitySystemComponent->RemoveLooseGameplayTags(BlockedTags);
+		}
+	}
+}
+
+void AAuraCharacter::OnRep_StatusEffectTags()
+{
+	Super::OnRep_StatusEffectTags();
 }
 
 void AAuraCharacter::InitializeAbilityActorInfo()

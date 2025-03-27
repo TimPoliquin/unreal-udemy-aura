@@ -23,6 +23,7 @@ class AURA_API AAuraBaseCharacter : public ACharacter, public IAbilitySystemInte
 
 public:
 	AAuraBaseCharacter();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const;
@@ -99,6 +100,8 @@ protected:
 	void AddCharacterAbilities();
 	UFUNCTION()
 	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	UFUNCTION(BlueprintCallable)
+	bool IsShocked() const;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	bool bHitReacting;
@@ -126,8 +129,35 @@ protected:
 
 	/** Minions **/
 	int32 MinionCount = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing=OnRep_ActiveAbilityTag, Category = "Combat")
 	FGameplayTag ActiveAbilityTag;
+	UFUNCTION()
+	virtual void OnRep_ActiveAbilityTag()
+	{
+	}
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing=OnRep_StatusEffectTags, Category = "Combat")
+	TArray<FGameplayTag> StatusEffectTags;
+	UFUNCTION()
+	virtual void OnRep_StatusEffectTags()
+	{
+	}
+
+	virtual void OnStatusShockAdded()
+	{
+	};
+
+	virtual void OnStatusShockRemoved()
+	{
+	};
+
+	virtual void OnStatusBurnAdded()
+	{
+	};
+
+	virtual void OnStatusBurnRemoved()
+	{
+	};
 
 private:
 	bool bDead = false;
@@ -149,5 +179,9 @@ private:
 		void (AAuraBaseCharacter::*Callback)(UMaterialInstanceDynamic*)
 	);
 	UFUNCTION()
-	void OnDebuffBurn(FGameplayTag GameplayTag, int StackCount);
+	void OnDebuffTypeBurnChanged(FGameplayTag GameplayTag, int StackCount);
+	UFUNCTION()
+	void OnDebuffTypeShockChanged(FGameplayTag StunTag, int32 Count);
+	UFUNCTION()
+	void RegisterStatusEffectTags(UAbilitySystemComponent* InAbilitySystemComponent);
 };

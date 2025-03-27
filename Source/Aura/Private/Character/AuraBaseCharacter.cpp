@@ -12,6 +12,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Tags/AuraGameplayTags.h"
 
 AAuraBaseCharacter::AAuraBaseCharacter()
@@ -30,12 +31,28 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Type_Burn;
 }
 
+void AAuraBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AAuraBaseCharacter, ActiveAbilityTag);
+	DOREPLIFETIME(AAuraBaseCharacter, StatusEffectTags);
+}
+
 
 void AAuraBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	if (!AbilitySystemComponent)
+	{
+		GetOnAbilitySystemRegisteredDelegate().AddUObject(this, &AAuraBaseCharacter::RegisterStatusEffectTags);
+	}
+	else
+	{
+		RegisterStatusEffectTags(AbilitySystemComponent);
+	}
 }
+
 
 FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const
 {
@@ -89,6 +106,19 @@ void AAuraBaseCharacter::OnHitReactTagChanged(const FGameplayTag CallbackTag, in
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting
 		                                       ? 0
 		                                       : BaseWalkSpeed;
+	if (bHitReacting)
+	{
+		GetCharacterMovement()->DisableMovement();
+	}
+	else
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+}
+
+bool AAuraBaseCharacter::IsShocked() const
+{
+	return StatusEffectTags.Contains(FAuraGameplayTags::Get().Debuff_Type_Shock);
 }
 
 AActor* AAuraBaseCharacter::GetAvatar_Implementation()
@@ -215,11 +245,47 @@ void AAuraBaseCharacter::Dissolve(
 	}
 }
 
-void AAuraBaseCharacter::OnDebuffBurn(FGameplayTag GameplayTag, int StackCount)
+void AAuraBaseCharacter::OnDebuffTypeBurnChanged(FGameplayTag GameplayTag, int StackCount)
 {
-	UE_LOG(LogAura, Warning, TEXT("AAuraBaseCharacter::OnDebuffBurn"));
+	if (StackCount > 0)
+	{
+		StatusEffectTags.AddUnique(GameplayTag);
+		OnStatusBurnAdded();
+	}
+	else
+	{
+		StatusEffectTags.Remove(GameplayTag);
+		OnStatusBurnRemoved();
+	}
 }
 
+void AAuraBaseCharacter::OnDebuffTypeShockChanged(FGameplayTag StunTag, int32 Count)
+{
+	if (Count > 0)
+	{
+		StatusEffectTags.AddUnique(StunTag);
+		UE_LOG(LogAura, Warning, TEXT("[%s] is Stunned!"), *GetName());
+		OnStatusShockAdded();
+	}
+	else
+	{
+		StatusEffectTags.Remove(StunTag);
+		OnStatusShockRemoved();
+	}
+}
+
+
+void AAuraBaseCharacter::RegisterStatusEffectTags(UAbilitySystemComponent* InAbilitySystemComponent)
+{
+	InAbilitySystemComponent->RegisterGameplayTagEvent(
+		FAuraGameplayTags::Get().Debuff_Type_Shock,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(this, &AAuraBaseCharacter::OnDebuffTypeShockChanged);
+	InAbilitySystemComponent->RegisterGameplayTagEvent(
+		FAuraGameplayTags::Get().Debuff_Type_Burn,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(this, &AAuraBaseCharacter::OnDebuffTypeBurnChanged);
+}
 
 void AAuraBaseCharacter::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const
 {

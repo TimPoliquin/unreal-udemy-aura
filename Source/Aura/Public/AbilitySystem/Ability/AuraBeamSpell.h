@@ -102,4 +102,6 @@ private:
 	void OnCascadeTargetDead(AActor* CascadeTarget);
 	void BindPrimaryTargetDeath(AActor* Actor);
 	void BindCascadeTargetDeath(AActor* Actor);
+	bool IsTargetALivingEnemy(const AActor* TargetActor) const;
+	void EndAbilityOnTargets();
 };
