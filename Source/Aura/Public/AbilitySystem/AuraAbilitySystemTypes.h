@@ -252,7 +252,7 @@ USTRUCT(BlueprintType)
 struct FAuraDamageConfig
 {
 	GENERATED_BODY()
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (Categories = "Damage"))
 	FGameplayTag DamageTypeTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FScalableFloat Amount;

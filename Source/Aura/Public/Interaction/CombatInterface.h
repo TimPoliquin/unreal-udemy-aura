@@ -78,8 +78,8 @@ public:
 	void ChangeMinionCount(const int32 Delta);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	int32 GetXPReward() const;
-	virtual FOnAbilitySystemComponentRegisteredSignature GetOnAbilitySystemRegisteredDelegate() const = 0;
-	virtual FOnDeathSignature GetOnDeathDelegate() = 0;
+	virtual FOnAbilitySystemComponentRegisteredSignature& GetOnAbilitySystemRegisteredDelegate() = 0;
+	virtual FOnDeathSignature& GetOnDeathDelegate() = 0;
 	virtual void ApplyDeathImpulse(const FVector& DeathImpulse) = 0;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetActiveAbilityTag(const FGameplayTag& ActiveAbilityTag);
@@ -117,6 +117,6 @@ public:
 	static void SetActiveAbilityTag(UObject* Actor, const FGameplayTag& ActiveAbilityTag);
 	static void ClearActiveAbilityTag(UObject* Actor);
 	static void UpdateFacingTarget(UObject* Actor, const FVector& FacingTarget);
+	static FVector GetCombatSocketLocation(const UObject* Actor, const FGameplayTag& SocketTag);
 	static USkeletalMeshComponent* GetWeapon(const UObject* Actor);
-	static FName GetWeaponTipSocketName(const UObject* Actor);
 };

@@ -38,18 +38,68 @@ private:
 	FGameplayTag SoundCueTag;
 	UPROPERTY(EditDefaultsOnly, Category="Beam", meta=(Categories = "GameplayCue"))
 	FGameplayTag LoopCueTag;
+	UPROPERTY(EditDefaultsOnly, Category="Beam", meta=(Categories = "Combat.Socket"))
+	FGameplayTag SocketTag;
+	UPROPERTY(EditDefaultsOnly, Category="Beam")
+	float BeamTraceSize = 10.f;
+	UPROPERTY(EditDefaultsOnly, Category="Beam")
+	float CascadeRadius = 100.f;
+	UPROPERTY(EditDefaultsOnly, Category="Beam")
+	int32 MaxCascadeTargets = 5.f;
+	UPROPERTY(EditDefaultsOnly, Category="Beam")
+	float DamageTick = .1f;
+	UPROPERTY(EditDefaultsOnly, Category="Beam|Debug")
+	bool bForceCascadeMax = false;
+	UPROPERTY()
+	FTimerHandle TimerHandle;
+	UPROPERTY()
+	FTimerHandle DelayTimerHandle;
+	UPROPERTY(EditDefaultsOnly, Category="Beam")
+	float MinimumSpellTime = .5f;
 
 	FVector HitLocation;
+	UPROPERTY()
+	TObjectPtr<AActor> PrimaryTarget;
+	AActor* TraceFirstTarget(const FVector& BeamTargetLocation);
+	UPROPERTY()
+	TMap<AActor*, FGameplayCueParameters> ActorGameplayCueParameters;
+	UPROPERTY()
+	TArray<AActor*> CueActors;
 
 
+	UFUNCTION()
+	void OnDelayedRelease();
 	UFUNCTION()
 	void OnInputRelease(float TimeHeld);
 	UFUNCTION()
 	void OnReceiveMouseData(const FGameplayAbilityTargetDataHandle& DataHandle);
 
 	UFUNCTION()
-	void OnMontageEventReceived(FGameplayEventData Payload);
+	void SpawnBeam(FGameplayEventData Payload);
 	void ExecuteAbility(const FHitResult& HitResult);
 	void SetMouseCursorVisible(const bool Visible) const;
 	void SetMovementEnabled(const bool Enabled) const;
+	AActor* DetermineCueTarget(AActor* ActorHit) const;
+	void DetermineCascadingTargets(AActor* CueTarget, TArray<AActor*>& OutCascadedTargets);
+
+	float GetCascadeRadius() const
+	{
+		return CascadeRadius;
+	}
+
+	int32 GetCascadeTargetsCount() const;
+
+	void ApplyCueToTarget(AActor* CueTarget, const FGameplayCueParameters& Parameters);
+	void CascadeToActor(const AActor* FromActor, AActor* CascadeTarget);
+
+	UFUNCTION()
+	void OnTimerTick();
+	void InitializeTimer();
+	void ApplyDamage(AActor* DamageActor);
+	UFUNCTION()
+	void OnPrimaryTargetDead(AActor* TargetActor);
+	UFUNCTION()
+	void OnCascadeTargetDead(AActor* CascadeTarget);
+	void BindPrimaryTargetDeath(AActor* Actor);
+	void BindCascadeTargetDeath(AActor* Actor);
 };

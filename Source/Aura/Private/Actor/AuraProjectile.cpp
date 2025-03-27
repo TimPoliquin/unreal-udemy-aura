@@ -41,6 +41,15 @@ UProjectileMovementComponent* AAuraProjectile::GetProjectileMovementComponent() 
 	return ProjectileMovement;
 }
 
+void AAuraProjectile::OnTargetDead(AActor* DeadActor)
+{
+	PlayImpactEffect();
+	if (HasAuthority())
+	{
+		Destroy();
+	}
+}
+
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();

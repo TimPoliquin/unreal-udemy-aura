@@ -38,12 +38,12 @@ public:
 	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 	virtual int32 GetXPReward_Implementation() const override;
 
-	virtual FOnDeathSignature GetOnDeathDelegate() override
+	virtual FOnDeathSignature& GetOnDeathDelegate() override
 	{
 		return OnDeathDelegate;
 	}
 
-	virtual FOnAbilitySystemComponentRegisteredSignature GetOnAbilitySystemRegisteredDelegate() const override
+	virtual FOnAbilitySystemComponentRegisteredSignature& GetOnAbilitySystemRegisteredDelegate() override
 	{
 		return OnAbilitySystemComponentRegisteredDelegate;
 	}
@@ -94,7 +94,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> InitializeVitalAttributes;
 
-	virtual void InitializeDefaultAttributes() const;
+	virtual void InitializeDefaultAttributes();
 
 	void AddCharacterAbilities();
 	UFUNCTION()
@@ -126,7 +126,7 @@ protected:
 
 	/** Minions **/
 	int32 MinionCount = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	FGameplayTag ActiveAbilityTag;
 
 private:

@@ -17,7 +17,7 @@ int32 ICombatInterface::GetCharacterLevel(const UObject* Actor)
 
 bool ICombatInterface::IsAlive(const UObject* Actor)
 {
-	if (Actor && Actor->Implements<UCombatInterface>())
+	if (IsValid(Actor) && Actor->Implements<UCombatInterface>())
 	{
 		return !Execute_IsDead(Actor);
 	}
@@ -83,6 +83,15 @@ void ICombatInterface::UpdateFacingTarget(UObject* Actor, const FVector& FacingT
 	{
 		Execute_UpdateFacingTarget(Actor, FacingTarget);
 	}
+}
+
+FVector ICombatInterface::GetCombatSocketLocation(const UObject* Actor, const FGameplayTag& SocketTag)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetCombatSocketLocation(Actor, SocketTag);
+	}
+	return FVector::ZeroVector;
 }
 
 USkeletalMeshComponent* ICombatInterface::GetWeapon(const UObject* Actor)

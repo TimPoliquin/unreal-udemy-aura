@@ -57,7 +57,7 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	return GetActorLocation();
 }
 
-void AAuraBaseCharacter::InitializeDefaultAttributes() const
+void AAuraBaseCharacter::InitializeDefaultAttributes()
 {
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);

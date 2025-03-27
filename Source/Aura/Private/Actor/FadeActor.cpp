@@ -3,6 +3,7 @@
 
 #include "Actor/FadeActor.h"
 
+#include "Aura/Aura.h"
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetMaterialLibrary.h"
 
@@ -59,6 +60,7 @@ void AFadeActor::FadeOut_Implementation()
 	ReplaceMaterials(DynamicMaterials);
 	MeshComponent->SetCastShadow(false);
 	MeshComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+	MeshComponent->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
 	TimelineComponent->SetTimelineFinishedFunc(OnFadeOutFinishedDelegate);
 	TimelineComponent->Play();
 }
@@ -68,6 +70,7 @@ void AFadeActor::OnFadeInComplete()
 	ReplaceMaterials(OriginalMaterials);
 	MeshComponent->SetCastShadow(true);
 	MeshComponent->SetCollisionResponseToChannel(ECC_Visibility, OriginalVisibilityResponse);
+	MeshComponent->SetCollisionResponseToChannel(ECC_Target, ECR_Block);
 }
 
 void AFadeActor::OnFadeOutComplete()
