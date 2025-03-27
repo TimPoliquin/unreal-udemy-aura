@@ -41,6 +41,15 @@ UProjectileMovementComponent* AAuraProjectile::GetProjectileMovementComponent() 
 	return ProjectileMovement;
 }
 
+void AAuraProjectile::OnTargetDead(AActor* DeadActor)
+{
+	PlayImpactEffect();
+	if (HasAuthority())
+	{
+		Destroy();
+	}
+}
+
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
@@ -123,6 +132,7 @@ void AAuraProjectile::PlayImpactEffect()
 	if (TravelSoundComponent)
 	{
 		TravelSoundComponent->Stop();
+		TravelSoundComponent->DestroyComponent();
 	}
 	bHit = true;
 }

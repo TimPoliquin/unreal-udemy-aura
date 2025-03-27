@@ -316,6 +316,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Type.None"),
 		FString("None Type")
 	);
+	/** Event Tags **/
+	Instance.Event_Montage_Electrocute = TagManager.AddNativeGameplayTag(
+		FName("Event.Montage.Electrocute"),
+		FString("Event fired during electrocute montage")
+	);
 	/** Cooldown Tags **/
 	Instance.Cooldown_Fire_FireBolt = TagManager.AddNativeGameplayTag(
 		FName("Cooldown.Fire.FireBolt"),
@@ -325,7 +330,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Cooldown.Lightning.Electrocute"),
 		FString("Electrocute ability cooldown tag")
 	);
-
 
 	/** Combat Socket Tags **/
 	Instance.Combat_Socket_Weapon = TagManager.AddNativeGameplayTag(
@@ -357,6 +361,24 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 			)
 		);
 	}
+
+	/** Player Tags **/
+	Instance.Player_Block_CursorTrace = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.CursorTrace"),
+		FString("Block tracing under the cursor")
+	);
+	Instance.Player_Block_InputPressed = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.InputPressed"),
+		FString("Block Input Pressed callback for input")
+	);
+	Instance.Player_Block_InputHeld = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.InputHeld"),
+		FString("Block Input Held callback for input")
+	);
+	Instance.Player_Block_InputReleased = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.InputReleased"),
+		FString("Block Input Released callback for input")
+	);
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

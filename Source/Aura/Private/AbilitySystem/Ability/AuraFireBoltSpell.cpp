@@ -5,6 +5,7 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Interaction/CombatInterface.h"
 #include "Interaction/HighlightInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Tags/AuraGameplayTags.h"
@@ -46,7 +47,7 @@ FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
 void UAuraFireBoltSpell::SpawnProjectiles(
 	const FVector& ProjectileTargetLocation,
 	const FGameplayTag& SocketTag,
-	const AActor* Target
+	AActor* Target
 )
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority())
@@ -69,6 +70,13 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 			if (IsValid(Target) && Target->Implements<UHighlightInterface>())
 			{
 				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = Target->GetRootComponent();
+				if (ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(Target))
+				{
+					TargetCombatInterface->GetOnDeathDelegate().AddDynamic(
+						SpawnedProjectile,
+						&AAuraProjectile::OnTargetDead
+					);
+				}
 			}
 			else
 			{
@@ -86,6 +94,7 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 			SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = true;
 		}
 	);
+
 	for (const FRotator& ProjectileRotation : Rotations)
 	{
 		SpawnProjectile(

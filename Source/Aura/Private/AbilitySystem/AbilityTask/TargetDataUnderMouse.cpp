@@ -4,6 +4,7 @@
 #include "AbilitySystem/AbilityTask/TargetDataUnderMouse.h"
 
 #include "AbilitySystemComponent.h"
+#include "Aura/Aura.h"
 
 UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility)
 {
@@ -38,7 +39,7 @@ void UTargetDataUnderMouse::SendMouseCursorDataToServer() const
 {
 	if (const APlayerController* PlayerController = Ability->GetCurrentActorInfo()->PlayerController.Get())
 	{
-		if (FHitResult CursorHit; PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, CursorHit))
+		if (FHitResult CursorHit; PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit))
 		{
 			// create a prediction window for this ability system
 			FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());

@@ -78,9 +78,9 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 	{
 		const UCharacterClassInfo* ClassInfo = GameMode->GetCharacterClassInfo();
 		const FCharacterClassDefaultInfo DefaultInfo = ClassInfo->GetClassDefaultInfo(CharacterClass);
-		ApplyGameplayEffectSpec(AbilitySystemComponent, DefaultInfo.PrimaryAttributes, Level);
-		ApplyGameplayEffectSpec(AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
-		ApplyGameplayEffectSpec(AbilitySystemComponent, ClassInfo->VitalAttributes, Level);
+		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, DefaultInfo.PrimaryAttributes, Level);
+		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
+		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->VitalAttributes, Level);
 	}
 }
 
@@ -247,8 +247,45 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 			}
 			if (ICombatInterface::IsAlive(Overlap.GetActor()))
 			{
-				OutOverlappingActors.Add(OverlapActor);
+				OutOverlappingActors.AddUnique(OverlapActor);
 			}
+		}
+	}
+}
+
+void UAuraAbilitySystemLibrary::GetClosestActors(
+	const int32 MaxCount,
+	const FVector& Location,
+	const TArray<AActor*>& Actors,
+	TArray<AActor*>& OutActors
+)
+{
+	if (Actors.Num() <= MaxCount)
+	{
+		OutActors = Actors;
+		return;
+	}
+	TArray<AActor*> SortedActors(Actors);
+	SortedActors.Sort(
+		[Location](AActor& A1, AActor& A2)
+		{
+			return
+				FVector::Distance(Location, A1.GetActorLocation()) <
+				FVector::Distance(
+					Location,
+					A2.GetActorLocation()
+				);
+		}
+	);
+	for (AActor* Actor : SortedActors)
+	{
+		if (OutActors.Num() < MaxCount)
+		{
+			OutActors.Add(Actor);
+		}
+		else
+		{
+			break;
 		}
 	}
 }
@@ -375,6 +412,16 @@ TArray<FVector> UAuraAbilitySystemLibrary::EvenlyRotatedVectors(
 	return Vectors;
 }
 
+FPredictionKey UAuraAbilitySystemLibrary::GetPredictionKeyFromAbilitySpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances(); Instances.Num() > 0)
+	{
+		const FGameplayAbilityActivationInfo& ActivationInfo = Instances.Last()->GetCurrentActivationInfoRef();
+		return ActivationInfo.GetActivationPredictionKey();
+	}
+	return FPredictionKey();
+}
+
 FGameplayTag UAuraAbilitySystemLibrary::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
 	if (AbilitySpec.Ability)
@@ -443,19 +490,25 @@ AAuraHUD* UAuraAbilitySystemLibrary::GetAuraHUD(const UObject* WorldContextObjec
 }
 
 void UAuraAbilitySystemLibrary::ApplyGameplayEffectSpec(
-	UAbilitySystemComponent* AbilitySystemComponent,
+	const UAbilitySystemComponent* SourceAbilitySystemComponent,
+	UAbilitySystemComponent* TargetAbilitySystemComponent,
 	const TSubclassOf<UGameplayEffect>& GameplayEffectClass,
-	const float Level
+	const float Level,
+	const FMakeEffectSpecSignature* SetPropsOnSpecCallback
 )
 {
-	FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
-	ContextHandle.AddSourceObject(AbilitySystemComponent->GetAvatarActor());
-	const FGameplayEffectSpecHandle EffectSpec = AbilitySystemComponent->MakeOutgoingSpec(
+	FGameplayEffectContextHandle ContextHandle = SourceAbilitySystemComponent->MakeEffectContext();
+	ContextHandle.AddSourceObject(SourceAbilitySystemComponent->GetAvatarActor());
+	FGameplayEffectSpecHandle EffectSpec = SourceAbilitySystemComponent->MakeOutgoingSpec(
 		GameplayEffectClass,
 		Level,
 		ContextHandle
 	);
-	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpec.Data.Get());
+	if (SetPropsOnSpecCallback)
+	{
+		SetPropsOnSpecCallback->ExecuteIfBound(EffectSpec);
+	}
+	TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpec.Data.Get());
 }
 
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)

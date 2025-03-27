@@ -112,6 +112,9 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Type_Passive;
 	FGameplayTag Abilities_Type_None;
 
+	/** Event Tags **/
+	FGameplayTag Event_Montage_Electrocute;
+
 	/** Cooldown **/
 	FGameplayTag Cooldown_Fire_FireBolt;
 	FGameplayTag Cooldown_Lightning_Electrocute;
@@ -121,6 +124,12 @@ struct FAuraGameplayTags
 	FGameplayTag Combat_Socket_LeftHand;
 	FGameplayTag Combat_Socket_RightHand;
 	FGameplayTag Combat_Socket_Tail;
+
+	/** Player Tags **/
+	FGameplayTag Player_Block_CursorTrace;
+	FGameplayTag Player_Block_InputPressed;
+	FGameplayTag Player_Block_InputHeld;
+	FGameplayTag Player_Block_InputReleased;
 
 	/**
 	 * Montage Attack Tags 

@@ -8,6 +8,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+DECLARE_DELEGATE_OneParam(FMakeEffectSpecSignature, FGameplayEffectSpecHandle&);
+
 struct FDamageEffectParams;
 class UAuraAbilitySystemComponent;
 class UAbilityInfo;
@@ -183,6 +185,14 @@ public:
 		TArray<AActor*>& OutOverlappingActors
 	);
 
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static void GetClosestActors(
+		int32 MaxCount,
+		const FVector& Location,
+		const TArray<AActor*>& Actors,
+		TArray<AActor*>& OutActors
+	);
+
 	static bool CanEquipAbility(UAuraAbilitySystemComponent* AbilitySystemComponent, const FGameplayTag& AbilityTag);
 	static bool AbilityHasSlotTag(const FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& SlotTag);
 
@@ -203,6 +213,14 @@ public:
 		const float Spread,
 		const int32 Count
 	);
+	static FPredictionKey GetPredictionKeyFromAbilitySpec(const FGameplayAbilitySpec& AbilitySpec);
+	static void ApplyGameplayEffectSpec(
+		const UAbilitySystemComponent* SourceAbilitySystemComponent,
+		UAbilitySystemComponent* TargetAbilitySystemComponent,
+		const TSubclassOf<UGameplayEffect>& GameplayEffectClass,
+		float Level,
+		const FMakeEffectSpecSignature* SetPropsOnSpecCallback = nullptr
+	);
 
 private:
 	static bool GetWidgetControllerParams(
@@ -210,12 +228,6 @@ private:
 		FWidgetControllerParams& FWidgetControllerParams
 	);
 	static AAuraHUD* GetAuraHUD(const UObject* WorldContextObject);
-
-	static void ApplyGameplayEffectSpec(
-		UAbilitySystemComponent* AbilitySystemComponent,
-		const TSubclassOf<UGameplayEffect>& GameplayEffectClass,
-		const float Level
-	);
 
 	static void GrantAbilities(
 		UAbilitySystemComponent* AbilitySystemComponent,

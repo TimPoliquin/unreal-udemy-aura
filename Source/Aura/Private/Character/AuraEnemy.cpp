@@ -80,7 +80,7 @@ void AAuraEnemy::InitializeAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
-void AAuraEnemy::InitializeDefaultAttributes() const
+void AAuraEnemy::InitializeDefaultAttributes()
 {
 	if (HasAuthority())
 	{

@@ -318,7 +318,7 @@ void UAuraAttributeSet::ShowDamageText(const FEffectProperties& Props, const flo
 
 void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 {
-	const int32 XPReward = ICombatInterface::Execute_GetXPReward(Props.Target.AvatarActor);
+	const int32 XPReward = ICombatInterface::GetXPReward(Props.Target.AvatarActor);
 	FGameplayEventData Payload;
 	Payload.EventTag = FAuraGameplayTags::Get().Attributes_Meta_IncomingXP;
 	Payload.EventMagnitude = XPReward;

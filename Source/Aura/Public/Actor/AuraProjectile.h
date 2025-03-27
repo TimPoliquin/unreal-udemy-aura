@@ -27,6 +27,11 @@ public:
 	UProjectileMovementComponent* GetProjectileMovementComponent() const;
 	UPROPERTY()
 	TObjectPtr<USceneComponent> HomingTargetSceneComponent;
+	UPROPERTY(EditDefaultsOnly)
+	bool bShouldDestroyOnTargetDeath = true;
+
+	UFUNCTION()
+	void OnTargetDead(AActor* DeadActor);
 
 protected:
 	virtual void BeginPlay() override;

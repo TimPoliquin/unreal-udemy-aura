@@ -17,7 +17,7 @@ class AURA_API UAuraFireBoltSpell : public UAuraProjectileSpell
 public:
 	virtual FString GetDescription(const int32 AbilityLevel) const override;
 	UFUNCTION(BlueprintCallable)
-	void SpawnProjectiles(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag, const AActor* Target);
+	void SpawnProjectiles(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag, AActor* Target);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "FireBolt")

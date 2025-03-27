@@ -57,7 +57,7 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	return GetActorLocation();
 }
 
-void AAuraBaseCharacter::InitializeDefaultAttributes() const
+void AAuraBaseCharacter::InitializeDefaultAttributes()
 {
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
@@ -157,6 +157,11 @@ void AAuraBaseCharacter::ApplyDeathImpulse(const FVector& DeathImpulse)
 	{
 		Weapon->AddImpulse(DeathImpulse, NAME_None, true);
 	}
+}
+
+USkeletalMeshComponent* AAuraBaseCharacter::GetWeapon_Implementation() const
+{
+	return Weapon;
 }
 
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()

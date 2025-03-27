@@ -59,7 +59,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeAbilityActorInfo() override;
-	virtual void InitializeDefaultAttributes() const override;
+	virtual void InitializeDefaultAttributes() override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Highlight")
 	bool bHighlighted;
 
