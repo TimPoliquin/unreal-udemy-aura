@@ -131,5 +131,5 @@ float UAuraDamageGameplayAbility::GetCooldown(const float InLevel) const
 
 FGameplayTag UAuraDamageGameplayAbility::GetDefaultAbilityTag() const
 {
-	return AbilityTags.First();
+	return GetAssetTags().First();
 }

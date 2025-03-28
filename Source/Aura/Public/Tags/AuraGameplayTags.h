@@ -102,9 +102,9 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Offensive_Fire_FireBolt;
 	FGameplayTag Abilities_Offensive_Lightning_Electrocute;
 	FGameplayTag Abilities_Passive;
-	FGameplayTag Abilities_Passive_1;
-	FGameplayTag Abilities_Passive_2;
-	FGameplayTag Abilities_Passive_3;
+	FGameplayTag Abilities_Passive_HaloOfProtection;
+	FGameplayTag Abilities_Passive_LifeSiphon;
+	FGameplayTag Abilities_Passive_ManaSiphon;
 	FGameplayTag Abilities_Status;
 	FGameplayTag Abilities_Status_Locked;
 	FGameplayTag Abilities_Status_Eligible;

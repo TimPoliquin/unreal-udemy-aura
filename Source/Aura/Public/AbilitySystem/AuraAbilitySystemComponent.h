@@ -15,6 +15,7 @@ DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility, FGameplayAbilitySpec&);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityEquippedSignature, const FAuraEquipAbilityPayload&, EquipPayload);
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbilitySignature, const FGameplayTag& /*Ability Tag*/);
 /**
  * 
  */
@@ -61,6 +62,7 @@ public:
 
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
 	FAbilityEquippedSignature OnAbilityEquippedDelegate;
+	FDeactivatePassiveAbilitySignature OnDeactivatePassiveAbilityDelegate;
 
 protected:
 	virtual void BeginPlay() override;

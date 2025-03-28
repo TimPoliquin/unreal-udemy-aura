@@ -280,16 +280,16 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Passive"),
 		FString("Passive ability tag")
 	);
-	Instance.Abilities_Passive_1 = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Passive.1"),
+	Instance.Abilities_Passive_HaloOfProtection = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.HaloOfProtection"),
 		FString("Passive 1 ability tag")
 	);
-	Instance.Abilities_Passive_2 = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Passive.2"),
+	Instance.Abilities_Passive_LifeSiphon = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.LifeSiphon"),
 		FString("Passive 2 ability tag")
 	);
-	Instance.Abilities_Passive_3 = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Passive.3"),
+	Instance.Abilities_Passive_ManaSiphon = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.ManaSiphon"),
 		FString("Passive 3 ability tag")
 	);
 	Instance.Abilities_Status = TagManager.AddNativeGameplayTag(
