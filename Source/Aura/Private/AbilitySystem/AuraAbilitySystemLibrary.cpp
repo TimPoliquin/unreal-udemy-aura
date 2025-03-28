@@ -3,10 +3,13 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
+#include <rapidjson/schema.h>
+
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameModeBase.h"
@@ -314,6 +317,11 @@ bool UAuraAbilitySystemLibrary::AbilityHasSlotTag(const FGameplayAbilitySpec& Ab
 	return false;
 }
 
+bool UAuraAbilitySystemLibrary::AbilityHasAnySlot(const FGameplayAbilitySpec& AbilitySpec)
+{
+	return AbilitySpec.GetDynamicSpecSourceTags().HasTag(FAuraGameplayTags::Get().InputTag);
+}
+
 FGameplayEffectContextHandle UAuraAbilitySystemLibrary::ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams)
 {
 	checkf(
@@ -509,6 +517,17 @@ void UAuraAbilitySystemLibrary::ApplyGameplayEffectSpec(
 		SetPropsOnSpecCallback->ExecuteIfBound(EffectSpec);
 	}
 	TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*EffectSpec.Data.Get());
+}
+
+bool UAuraAbilitySystemLibrary::IsPassiveAbility(
+	const UObject* WorldContextObject,
+	const FGameplayAbilitySpec& AbilitySpec
+)
+{
+	UAbilityInfo* AbilityInfo = GetAbilityInfo(WorldContextObject);
+	const FGameplayTag AbilityTag = GetAbilityTagFromSpec(AbilitySpec);
+	const FAuraAbilityInfo& Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+	return Info.AbilityType == FAuraGameplayTags::Get().Abilities_Type_Passive;
 }
 
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)

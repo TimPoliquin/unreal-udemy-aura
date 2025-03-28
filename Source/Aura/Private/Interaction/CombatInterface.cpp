@@ -3,6 +3,7 @@
 
 #include "Interaction/CombatInterface.h"
 
+#include "AnimationCompression.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 

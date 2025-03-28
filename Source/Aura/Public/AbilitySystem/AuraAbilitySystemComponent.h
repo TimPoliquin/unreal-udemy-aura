@@ -15,6 +15,12 @@ DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility, FGameplayAbilitySpec&);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityEquippedSignature, const FAuraEquipAbilityPayload&, EquipPayload);
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(
+	FActivatePassiveEffectSignature,
+	const FGameplayTag& /* Ability Tag*/,
+	const bool /*bActivate*/
+)
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbilitySignature, const FGameplayTag& /*Ability Tag*/);
 /**
  * 
@@ -47,6 +53,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag);
 	void ServerUpdateAbilityStatuses(const int32 Level);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastActivatePassiveEffect(const FGameplayTag& AbilityTag, bool bActivate);
 	UFUNCTION(Server, Reliable)
 	void ServerSpendSpellPoint(const FGameplayTag& AbilityTag);
 	UFUNCTION(Server, Reliable)
@@ -63,6 +71,7 @@ public:
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
 	FAbilityEquippedSignature OnAbilityEquippedDelegate;
 	FDeactivatePassiveAbilitySignature OnDeactivatePassiveAbilityDelegate;
+	FActivatePassiveEffectSignature OnActivatePassiveEffectDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -82,4 +91,8 @@ private:
 		const int32 PlayerLevel,
 		const TArray<FAbilityTagStatus>& AbilityStatuses
 	);
+
+	bool IsSlotEmpty(const FGameplayTag& SlotTag);
+	FGameplayAbilitySpec* GetAbilitySpecWithSlot(const FGameplayTag& SlotTag);
+	void AssignSlotTagToAbilitySpec(FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& SlotTag);
 };

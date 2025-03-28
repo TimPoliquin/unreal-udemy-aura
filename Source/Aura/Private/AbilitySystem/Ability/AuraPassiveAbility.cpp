@@ -6,6 +6,12 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/AuraLogChannels.h"
+
+UAuraPassiveAbility::UAuraPassiveAbility()
+{
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerInitiated;
+}
 
 void UAuraPassiveAbility::ActivateAbility(
 	const FGameplayAbilitySpecHandle Handle,
@@ -24,6 +30,17 @@ void UAuraPassiveAbility::ActivateAbility(
 			&UAuraPassiveAbility::ReceiveDeactivate
 		);
 	}
+}
+
+void UAuraPassiveAbility::EndAbility(
+	const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo,
+	bool bReplicateEndAbility,
+	bool bWasCancelled
+)
+{
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UAuraPassiveAbility::ReceiveDeactivate(const FGameplayTag& AbilityTag)

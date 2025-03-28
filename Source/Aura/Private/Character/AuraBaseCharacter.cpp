@@ -7,6 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "Aura/Aura.h"
 #include "Aura/AuraLogChannels.h"
 #include "Components/CapsuleComponent.h"
@@ -32,6 +33,24 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 	ShockDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>(TEXT("Shock Debuff Niagara Component"));
 	ShockDebuffComponent->SetupAttachment(GetRootComponent());
 	ShockDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Type_Shock;
+	EffectAttachComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Effect Attach Component"));
+	EffectAttachComponent->SetupAttachment(GetRootComponent());
+	EffectAttachComponent->SetAbsolute(false, true, false);
+	HaloOfProtectionNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>(
+		TEXT("Halo of Protection Niagara Component")
+	);
+	HaloOfProtectionNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	HaloOfProtectionNiagaraComponent->PassiveSpellTag = FAuraGameplayTags::Get().Abilities_Passive_HaloOfProtection;
+	LifeSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>(
+		TEXT("Life Siphon Niagara Component")
+	);
+	LifeSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	LifeSiphonNiagaraComponent->PassiveSpellTag = FAuraGameplayTags::Get().Abilities_Passive_LifeSiphon;
+	ManaSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>(
+		TEXT("Mana Siphon Niagara Component")
+	);
+	ManaSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	ManaSiphonNiagaraComponent->PassiveSpellTag = FAuraGameplayTags::Get().Abilities_Passive_ManaSiphon;
 }
 
 void AAuraBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -106,12 +125,24 @@ void AAuraBaseCharacter::AddCharacterAbilities()
 	);
 	AuraAbilitySystemComponent->AddCharacterAbilities(StartingAbilities, StartingPassiveAbilities);
 	AbilitySystemComponent->RegisterGameplayTagEvent(
-		FAuraGameplayTags::Get().Effect_HitReact,
+		FAuraGameplayTags::Get().Effect_HitReact_Default,
 		EGameplayTagEventType::NewOrRemoved
 	).AddUObject(
 		this,
 		&AAuraBaseCharacter::OnHitReactTagChanged
 	);
+	TArray<FGameplayTag> HitReactionKeys;
+	HitReactionMontageByMontageTag.GetKeys(HitReactionKeys);
+	for (const FGameplayTag& HitReactionTag : HitReactionKeys)
+	{
+		AbilitySystemComponent->RegisterGameplayTagEvent(
+			HitReactionTag,
+			EGameplayTagEventType::NewOrRemoved
+		).AddUObject(
+			this,
+			&AAuraBaseCharacter::OnHitReactTagChanged
+		);
+	}
 }
 
 void AAuraBaseCharacter::OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
+class UPassiveNiagaraComponent;
 class UDebuffNiagaraComponent;
 class UNiagaraSystem;
 struct FGameplayTag;
@@ -137,10 +138,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	TObjectPtr<USoundBase> DeathSound;
 
-	UPROPERTY(VisibleAnywhere, Category="Combat")
+	UPROPERTY(VisibleAnywhere, Category="Combat|Debuff")
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
-	UPROPERTY(VisibleAnywhere, Category="Combat")
+	UPROPERTY(VisibleAnywhere, Category="Combat|Debuff")
 	TObjectPtr<UDebuffNiagaraComponent> ShockDebuffComponent;
+	UPROPERTY(VisibleAnywhere, Category="Combat|Passive")
+	TObjectPtr<USceneComponent> EffectAttachComponent;
+	UPROPERTY(VisibleAnywhere, Category = "Combat|Passive")
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNiagaraComponent;
+	UPROPERTY(VisibleAnywhere, Category = "Combat|Passive")
+	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNiagaraComponent;
+	UPROPERTY(VisibleAnywhere, Category = "Combat|Passive")
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraComponent;
 
 
 	/** Minions **/

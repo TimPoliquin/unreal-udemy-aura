@@ -71,6 +71,14 @@ void UAuraAbilitySystemComponent::ServerUpdateAbilityStatuses(const int32 Level)
 	ClientUpdateAbilityStatus(Level, EligibleAbilities);
 }
 
+void UAuraAbilitySystemComponent::MulticastActivatePassiveEffect_Implementation(
+	const FGameplayTag& AbilityTag,
+	bool bActivate
+)
+{
+	OnActivatePassiveEffectDelegate.Broadcast(AbilityTag, bActivate);
+}
+
 void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
 {
 	if (IPlayerInterface::GetSpellPoints(GetAvatarActor()) <= 0)
@@ -121,30 +129,53 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(
 		const FGameplayTag Status = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec);
 		if (UAuraAbilitySystemLibrary::CanEquipAbility(this, AbilityTag))
 		{
-			// Remove this input tag from any ability that is using it
-			ClearAbilitiesUsingSlot(SlotTag);
-			// Clear this ability's slot
-			ClearAbilitySlot(*AbilitySpec);
-			// Assign this slot to this ability
-			AbilitySpec->GetDynamicSpecSourceTags().AddTag(SlotTag);
-			if (SlotTag.MatchesTagExact(GameplayTags.InputTag_LeftMouseButton))
+			if (FGameplayAbilitySpec* SpecWithSlot = GetAbilitySpecWithSlot(SlotTag))
 			{
-				// This is a special tag that binds to Shift + Left Click.
-				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.InputTag_AttackTarget);
+				// there is an ability in this slot already. Deactivate the ability and clear the slot.
+				if (AbilityTag.MatchesTagExact(UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(*SpecWithSlot)))
+				{
+					// equipped the same ability in the same slot - early return.
+					ClientEquipAbility(
+						FAuraEquipAbilityPayload::Create(
+							AbilityTag,
+							GameplayTags.Abilities_Status_Equipped,
+							SlotTag,
+							PreviousSlot
+						)
+					);
+					return;
+				}
+				if (UAuraAbilitySystemLibrary::IsPassiveAbility(GetAvatarActor(), *SpecWithSlot))
+				{
+					OnDeactivatePassiveAbilityDelegate.Broadcast(
+						UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(*SpecWithSlot)
+					);
+					MulticastActivatePassiveEffect(
+						UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(*SpecWithSlot),
+						false
+					);
+				}
+				ClearAbilitySlot(*SpecWithSlot);
 			}
-			if (Status.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+			if (!UAuraAbilitySystemLibrary::AbilityHasAnySlot(*AbilitySpec))
 			{
-				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(GameplayTags.Abilities_Status_Unlocked);
-				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
+				// ability is not yet equipped/active
+				if (UAuraAbilitySystemLibrary::IsPassiveAbility(GetAvatarActor(), *AbilitySpec))
+				{
+					TryActivateAbility(AbilitySpec->Handle);
+					MulticastActivatePassiveEffect(AbilityTag, true);
+				}
 			}
+			AssignSlotTagToAbilitySpec(*AbilitySpec, SlotTag);
 			MarkAbilitySpecDirty(*AbilitySpec);
-			const FAuraEquipAbilityPayload EquipPayload = FAuraEquipAbilityPayload::Create(
-				AbilityTag,
-				GameplayTags.Abilities_Status_Equipped,
-				SlotTag,
-				PreviousSlot
+			ClientEquipAbility(
+				FAuraEquipAbilityPayload::Create(
+					AbilityTag,
+					GameplayTags.Abilities_Status_Equipped,
+					SlotTag,
+					PreviousSlot
+				)
 			);
-			ClientEquipAbility(EquipPayload);
 		}
 	}
 }
@@ -160,8 +191,6 @@ void UAuraAbilitySystemComponent::ClearAbilitySlot(FGameplayAbilitySpec& Ability
 	{
 		AbilitySpec.GetDynamicSpecSourceTags().RemoveTag(Slot);
 	}
-
-	MarkAbilitySpecDirty(AbilitySpec);
 }
 
 void UAuraAbilitySystemComponent::ClearAbilitiesUsingSlot(const FGameplayTag& SlotTag)
@@ -231,6 +260,51 @@ void UAuraAbilitySystemComponent::BeginPlay()
 	);
 }
 
+bool UAuraAbilitySystemComponent::IsSlotEmpty(const FGameplayTag& SlotTag)
+{
+	bool HasTagExact = false;
+	FForEachAbility Delegate;
+	Delegate.BindLambda(
+		[SlotTag, &HasTagExact](FGameplayAbilitySpec& AbilitySpec)
+		{
+			HasTagExact = UAuraAbilitySystemLibrary::AbilityHasSlotTag(AbilitySpec, SlotTag);
+		}
+	);
+	ForEachAbility(Delegate);
+	return HasTagExact;
+}
+
+FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetAbilitySpecWithSlot(const FGameplayTag& SlotTag)
+{
+	FGameplayAbilitySpec* AbilityInSlot = nullptr;
+	FForEachAbility Delegate;
+	Delegate.BindLambda(
+		[SlotTag, &AbilityInSlot](FGameplayAbilitySpec& AbilitySpec)
+		{
+			if (UAuraAbilitySystemLibrary::AbilityHasSlotTag(AbilitySpec, SlotTag))
+			{
+				AbilityInSlot = &AbilitySpec;
+			}
+		}
+	);
+	ForEachAbility(Delegate);
+	return AbilityInSlot;
+}
+
+void UAuraAbilitySystemComponent::AssignSlotTagToAbilitySpec(
+	FGameplayAbilitySpec& AbilitySpec,
+	const FGameplayTag& SlotTag
+)
+{
+	ClearAbilitySlot(AbilitySpec);
+	AbilitySpec.GetDynamicSpecSourceTags().AddTag(SlotTag);
+	if (SlotTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LeftMouseButton))
+	{
+		// This is a special tag that binds to Shift + Left Click.
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().InputTag_AttackTarget);
+	}
+}
+
 void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(
 	const int32 PlayerLevel,
 	const TArray<FAbilityTagStatus>& AbilityStatuses
@@ -285,23 +359,25 @@ void UAuraAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Inp
 	{
 		return;
 	}
-
-	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
-	{
-		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
+	FForEachAbility Delegate;
+	Delegate.BindLambda(
+		[this, InputTag](FGameplayAbilitySpec& AbilitySpec)
 		{
-			AbilitySpecInputPressed(AbilitySpec);
-			if (AbilitySpec.IsActive())
+			if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 			{
-				InvokeReplicatedEvent(
-					EAbilityGenericReplicatedEvent::InputPressed,
-					AbilitySpec.Handle,
-					UAuraAbilitySystemLibrary::GetPredictionKeyFromAbilitySpec(AbilitySpec)
-				);
+				AbilitySpecInputPressed(AbilitySpec);
+				if (AbilitySpec.IsActive())
+				{
+					InvokeReplicatedEvent(
+						EAbilityGenericReplicatedEvent::InputPressed,
+						AbilitySpec.Handle,
+						UAuraAbilitySystemLibrary::GetPredictionKeyFromAbilitySpec(AbilitySpec)
+					);
+				}
 			}
-			break;
 		}
-	}
+	);
+	ForEachAbility(Delegate);
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -310,18 +386,21 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 	{
 		return;
 	}
-	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
-	{
-		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
+	FForEachAbility Delegate;
+	Delegate.BindLambda(
+		[this, InputTag](FGameplayAbilitySpec& AbilitySpec)
 		{
-			AbilitySpecInputPressed(AbilitySpec);
-			if (!AbilitySpec.IsActive())
+			if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag))
 			{
-				TryActivateAbility(AbilitySpec.Handle);
+				AbilitySpecInputPressed(AbilitySpec);
+				if (!AbilitySpec.IsActive())
+				{
+					TryActivateAbility(AbilitySpec.Handle);
+				}
 			}
-			break;
 		}
-	}
+	);
+	ForEachAbility(Delegate);
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
@@ -330,19 +409,23 @@ void UAuraAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& In
 	{
 		return;
 	}
-	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
-	{
-		if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
+	FForEachAbility Delegate;
+
+	Delegate.BindLambda(
+		[this, InputTag](FGameplayAbilitySpec& AbilitySpec)
 		{
-			AbilitySpecInputReleased(AbilitySpec);
-			InvokeReplicatedEvent(
-				EAbilityGenericReplicatedEvent::InputReleased,
-				AbilitySpec.Handle,
-				UAuraAbilitySystemLibrary::GetPredictionKeyFromAbilitySpec(AbilitySpec)
-			);
-			break;
+			if (AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag) && AbilitySpec.IsActive())
+			{
+				AbilitySpecInputReleased(AbilitySpec);
+				InvokeReplicatedEvent(
+					EAbilityGenericReplicatedEvent::InputReleased,
+					AbilitySpec.Handle,
+					UAuraAbilitySystemLibrary::GetPredictionKeyFromAbilitySpec(AbilitySpec)
+				);
+			}
 		}
-	}
+	);
+	ForEachAbility(Delegate);
 }
 
 void UAuraAbilitySystemComponent::OnRep_ActivateAbilities()

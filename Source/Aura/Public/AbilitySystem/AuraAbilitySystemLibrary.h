@@ -195,6 +195,7 @@ public:
 
 	static bool CanEquipAbility(UAuraAbilitySystemComponent* AbilitySystemComponent, const FGameplayTag& AbilityTag);
 	static bool AbilityHasSlotTag(const FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& SlotTag);
+	static bool AbilityHasAnySlot(const FGameplayAbilitySpec& AbilitySpec);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
@@ -221,6 +222,8 @@ public:
 		float Level,
 		const FMakeEffectSpecSignature* SetPropsOnSpecCallback = nullptr
 	);
+
+	static bool IsPassiveAbility(const UObject* WorldContextObject, const FGameplayAbilitySpec& AbilitySpec);
 
 private:
 	static bool GetWidgetControllerParams(
