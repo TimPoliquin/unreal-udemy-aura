@@ -29,6 +29,9 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>(TEXT("Burn Debuff Niagara Component"));
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
 	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Type_Burn;
+	ShockDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>(TEXT("Shock Debuff Niagara Component"));
+	ShockDebuffComponent->SetupAttachment(GetRootComponent());
+	ShockDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Type_Shock;
 }
 
 void AAuraBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -38,6 +41,17 @@ void AAuraBaseCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME(AAuraBaseCharacter, StatusEffectTags);
 }
 
+
+FGameplayTag AAuraBaseCharacter::GetHitReactAbilityTagByDamageType_Implementation(
+	const FGameplayTag& DamageTypeTag
+) const
+{
+	if (HitReactionsByDamageType.Contains(DamageTypeTag))
+	{
+		return HitReactionsByDamageType[DamageTypeTag];
+	}
+	return FAuraGameplayTags::Get().Effect_HitReact_Default;
+}
 
 void AAuraBaseCharacter::BeginPlay()
 {
@@ -121,16 +135,25 @@ bool AAuraBaseCharacter::IsShocked() const
 	return StatusEffectTags.Contains(FAuraGameplayTags::Get().Debuff_Type_Shock);
 }
 
+bool AAuraBaseCharacter::IsBurned() const
+{
+	return StatusEffectTags.Contains(FAuraGameplayTags::Get().Debuff_Type_Burn);
+}
+
 AActor* AAuraBaseCharacter::GetAvatar_Implementation()
 {
 	return this;
 }
 
-
-UAnimMontage* AAuraBaseCharacter::GetHitReactMontage_Implementation()
+UAnimMontage* AAuraBaseCharacter::GetHitReactMontage_Implementation(const FGameplayTag& HitReactTypeTag)
 {
+	if (HitReactionMontageByMontageTag.Contains(HitReactTypeTag))
+	{
+		return HitReactionMontageByMontageTag[HitReactTypeTag];
+	}
 	return HitReactMontage;
 }
+
 
 TArray<FTaggedMontage> AAuraBaseCharacter::GetAttackMontages_Implementation() const
 {

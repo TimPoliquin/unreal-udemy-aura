@@ -67,7 +67,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag) const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	UAnimMontage* GetHitReactMontage();
+	UAnimMontage* GetHitReactMontage(const FGameplayTag& HitReactTypeTag);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	UNiagaraSystem* GetBloodEffect();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -89,6 +89,8 @@ public:
 	void UpdateFacingTarget(const FVector& FacingTarget);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	USkeletalMeshComponent* GetWeapon() const;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	FGameplayTag GetHitReactAbilityTagByDamageType(const FGameplayTag& DamageTypeTag) const;
 	/**
 	 * 
 	 * @param Actor 
@@ -119,4 +121,5 @@ public:
 	static void UpdateFacingTarget(UObject* Actor, const FVector& FacingTarget);
 	static FVector GetCombatSocketLocation(const UObject* Actor, const FGameplayTag& SocketTag);
 	static USkeletalMeshComponent* GetWeapon(const UObject* Actor);
+	static FGameplayTag GetHitReactAbilityTagByDamageType(const UObject* Actor, const FGameplayTag& DamageTypeTag);
 };

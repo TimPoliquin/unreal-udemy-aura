@@ -30,7 +30,7 @@ public:
 
 	/** Combat Interface **/
 	virtual AActor* GetAvatar_Implementation() override;
-	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
+	virtual UAnimMontage* GetHitReactMontage_Implementation(const FGameplayTag& HitReactTypeTag) override;
 	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() const override;
 	virtual FTaggedMontage GetTagMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const override;
@@ -68,6 +68,9 @@ public:
 		ActiveAbilityTag = FGameplayTag::EmptyTag;
 	}
 
+	virtual FGameplayTag
+	GetHitReactAbilityTagByDamageType_Implementation(const FGameplayTag& DamageTypeTag) const override;
+
 	/** Combat Interface End **/
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -102,9 +105,9 @@ protected:
 	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 	UFUNCTION(BlueprintCallable)
 	bool IsShocked() const;
+	UFUNCTION(BlueprintCallable)
+	bool IsBurned() const;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Combat")
-	bool bHitReacting;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float BaseWalkSpeed = 250.f;
 
@@ -118,6 +121,16 @@ protected:
 	TObjectPtr<UMaterialInstance> DissolveMaterialInstance;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Materials|Disolve")
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat")
+	TMap<FGameplayTag, FGameplayTag> HitReactionsByDamageType;
+	UPROPERTY(BlueprintReadOnly, Category = "Combat")
+	bool bHitReacting;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TObjectPtr<UAnimMontage> HitReactMontage;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> HitReactionMontageByMontageTag;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	TArray<FTaggedMontage> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<UNiagaraSystem> BloodEffect;
@@ -126,6 +139,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category="Combat")
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
+	UPROPERTY(VisibleAnywhere, Category="Combat")
+	TObjectPtr<UDebuffNiagaraComponent> ShockDebuffComponent;
+
 
 	/** Minions **/
 	int32 MinionCount = 0;
@@ -138,6 +154,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing=OnRep_StatusEffectTags, Category = "Combat")
 	TArray<FGameplayTag> StatusEffectTags;
+
 	UFUNCTION()
 	virtual void OnRep_StatusEffectTags()
 	{
@@ -165,10 +182,6 @@ private:
 	TArray<TSubclassOf<UGameplayAbility>> StartingAbilities;
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartingPassiveAbilities;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	TObjectPtr<UAnimMontage> HitReactMontage;
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	TArray<FTaggedMontage> AttackMontages;
 	FOnAbilitySystemComponentRegisteredSignature OnAbilitySystemComponentRegisteredDelegate;
 	FOnDeathSignature OnDeathDelegate;
 

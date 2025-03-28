@@ -136,6 +136,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Effect.HitReact"),
 		FString("Tag applied when character is reacting to a hit")
 	);
+	Instance.Effect_HitReact_Default = TagManager.AddNativeGameplayTag(
+		FName("Effect.HitReact.Default"),
+		FString("Tag applied when character is reacting to a hit")
+	);
+	Instance.Effect_HitReact_Shock = TagManager.AddNativeGameplayTag(
+		FName("Effect.HitReact.Shock"),
+		FString("Tag applied when character is reacting to a hit with shock")
+	);
 
 	// Damage Tags
 	Instance.Damage = TagManager.AddNativeGameplayTag(

@@ -62,6 +62,8 @@ struct FAuraGameplayTags
 
 	/** Effect Tags **/
 	FGameplayTag Effect_HitReact;
+	FGameplayTag Effect_HitReact_Default;
+	FGameplayTag Effect_HitReact_Shock;
 
 	/** Damage Tags **/
 	FGameplayTag Damage;

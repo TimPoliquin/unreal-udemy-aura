@@ -97,8 +97,13 @@ void UExecCalc_Damage::Execute_Implementation(
 	float Damage = 0.f;
 	for (const auto& DamageType : FAuraGameplayTags::Get().GetDamageTypes())
 	{
-		Damage += GetDamageTypeDamage(ExecutionParams, EvaluateParameters, DamageType);
-		UAuraAbilitySystemLibrary::SetDamageTypeTag(EffectContextHandle, DamageType);
+		const float DamageTypeDamage = GetDamageTypeDamage(ExecutionParams, EvaluateParameters, DamageType);
+		if (DamageTypeDamage > 0.f)
+		{
+			Damage += DamageTypeDamage;
+			UAuraAbilitySystemLibrary::SetDamageTypeTag(EffectContextHandle, DamageType);
+			break;
+		}
 	}
 
 	// If the attack was blocked (based on BlockChance), cut the damage in half.

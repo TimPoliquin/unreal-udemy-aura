@@ -179,7 +179,9 @@ void UAuraBeamSpell::InitializeTimer()
 
 void UAuraBeamSpell::ApplyDamage(AActor* DamageActor)
 {
-	if (!IsValid(DamageActor) || ICombatInterface::IsDead(DamageActor))
+	if (!IsValid(DamageActor) || ICombatInterface::IsDead(DamageActor) || !HasAuthority(
+		&CurrentActivationInfo
+	))
 	{
 		return;
 	}
@@ -207,6 +209,10 @@ void UAuraBeamSpell::OnTimerTick()
 {
 	if (CommitAbilityCost(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
 	{
+		if (!HasAuthority(&CurrentActivationInfo))
+		{
+			return;
+		}
 		TArray ApplyDamageActors(CueActors);
 		ApplyDamageActors.RemoveAll(
 			[this](AActor* Actor)
@@ -418,7 +424,7 @@ void UAuraBeamSpell::EndAbilityOnTargets()
 			LoopCueTag,
 			ActorGameplayCueParameters[CueActor]
 		);
-		if (IsTargetALivingEnemy(CueActor))
+		if (IsTargetALivingEnemy(CueActor) && HasAuthority(&CurrentActivationInfo))
 		{
 			FDamageEffectParams LastHit = MakeDamageEffectParamsFromClassDefaults(CueActor);
 			UAuraAbilitySystemLibrary::ApplyDamageEffect(LastHit);

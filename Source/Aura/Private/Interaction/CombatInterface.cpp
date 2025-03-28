@@ -3,6 +3,7 @@
 
 #include "Interaction/CombatInterface.h"
 
+#include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 
 
@@ -101,4 +102,16 @@ USkeletalMeshComponent* ICombatInterface::GetWeapon(const UObject* Actor)
 		return Execute_GetWeapon(Actor);
 	}
 	return nullptr;
+}
+
+FGameplayTag ICombatInterface::GetHitReactAbilityTagByDamageType(
+	const UObject* Actor,
+	const FGameplayTag& DamageTypeTag
+)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		return Execute_GetHitReactAbilityTagByDamageType(Actor, DamageTypeTag);
+	}
+	return FAuraGameplayTags::Get().Effect_HitReact_Default;
 }

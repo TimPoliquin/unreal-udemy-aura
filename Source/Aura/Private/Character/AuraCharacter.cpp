@@ -10,6 +10,7 @@
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -74,6 +75,11 @@ void AAuraCharacter::OnRep_PlayerState()
 void AAuraCharacter::OnRep_ActiveAbilityTag()
 {
 	Super::OnRep_ActiveAbilityTag();
+}
+
+void AAuraCharacter::OnRep_StatusEffectTags()
+{
+	Super::OnRep_StatusEffectTags();
 	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
 		AbilitySystemComponent
 	))
@@ -87,17 +93,22 @@ void AAuraCharacter::OnRep_ActiveAbilityTag()
 		if (IsShocked())
 		{
 			AuraAbilitySystemComponent->AddLooseGameplayTags(BlockedTags);
+			ShockDebuffComponent->Activate();
 		}
 		else
 		{
 			AuraAbilitySystemComponent->RemoveLooseGameplayTags(BlockedTags);
+			ShockDebuffComponent->Deactivate();
+		}
+		if (IsBurned())
+		{
+			BurnDebuffComponent->Activate();
+		}
+		else
+		{
+			BurnDebuffComponent->Deactivate();
 		}
 	}
-}
-
-void AAuraCharacter::OnRep_StatusEffectTags()
-{
-	Super::OnRep_StatusEffectTags();
 }
 
 void AAuraCharacter::InitializeAbilityActorInfo()

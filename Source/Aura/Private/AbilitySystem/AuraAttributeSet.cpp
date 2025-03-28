@@ -172,11 +172,17 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		if (!bFatal)
 		{
 			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(FAuraGameplayTags::Get().Effect_HitReact);
+			TagContainer.AddTag(
+				ICombatInterface::GetHitReactAbilityTagByDamageType(
+					Props.Target.AvatarActor,
+					UAuraAbilitySystemLibrary::GetDamageTypeTag(Props.EffectContextHandle)
+				)
+			);
 			Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
 				TagContainer
 			);
-			if (FVector KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackVector(Props.EffectContextHandle); !
+			if (const FVector KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackVector(Props.EffectContextHandle);
+				!
 				KnockbackForce.IsNearlyZero(1.f))
 			{
 				Props.Target.Character->LaunchCharacter(KnockbackForce, true, true);
