@@ -20,9 +20,11 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_ExcludeCharacters, ECR_Overlap);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile, ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_ExcludeCharacters, ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
@@ -368,4 +370,16 @@ UAbilitySystemComponent* AAuraBaseCharacter::GetAbilitySystemComponent() const
 UAttributeSet* AAuraBaseCharacter::GetAttributeSet() const
 {
 	return AttributeSet;
+}
+
+float AAuraBaseCharacter::TakeDamage(
+	float DamageAmount,
+	const struct FDamageEvent& DamageEvent,
+	class AController* EventInstigator,
+	AActor* DamageCauser
+)
+{
+	const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamageDelegate.Broadcast(Damage);
+	return Damage;
 }

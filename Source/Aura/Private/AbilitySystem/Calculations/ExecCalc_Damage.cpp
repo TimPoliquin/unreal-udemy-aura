@@ -2,16 +2,13 @@
 
 
 #include "AbilitySystem/Calculations/ExecCalc_Damage.h"
-
-#include <rapidjson/schema.h>
-
 #include "AbilitySystemComponent.h"
-#include "NativeGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
 
 struct AuraDamageStatics
@@ -79,6 +76,26 @@ UExecCalc_Damage::UExecCalc_Damage()
 	RelevantAttributesToCapture.Add(DamageStatics().Resistance_PhysicalDef);
 }
 
+float UExecCalc_Damage::CalculateBaseDamage(
+	const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	const FAggregatorEvaluateParameters& EvaluateParameters
+)
+{
+	FGameplayEffectContextHandle EffectContextHandle;
+	float Damage = 0.f;
+	for (const auto& DamageType : FAuraGameplayTags::Get().GetDamageTypes())
+	{
+		const float DamageTypeDamage = GetDamageTypeDamage(ExecutionParams, EvaluateParameters, DamageType);
+		if (DamageTypeDamage > 0.f)
+		{
+			Damage += DamageTypeDamage;
+			UAuraAbilitySystemLibrary::SetDamageTypeTag(EffectContextHandle, DamageType);
+			break;
+		}
+	}
+	return Damage;
+}
+
 void UExecCalc_Damage::Execute_Implementation(
 	const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 	FGameplayEffectCustomExecutionOutput& OutExecutionOutput
@@ -94,16 +111,10 @@ void UExecCalc_Damage::Execute_Implementation(
 	DetermineDebuff(ExecutionParams, EvaluateParameters);
 
 	// Get Damage Set by Caller Magnitude
-	float Damage = 0.f;
-	for (const auto& DamageType : FAuraGameplayTags::Get().GetDamageTypes())
+	float Damage = CalculateBaseDamage(ExecutionParams, EvaluateParameters);
+	if (IsRadialDamage(ExecutionParams))
 	{
-		const float DamageTypeDamage = GetDamageTypeDamage(ExecutionParams, EvaluateParameters, DamageType);
-		if (DamageTypeDamage > 0.f)
-		{
-			Damage += DamageTypeDamage;
-			UAuraAbilitySystemLibrary::SetDamageTypeTag(EffectContextHandle, DamageType);
-			break;
-		}
+		ApplyRadialDamage(ExecutionParams, Damage);
 	}
 
 	// If the attack was blocked (based on BlockChance), cut the damage in half.
@@ -302,5 +313,51 @@ void UExecCalc_Damage::DetermineDebuff(
 			);
 			break;
 		}
+	}
+}
+
+bool UExecCalc_Damage::IsRadialDamage(
+	const FGameplayEffectCustomExecutionParameters& ExecutionParams
+)
+{
+	return UAuraAbilitySystemLibrary::IsRadialDamage(ExecutionParams.GetOwningSpec().GetContext());
+}
+
+void UExecCalc_Damage::ApplyRadialDamage(
+	const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	float& OutRadialDamage
+)
+{
+	const FGameplayEffectSpec Spec = ExecutionParams.GetOwningSpec();
+	const UAbilitySystemComponent* TargetAbilitySystemComponent = ExecutionParams.GetTargetAbilitySystemComponent();
+	AActor* TargetActor = TargetAbilitySystemComponent
+		                      ? TargetAbilitySystemComponent->GetAvatarActor()
+		                      : nullptr;
+	const UAbilitySystemComponent* SourceAbilitySystemComponent = ExecutionParams.GetSourceAbilitySystemComponent();
+	AActor* SourceActor = SourceAbilitySystemComponent
+		                      ? SourceAbilitySystemComponent->GetAvatarActor()
+		                      : nullptr;
+	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetActor))
+	{
+		FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+		CombatInterface->GetOnDamageDelegate().AddLambda(
+			[&](float DamageAmount)
+			{
+				OutRadialDamage = DamageAmount;
+			}
+		);
+		UGameplayStatics::ApplyRadialDamageWithFalloff(
+			TargetActor,
+			OutRadialDamage,
+			0.f,
+			UAuraAbilitySystemLibrary::GetRadialDamageOrigin(EffectContextHandle),
+			UAuraAbilitySystemLibrary::GetRadialDamageInnerRadius(EffectContextHandle),
+			UAuraAbilitySystemLibrary::GetRadialDamageOuterRadius(EffectContextHandle),
+			1.f,
+			UDamageType::StaticClass(),
+			TArray<AActor*>(),
+			SourceActor,
+			nullptr
+		);
 	}
 }

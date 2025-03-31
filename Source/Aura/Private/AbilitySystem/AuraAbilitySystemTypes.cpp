@@ -7,7 +7,7 @@ bool FAuraGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, bo
 	{
 		GetSavingBits(RepBits);
 	}
-	Ar.SerializeBits(&RepBits, 16);
+	Ar.SerializeBits(&RepBits, 20);
 	AssignValuesToArchive(Ar, Map, RepBits, bOutSuccess);
 	if (Ar.IsLoading())
 	{
@@ -86,6 +86,22 @@ void FAuraGameplayEffectContext::GetSavingBits(uint32& RepBits) const
 	if (!KnockbackVector.IsZero())
 	{
 		RepBits |= 1 << 16;
+	}
+	if (bIsRadialDamage)
+	{
+		RepBits |= 1 << 17;
+		if (RadialDamageInnerRadius > 0.f)
+		{
+			RepBits |= 1 << 18;
+		}
+		if (RadialDamageOuterRadius > 0.f)
+		{
+			RepBits |= 1 << 19;
+		}
+		if (RadialDamageOrigin.IsZero())
+		{
+			RepBits |= 1 << 20;
+		}
 	}
 }
 
@@ -189,5 +205,21 @@ void FAuraGameplayEffectContext::AssignValuesToArchive(
 	if (RepBits & (1 << 16))
 	{
 		KnockbackVector.NetSerialize(Ar, Map, bOutSuccess);
+	}
+	if (RepBits & (1 << 17))
+	{
+		Ar << bIsRadialDamage;
+		if (RepBits & (1 << 18))
+		{
+			Ar << RadialDamageInnerRadius;
+		}
+		if (RepBits & (1 << 19))
+		{
+			Ar << RadialDamageOuterRadius;
+		}
+		if (RepBits & (1 << 20))
+		{
+			RadialDamageOrigin.NetSerialize(Ar, Map, bOutSuccess);
+		}
 	}
 }

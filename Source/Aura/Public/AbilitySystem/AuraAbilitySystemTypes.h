@@ -122,6 +122,46 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 		KnockbackVector = InKnockbackVector;
 	}
 
+	bool IsRadialDamage() const
+	{
+		return bIsRadialDamage;
+	}
+
+	void SetIsRadialDamage(const bool InIsRadialDamage)
+	{
+		bIsRadialDamage = InIsRadialDamage;
+	}
+
+	float GetRadialDamageInnerRadius() const
+	{
+		return RadialDamageInnerRadius;
+	}
+
+	void SetRadialDamageInnerRadius(const float InRadialDamageInnerRadius)
+	{
+		this->RadialDamageInnerRadius = InRadialDamageInnerRadius;
+	}
+
+	float GetRadialDamageOuterRadius() const
+	{
+		return RadialDamageOuterRadius;
+	}
+
+	void SetRadialDamageOuterRadius(const float InRadialDamageOuterRadius)
+	{
+		this->RadialDamageOuterRadius = InRadialDamageOuterRadius;
+	}
+
+	FVector GetRadialDamageOrigin() const
+	{
+		return RadialDamageOrigin;
+	}
+
+	void SetRadialDamageOrigin(const FVector& InRadialDamageOrigin)
+	{
+		this->RadialDamageOrigin = InRadialDamageOrigin;
+	}
+
 	/** Creates a copy of this context, used to duplicate for later modifications */
 	virtual FAuraGameplayEffectContext* Duplicate() const override
 	{
@@ -152,6 +192,16 @@ protected:
 	FVector DeathImpulse = FVector::ZeroVector;
 	UPROPERTY()
 	FVector KnockbackVector = FVector::ZeroVector;
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 
 
 	TSharedPtr<FGameplayTag> DebuffType;
@@ -270,6 +320,12 @@ struct FAuraDamageConfig
 	float KnockbackForceMagnitude = 500.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float KnockbackChance = 0.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsRadialDamage = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float RadialDamageInnerRadius = 0.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float RadialDamageOuterRadius = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -280,38 +336,46 @@ struct FDamageEffectParams
 	{
 	}
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UObject> WorldContextObject = nullptr;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent = nullptr;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent = nullptr;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float BaseDamage = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float AbilityLevel = 1.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FGameplayTag DamageType = FGameplayTag::EmptyTag;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffChance = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDamage = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDuration = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffFrequency = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DeathImpulseMagnitude = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FVector DeathImpulse = FVector::ZeroVector;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float KnockbackChance = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float KnockbackForceMagnitude = 0.f;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FVector KnockbackForce = FVector::ZeroVector;
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+	UPROPERTY(BluePrintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 
 	void FillFromDamageConfig(const FAuraDamageConfig& DamageConfig)
 	{
@@ -323,5 +387,11 @@ struct FDamageEffectParams
 		DeathImpulseMagnitude = DamageConfig.DeathImpulseMagnitude;
 		KnockbackChance = DamageConfig.KnockbackChance;
 		KnockbackForceMagnitude = DamageConfig.KnockbackForceMagnitude;
+		if (DamageConfig.bIsRadialDamage)
+		{
+			bIsRadialDamage = DamageConfig.bIsRadialDamage;
+			RadialDamageInnerRadius = DamageConfig.RadialDamageInnerRadius;
+			RadialDamageOuterRadius = DamageConfig.RadialDamageOuterRadius;
+		}
 	}
 };

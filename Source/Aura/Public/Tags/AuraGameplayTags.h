@@ -100,7 +100,9 @@ struct FAuraGameplayTags
 
 	FGameplayTag Abilities_Offensive;
 	FGameplayTag Abilities_Offensive_Fire_FireBolt;
+	FGameplayTag Abilities_Offensive_Fire_FireBlast;
 	FGameplayTag Abilities_Offensive_Lightning_Electrocute;
+	FGameplayTag Abilities_Offensive_Arcane_ArcaneShards;
 	FGameplayTag Abilities_Passive;
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
@@ -120,7 +122,9 @@ struct FAuraGameplayTags
 
 	/** Cooldown **/
 	FGameplayTag Cooldown_Fire_FireBolt;
+	FGameplayTag Cooldown_Fire_FireBlast;
 	FGameplayTag Cooldown_Lightning_Electrocute;
+	FGameplayTag Cooldown_Arcane_ArcaneShards;
 
 	/** Combat Socket Tags */
 	FGameplayTag Combat_Socket_Weapon;

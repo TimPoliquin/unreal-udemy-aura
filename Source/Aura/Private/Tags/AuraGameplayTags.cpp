@@ -272,9 +272,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Offensive.Fire.FireBolt"),
 		FString("FireBolt ability tag")
 	);
+	Instance.Abilities_Offensive_Fire_FireBlast = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Offensive.Fire.FireBlast"),
+		FString("FireBlast ability tag")
+	);
 	Instance.Abilities_Offensive_Lightning_Electrocute = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Offensive.Lightning.Electrocute"),
 		FString("Electrocute ability tag")
+	);
+	Instance.Abilities_Offensive_Arcane_ArcaneShards = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Offensive.Arcane.ArcaneShards"),
+		FString("ArcaneShards ability tag")
 	);
 	Instance.Abilities_Passive = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Passive"),
@@ -338,9 +346,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Cooldown.Fire.FireBolt"),
 		FString("FireBolt ability cooldown tag")
 	);
+	Instance.Cooldown_Fire_FireBlast = TagManager.AddNativeGameplayTag(
+		FName("Cooldown.Fire.FireBlast"),
+		FString("FireBlast ability cooldown tag")
+	);
 	Instance.Cooldown_Lightning_Electrocute = TagManager.AddNativeGameplayTag(
 		FName("Cooldown.Lightning.Electrocute"),
 		FString("Electrocute ability cooldown tag")
+	);
+	Instance.Cooldown_Arcane_ArcaneShards = TagManager.AddNativeGameplayTag(
+		FName("Cooldown.Arcane.ArcaneShards"),
+		FString("ArcaneShards ability cooldown tag")
 	);
 
 	/** Combat Socket Tags **/

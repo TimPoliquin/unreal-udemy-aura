@@ -22,6 +22,12 @@ public:
 		FGameplayEffectCustomExecutionOutput& OutExecutionOutput
 	) const override;
 
+private:
+	static float CalculateBaseDamage(
+		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+		const FAggregatorEvaluateParameters& EvaluateParameters
+	);
+
 	static float GetDamageTypeDamage(
 		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 		const FAggregatorEvaluateParameters& EvaluateParameters,
@@ -57,5 +63,14 @@ public:
 	static void DetermineDebuff(
 		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 		const FAggregatorEvaluateParameters& EvaluateParams
+	);
+
+	static bool IsRadialDamage(
+		const FGameplayEffectCustomExecutionParameters& ExecutionParams
+	);
+
+	static void ApplyRadialDamage(
+		const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+		float& OutRadialDamage
 	);
 };

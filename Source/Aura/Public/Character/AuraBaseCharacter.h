@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "AbilitySystem/AttributeChangeDelegates.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
@@ -28,6 +29,12 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const;
+	virtual float TakeDamage(
+		float DamageAmount,
+		const struct FDamageEvent& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
 
 	/** Combat Interface **/
 	virtual AActor* GetAvatar_Implementation() override;
@@ -48,6 +55,11 @@ public:
 	virtual FOnAbilitySystemComponentRegisteredSignature& GetOnAbilitySystemRegisteredDelegate() override
 	{
 		return OnAbilitySystemComponentRegisteredDelegate;
+	}
+
+	virtual FOnDamageSignature& GetOnDamageDelegate() override
+	{
+		return OnDamageDelegate;
 	}
 
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override
@@ -193,7 +205,7 @@ private:
 	TArray<TSubclassOf<UGameplayAbility>> StartingPassiveAbilities;
 	FOnAbilitySystemComponentRegisteredSignature OnAbilitySystemComponentRegisteredDelegate;
 	FOnDeathSignature OnDeathDelegate;
-
+	FOnDamageSignature OnDamageDelegate;
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 	void Dissolve(
 		UMeshComponent* InMesh,

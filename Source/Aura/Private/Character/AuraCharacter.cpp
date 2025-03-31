@@ -245,3 +245,19 @@ void AAuraCharacter::SpendSpellPoints_Implementation(const int32 SpentPoints)
 	check(AuraPlayerState);
 	AuraPlayerState->AddSpellPoints(-1 * SpentPoints);
 }
+
+void AAuraCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->ShowMagicCircle(DecalMaterial);
+	}
+}
+
+void AAuraCharacter::HideMagicCircle_Implementation()
+{
+	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		AuraPlayerController->HideMagicCircle();
+	}
+}

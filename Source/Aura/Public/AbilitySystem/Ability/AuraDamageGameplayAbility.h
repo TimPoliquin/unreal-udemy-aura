@@ -39,12 +39,21 @@ public:
 	FTaggedMontage GetRandomAttackMontage() const;
 
 	UFUNCTION(BlueprintPure)
-	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor = nullptr) const;
+	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(
+		AActor* TargetActor = nullptr,
+		FVector RadialDamageOrigin = FVector::ZeroVector,
+		bool bOverrideKnockbackDirection = false,
+		FVector InKnockbackDirectionOverride = FVector::ZeroVector,
+		bool bOverrideDeathImpulse = false,
+		FVector InDeathImpulseDirectionOverride = FVector::ZeroVector,
+		bool bOverridePitch = false,
+		float PitchOverride = 0.f
+	) const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	FAuraDamageConfig DamageConfig;
 
 	int32 GetDamageAtLevel(const int32 AbilityLevel) const;

@@ -7,6 +7,7 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPlayerController.generated.h"
 
+class AMagicCircle;
 class UNiagaraSystem;
 class UDamageTextComponent;
 class USplineComponent;
@@ -100,6 +101,11 @@ public:
 		const bool IsCriticalHit
 	);
 
+	UFUNCTION(BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
+	UFUNCTION(BlueprintCallable)
+	void HideMagicCircle();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -145,10 +151,14 @@ private:
 	TObjectPtr<USplineComponent> Spline;
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
-
+	UPROPERTY(EditDefaultsOnly, Category="Combat")
+	TSubclassOf<AMagicCircle> MagicCircleClass;
+	UPROPERTY(VisibleInstanceOnly, Category = "Combat")
+	TObjectPtr<AMagicCircle> MagicCircle;
 	FHitResult CursorHit;
 
 	void AutoMove_Start();
 	void AutoMove_Process();
 	void AutoMove_End();
+	void UpdateMagicCircleLocation();
 };

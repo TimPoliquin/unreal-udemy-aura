@@ -87,6 +87,32 @@ public:
 	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static bool IsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle);
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static float GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static float GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static FVector GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static void SetIsRadialDamage(FGameplayEffectContextHandle& EffectContextHandle, bool InIsRadialDamage);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static void SetRadialDamageInnerRadius(
+		FGameplayEffectContextHandle& EffectContextHandle,
+		float InRadialDamageInnerRadius
+	);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static void SetRadialDamageOuterRadius(
+		FGameplayEffectContextHandle& EffectContextHandle,
+		float InRadialDamageOuterRadius
+	);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
+	static void SetRadialDamageOrigin(
+		FGameplayEffectContextHandle& EffectContextHandle,
+		const FVector& InRadialDamageOrigin
+	);
+
+	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static bool IsSuccessfulDebuff(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
