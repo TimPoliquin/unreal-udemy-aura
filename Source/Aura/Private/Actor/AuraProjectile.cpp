@@ -82,12 +82,7 @@ void AAuraProjectile::OnSphereOverlap(
 	const FHitResult& SweepResult
 )
 {
-	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
-	if (SourceAvatarActor == OtherActor)
-	{
-		return;
-	}
-	if (TagUtils::HasAnyTag(OtherActor, ICombatInterface::GetTargetTagsToIgnore(SourceAvatarActor)))
+	if (!IsValidOverlap(OtherActor))
 	{
 		return;
 	}
@@ -110,6 +105,20 @@ void AAuraProjectile::OnSphereOverlap(
 		}
 		Destroy();
 	}
+}
+
+bool AAuraProjectile::IsValidOverlap(const AActor* OtherActor) const
+{
+	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	if (SourceAvatarActor == OtherActor)
+	{
+		return false;
+	}
+	if (TagUtils::HasAnyTag(OtherActor, ICombatInterface::GetTargetTagsToIgnore(SourceAvatarActor)))
+	{
+		return false;
+	}
+	return true;
 }
 
 void AAuraProjectile::PlayImpactEffect()

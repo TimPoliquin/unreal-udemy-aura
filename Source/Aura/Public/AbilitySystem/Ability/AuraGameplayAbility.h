@@ -47,6 +47,6 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly)
 	FName AbilityName;
-	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UPROPERTY(EditDefaultsOnly, Category="Input", meta=(Categories="InputTag"))
 	TArray<FGameplayTag> StartupInputTags;
 };
