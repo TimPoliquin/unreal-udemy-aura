@@ -27,4 +27,6 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "FireBlast")
 	TSubclassOf<AAuraFireball> FireballClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FAuraDamageConfig ExplosionDamageConfig;
 };

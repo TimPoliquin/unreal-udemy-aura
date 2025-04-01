@@ -56,6 +56,15 @@ void AAuraProjectile::OnTargetDead(AActor* DeadActor)
 	}
 }
 
+FVector AAuraProjectile::GetImpactDirection(const AActor* HitActor) const
+{
+	if (IsValid(HitActor))
+	{
+		return HitActor->GetActorLocation() - GetActorLocation();
+	}
+	return FVector::ZeroVector;
+}
+
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
@@ -128,6 +137,9 @@ void AAuraProjectile::PlayImpactEffect()
 		// Only play impact effect once
 		return;
 	}
+	// DEVNOTE - this could alternatively be done as a GameplayCue_Burst.
+	// This has implications on the number of RPCs, so we should use ExecuteGameplayCue_NonReplicated
+	// if we choose to go that route in the future.
 	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(

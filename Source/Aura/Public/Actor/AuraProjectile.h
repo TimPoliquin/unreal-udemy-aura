@@ -33,6 +33,8 @@ public:
 
 	UFUNCTION()
 	void OnTargetDead(AActor* DeadActor);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Projectile")
+	FVector GetImpactDirection(const AActor* HitActor) const;
 
 protected:
 	virtual void BeginPlay() override;

@@ -537,6 +537,111 @@ bool UAuraAbilitySystemLibrary::IsPassiveAbility(
 	return Info.AbilityType == FAuraGameplayTags::Get().Abilities_Type_Passive;
 }
 
+void UAuraAbilitySystemLibrary::SetKnockbackDirection(
+	FDamageEffectParams& DamageEffectParams,
+	FVector KnockbackDirection,
+	const bool bOverrideMagnitude,
+	const float Magnitude
+)
+{
+	const float UseMagnitude = bOverrideMagnitude
+		                           ? DamageEffectParams.KnockbackForceMagnitude
+		                           : Magnitude;
+	KnockbackDirection.Normalize();
+	DamageEffectParams.KnockbackForce = KnockbackDirection * UseMagnitude;
+}
+
+void UAuraAbilitySystemLibrary::SetDeathImpulseDirection(
+	FDamageEffectParams& DamageEffectParams,
+	FVector DeathImpulseDirection,
+	const bool bOverrideMagnitude,
+	const float Magnitude
+)
+{
+	const float UseMagnitude = bOverrideMagnitude
+		                           ? DamageEffectParams.DeathImpulseMagnitude
+		                           : Magnitude;
+	DeathImpulseDirection.Normalize();
+	DamageEffectParams.DeathImpulse = DeathImpulseDirection * UseMagnitude;
+}
+
+FDamageEffectParams UAuraAbilitySystemLibrary::MakeCustomDamageEffectParams(
+	AActor* SourceActor,
+	AActor* TargetActor,
+	TSubclassOf<UGameplayEffect> DamageEffectClass,
+	const FAuraDamageConfig& InDamageConfig,
+	int32 AbilityLevel,
+	FVector RadialDamageOrigin,
+	bool bOverrideKnockbackDirection,
+	FVector InKnockbackDirectionOverride,
+	bool bOverrideDeathImpulse,
+	FVector InDeathImpulseDirectionOverride,
+	bool bOverridePitch,
+	float PitchOverride
+)
+{
+	FDamageEffectParams DamageEffectParams;
+	DamageEffectParams.RadialDamageOrigin = RadialDamageOrigin;
+	DamageEffectParams.FillFromDamageConfig(InDamageConfig);
+	DamageEffectParams.WorldContextObject = SourceActor;
+	DamageEffectParams.DamageGameplayEffectClass = DamageEffectClass;
+	DamageEffectParams.SourceAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		SourceActor
+	);
+	DamageEffectParams.TargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	);
+	DamageEffectParams.AbilityLevel = AbilityLevel;
+	DamageEffectParams.BaseDamage = InDamageConfig.GetDamageAtLevel(AbilityLevel);
+	if (IsValid(TargetActor))
+	{
+		FRotator Rotation = (TargetActor->GetActorLocation() - SourceActor->GetActorLocation())
+			.Rotation();
+		if (bOverridePitch)
+		{
+			Rotation.Pitch = PitchOverride;
+		}
+		else if (IsValid(TargetActor))
+		{
+			Rotation.Pitch = 25.f;
+		}
+		if (!bOverrideKnockbackDirection)
+		{
+			if (DamageEffectParams.RollForKnockbackChance())
+			{
+				DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackForceMagnitude;
+			}
+		}
+		if (!bOverrideDeathImpulse)
+		{
+			DamageEffectParams.DeathImpulse = Rotation.Vector() * DamageEffectParams.DeathImpulseMagnitude;
+		}
+	}
+	if (bOverrideKnockbackDirection)
+	{
+		InKnockbackDirectionOverride.Normalize();
+		DamageEffectParams.KnockbackForce = InKnockbackDirectionOverride * InDamageConfig.KnockbackForceMagnitude;
+		if (bOverridePitch)
+		{
+			FRotator KnockbackRotation = InKnockbackDirectionOverride.Rotation();
+			KnockbackRotation.Pitch = PitchOverride;
+			DamageEffectParams.KnockbackForce = KnockbackRotation.Vector() * InDamageConfig.KnockbackForceMagnitude;
+		}
+	}
+	if (bOverrideDeathImpulse)
+	{
+		InDeathImpulseDirectionOverride.Normalize();
+		DamageEffectParams.DeathImpulse = InDeathImpulseDirectionOverride * InDamageConfig.DeathImpulseMagnitude;
+		if (bOverridePitch)
+		{
+			FRotator DeathImpulseRotation = InDeathImpulseDirectionOverride.Rotation();
+			DeathImpulseRotation.Pitch = PitchOverride;
+			DamageEffectParams.DeathImpulse = DeathImpulseRotation.Vector() * InDamageConfig.DeathImpulseMagnitude;
+		}
+	}
+	return DamageEffectParams;
+}
+
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraAbilitySystemTypes.h"
 #include "GameplayAbilitySpec.h"
 #include "GameplayTagContainer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -250,6 +251,37 @@ public:
 	);
 
 	static bool IsPassiveAbility(const UObject* WorldContextObject, const FGameplayAbilitySpec& AbilitySpec);
+
+	/** Damage effect params **/
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static void SetKnockbackDirection(
+		UPARAM(ref) FDamageEffectParams& DamageEffectParams,
+		FVector KnockbackDirection,
+		const bool bOverrideMagnitude = false,
+		const float Magnitude = 0.f
+	);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static void SetDeathImpulseDirection(
+		UPARAM(ref) FDamageEffectParams& DamageEffectParams,
+		FVector DeathImpulseDirection,
+		const bool bOverrideMagnitude = false,
+		const float Magnitude = 0.f
+	);
+
+	static FDamageEffectParams MakeCustomDamageEffectParams(
+		AActor* SourceActor,
+		AActor* TargetActor,
+		TSubclassOf<UGameplayEffect> DamageEffectClass,
+		const FAuraDamageConfig& InDamageConfig,
+		int32 AbilityLevel,
+		FVector RadialDamageOrigin = FVector::ZeroVector,
+		bool bOverrideKnockbackDirection = false,
+		FVector InKnockbackDirectionOverride = FVector::ZeroVector,
+		bool bOverrideDeathImpulse = false,
+		FVector InDeathImpulseDirectionOverride = FVector::ZeroVector,
+		bool bOverridePitch = false,
+		float PitchOverride = 0.f
+	);
 
 private:
 	static bool GetWidgetControllerParams(
