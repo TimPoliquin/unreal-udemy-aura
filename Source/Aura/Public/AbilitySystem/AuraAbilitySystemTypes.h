@@ -4,6 +4,8 @@
 #include "ScalableFloat.h"
 #include "AuraAbilitySystemTypes.generated.h"
 
+struct FRadialDamageParams;
+
 USTRUCT(BlueprintType)
 struct FAuraGameplayEffectContext : public FGameplayEffectContext
 {
@@ -299,6 +301,21 @@ struct FAuraEquipAbilityPayload
 };
 
 USTRUCT(BlueprintType)
+struct FAuraRadialDamageParams
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+	UPROPERTY(BlueprintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
+};
+
+USTRUCT(BlueprintType)
 struct FAuraDamageConfig
 {
 	GENERATED_BODY()
@@ -326,6 +343,23 @@ struct FAuraDamageConfig
 	float RadialDamageInnerRadius = 0.f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float RadialDamageOuterRadius = 0.f;
+
+	FAuraRadialDamageParams GetRadialDamageParams() const
+	{
+		FAuraRadialDamageParams DamageParams;
+		if (bIsRadialDamage)
+		{
+			DamageParams.bIsRadialDamage = bIsRadialDamage;
+			DamageParams.RadialDamageInnerRadius = RadialDamageInnerRadius;
+			DamageParams.RadialDamageOuterRadius = RadialDamageOuterRadius;
+		}
+		return DamageParams;
+	}
+
+	int32 GetDamageAtLevel(const int32 AbilityLevel) const
+	{
+		return Amount.GetValueAtLevel(AbilityLevel);
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -387,11 +421,23 @@ struct FDamageEffectParams
 		DeathImpulseMagnitude = DamageConfig.DeathImpulseMagnitude;
 		KnockbackChance = DamageConfig.KnockbackChance;
 		KnockbackForceMagnitude = DamageConfig.KnockbackForceMagnitude;
-		if (DamageConfig.bIsRadialDamage)
+		const FAuraRadialDamageParams& RadialDamageParams = DamageConfig.GetRadialDamageParams();
+		FillFromRadialDamageEffectParams(RadialDamageParams);
+	}
+
+	void FillFromRadialDamageEffectParams(const FAuraRadialDamageParams& RadialDamageParams)
+	{
+		if (RadialDamageParams.bIsRadialDamage)
 		{
-			bIsRadialDamage = DamageConfig.bIsRadialDamage;
-			RadialDamageInnerRadius = DamageConfig.RadialDamageInnerRadius;
-			RadialDamageOuterRadius = DamageConfig.RadialDamageOuterRadius;
+			bIsRadialDamage = RadialDamageParams.bIsRadialDamage;
+			RadialDamageInnerRadius = RadialDamageParams.RadialDamageInnerRadius;
+			RadialDamageOuterRadius = RadialDamageParams.RadialDamageOuterRadius;
+			RadialDamageOrigin = RadialDamageParams.RadialDamageOrigin;
 		}
+	}
+
+	bool RollForKnockbackChance() const
+	{
+		return FMath::RandRange(1, 100) < KnockbackChance;
 	}
 };

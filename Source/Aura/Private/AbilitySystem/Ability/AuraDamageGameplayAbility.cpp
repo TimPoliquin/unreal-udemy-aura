@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Interaction/CombatInterface.h"
 #include "Tags/AuraGameplayTags.h"
@@ -78,71 +79,27 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassD
 	float PitchOverride
 ) const
 {
-	FDamageEffectParams DamageEffectParams;
-	DamageEffectParams.RadialDamageOrigin = RadialDamageOrigin;
-	DamageEffectParams.FillFromDamageConfig(DamageConfig);
-	DamageEffectParams.WorldContextObject = GetAvatarActorFromActorInfo();
-	DamageEffectParams.DamageGameplayEffectClass = DamageEffectClass;
-	DamageEffectParams.SourceAbilitySystemComponent = GetAbilitySystemComponentFromActorInfo();
-	DamageEffectParams.TargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-		TargetActor
+	return UAuraAbilitySystemLibrary::MakeCustomDamageEffectParams(
+		GetAvatarActorFromActorInfo(),
+		TargetActor,
+		DamageEffectClass,
+		DamageConfig,
+		GetAbilityLevel(),
+		RadialDamageOrigin,
+		bOverrideKnockbackDirection,
+		InKnockbackDirectionOverride,
+		bOverrideDeathImpulse,
+		InDeathImpulseDirectionOverride,
+		bOverridePitch,
+		PitchOverride
 	);
-	DamageEffectParams.BaseDamage = GetDamageAtLevel(GetAbilityLevel());
-	DamageEffectParams.AbilityLevel = GetAbilityLevel();
-	if (IsValid(TargetActor))
-	{
-		FRotator Rotation = (TargetActor->GetActorLocation() - GetAvatarActorFromActorInfo()->GetActorLocation())
-			.Rotation();
-		if (bOverridePitch)
-		{
-			Rotation.Pitch = PitchOverride;
-		}
-		else if (IsValid(TargetActor))
-		{
-			Rotation.Pitch = 25.f;
-		}
-		if (!bOverrideKnockbackDirection)
-		{
-			if (FMath::RandRange(1, 100) < DamageEffectParams.KnockbackChance)
-			{
-				DamageEffectParams.KnockbackForce = Rotation.Vector() * DamageEffectParams.KnockbackForceMagnitude;
-			}
-		}
-		if (!bOverrideDeathImpulse)
-		{
-			DamageEffectParams.DeathImpulse = Rotation.Vector() * DamageEffectParams.DeathImpulseMagnitude;
-		}
-	}
-	if (bOverrideKnockbackDirection)
-	{
-		InKnockbackDirectionOverride.Normalize();
-		DamageEffectParams.KnockbackForce = InKnockbackDirectionOverride * DamageConfig.KnockbackForceMagnitude;
-		if (bOverridePitch)
-		{
-			FRotator KnockbackRotation = InKnockbackDirectionOverride.Rotation();
-			KnockbackRotation.Pitch = PitchOverride;
-			DamageEffectParams.KnockbackForce = KnockbackRotation.Vector() * DamageConfig.KnockbackForceMagnitude;
-		}
-	}
-	if (bOverrideDeathImpulse)
-	{
-		InDeathImpulseDirectionOverride.Normalize();
-		DamageEffectParams.DeathImpulse = InDeathImpulseDirectionOverride * DamageConfig.DeathImpulseMagnitude;
-		if (bOverridePitch)
-		{
-			FRotator DeathImpulseRotation = InDeathImpulseDirectionOverride.Rotation();
-			DeathImpulseRotation.Pitch = PitchOverride;
-			DamageEffectParams.DeathImpulse = DeathImpulseRotation.Vector() * DamageConfig.DeathImpulseMagnitude;
-		}
-	}
-	return DamageEffectParams;
 }
 
 int32 UAuraDamageGameplayAbility::GetDamageAtLevel(
 	const int32 AbilityLevel
 ) const
 {
-	return DamageConfig.Amount.GetValueAtLevel(AbilityLevel);
+	return DamageConfig.GetDamageAtLevel(AbilityLevel);
 }
 
 float UAuraDamageGameplayAbility::GetManaCost(const float InLevel) const

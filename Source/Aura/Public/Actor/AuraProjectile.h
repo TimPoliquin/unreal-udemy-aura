@@ -21,8 +21,8 @@ class AURA_API AAuraProjectile : public AActor
 public:
 	AAuraProjectile();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = true), Replicated)
+
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true), Replicated)
 	FDamageEffectParams DamageEffectParams;
 
 	UProjectileMovementComponent* GetProjectileMovementComponent() const;
@@ -33,13 +33,15 @@ public:
 
 	UFUNCTION()
 	void OnTargetDead(AActor* DeadActor);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Projectile")
+	FVector GetImpactDirection(const AActor* HitActor) const;
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 
 	UFUNCTION()
-	void OnSphereOverlap(
+	virtual void OnSphereOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComponent,
@@ -47,6 +49,9 @@ protected:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
+	bool IsValidOverlap(const AActor* OtherActor) const;
+	UFUNCTION(BlueprintCallable)
+	void PlayImpactEffect();
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -64,6 +69,4 @@ private:
 	bool bHit = false;
 	UPROPERTY(EditDefaultsOnly)
 	float LifeSpan = 10.f;
-
-	void PlayImpactEffect();
 };
