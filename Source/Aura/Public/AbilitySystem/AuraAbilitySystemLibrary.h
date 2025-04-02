@@ -9,6 +9,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class UAuraSaveGame;
 DECLARE_DELEGATE_OneParam(FMakeEffectSpecSignature, FGameplayEffectSpecHandle&);
 
 struct FDamageEffectParams;
@@ -61,6 +62,13 @@ public:
 		ECharacterClass CharacterClass,
 		const float Level,
 		UAbilitySystemComponent* AbilitySystemComponent
+	);
+
+	UFUNCTION(BlueprintCallable, Category= "AuraAbilitySystemLibrary|CharacterClassDefaults")
+	static void InitializeDefaultAttributesFromSaveData(
+		const UObject* WorldContextObject,
+		UAbilitySystemComponent* AbilitySystemComponent,
+		const UAuraSaveGame* SaveData
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
@@ -198,6 +206,7 @@ public:
 		UAuraAbilitySystemComponent* AbilitySystemComponent,
 		const FGameplayTag& AbilityTag
 	);
+	static bool IsAbilityEquipped(UAuraAbilitySystemComponent* AbilitySystemComponent, const FGameplayTag& AbilityTag);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static int32 GetXPReward(const UObject* WorldContextObject, const ECharacterClass& CharacterClass, int32 Level);

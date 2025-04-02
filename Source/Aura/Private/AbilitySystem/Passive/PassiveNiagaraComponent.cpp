@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Interaction/CombatInterface.h"
 
 
@@ -31,6 +32,7 @@ void UPassiveNiagaraComponent::BeginPlay()
 			this,
 			&UPassiveNiagaraComponent::OnPassiveActivate
 		);
+		ActivateIfAbilityIsAlreadyActive(AuraAbilitySystemComponent);
 	}
 	else if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner()))
 	{
@@ -45,6 +47,7 @@ void UPassiveNiagaraComponent::BeginPlay()
 						this,
 						&UPassiveNiagaraComponent::OnPassiveActivate
 					);
+					ActivateIfAbilityIsAlreadyActive(AwaitedComponent);
 				}
 			}
 		);
@@ -62,6 +65,17 @@ void UPassiveNiagaraComponent::OnPassiveActivate(const FGameplayTag& AbilityTag,
 		else if (!bActivate)
 		{
 			Deactivate();
+		}
+	}
+}
+
+void UPassiveNiagaraComponent::ActivateIfAbilityIsAlreadyActive(UAuraAbilitySystemComponent* AuraAbilitySystemComponent)
+{
+	if (AuraAbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
+	{
+		if (UAuraAbilitySystemLibrary::IsAbilityEquipped(AuraAbilitySystemComponent, PassiveSpellTag))
+		{
+			Activate();
 		}
 	}
 }

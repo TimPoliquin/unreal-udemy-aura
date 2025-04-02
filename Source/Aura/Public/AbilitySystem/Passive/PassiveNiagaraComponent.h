@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "NiagaraComponent.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "PassiveNiagaraComponent.generated.h"
 
 
@@ -27,4 +28,5 @@ protected:
 private:
 	UFUNCTION()
 	void OnPassiveActivate(const FGameplayTag& AbilityTag, const bool bActivate);
+	void ActivateIfAbilityIsAlreadyActive(UAuraAbilitySystemComponent* AuraAbilitySystemComponent);
 };

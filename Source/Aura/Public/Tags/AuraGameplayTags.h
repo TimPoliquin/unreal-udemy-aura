@@ -104,6 +104,7 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Offensive_Lightning_Electrocute;
 	FGameplayTag Abilities_Offensive_Arcane_ArcaneShards;
 	FGameplayTag Abilities_Passive;
+	FGameplayTag Abilities_Passive_ListenForEvent;
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;

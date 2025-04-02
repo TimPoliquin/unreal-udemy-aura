@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "AuraBaseCharacter.h"
 #include "Interaction/PlayerInterface.h"
+#include "Player/AuraPlayerState.h"
 #include "AuraCharacter.generated.h"
 
+class UAuraAbilitySystemComponent;
+class UAuraAttributeSet;
 class USpringArmComponent;
 class UCameraComponent;
 class UNiagaraComponent;
@@ -26,6 +29,9 @@ public:
 	virtual void OnRep_PlayerState() override;
 	virtual void OnRep_ActiveAbilityTag() override;
 	virtual void OnRep_StatusEffectTags() override;
+	AAuraPlayerState* GetAuraPlayerState() const;
+	UAuraAttributeSet* GetAuraAttributeSet() const;
+	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent() const;
 	// ICombatInterface
 	virtual int32 GetCharacterLevel_Implementation() const override;
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
@@ -46,9 +52,11 @@ public:
 	virtual void SpendSpellPoints_Implementation(int32 SpentPoints) override;
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() override;
+	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
 
 protected:
 	virtual void BeginPlay() override;
+	void LoadProgress();
 
 private:
 	UPROPERTY(VisibleAnywhere)

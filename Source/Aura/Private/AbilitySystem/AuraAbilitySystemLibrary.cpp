@@ -13,6 +13,7 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameModeBase.h"
+#include "Game/AuraSaveGame.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
@@ -85,6 +86,63 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->VitalAttributes, Level);
 	}
+}
+
+void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
+	const UObject* WorldContextObject,
+	UAbilitySystemComponent* AbilitySystemComponent,
+	const UAuraSaveGame* SaveData
+)
+{
+	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (!CharacterClassInfo)
+	{
+		UE_LOG(
+			LogAura,
+			Error,
+			TEXT("Unable to initialize default attributes from save data - character class info is undefined")
+		);
+		return;
+	}
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	const AActor* SourceAvatarActor = AbilitySystemComponent->GetAvatarActor();
+	FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
+	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
+		CharacterClassInfo->PrimaryAttributes_SetByCaller,
+		1.f,
+		EffectContextHandle
+	);
+	// primary attributes
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		GameplayTags.Attributes_Primary_Strength,
+		SaveData->Strength
+	);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		GameplayTags.Attributes_Primary_Intelligence,
+		SaveData->Intelligence
+	);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		GameplayTags.Attributes_Primary_Resilience,
+		SaveData->Resilience
+	);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		GameplayTags.Attributes_Primary_Vigor,
+		SaveData->Vigor
+	);
+	// secondary attributes
+	ApplyGameplayEffectSpec(
+		AbilitySystemComponent,
+		AbilitySystemComponent,
+		CharacterClassInfo->SecondaryAttributes_Infinite,
+		1.f
+	);
+	// vital attributes
+	ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, CharacterClassInfo->VitalAttributes, 1.f);
+	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 }
 
 void UAuraAbilitySystemLibrary::GrantStartupAbilities(
@@ -474,6 +532,16 @@ FGameplayTag UAuraAbilitySystemLibrary::GetInputTagByAbilityTag(
 		return GetInputTagFromSpec(*Spec);
 	}
 	return FGameplayTag();
+}
+
+bool UAuraAbilitySystemLibrary::IsAbilityEquipped(
+	UAuraAbilitySystemComponent* AbilitySystemComponent,
+	const FGameplayTag& AbilityTag
+)
+{
+	return GetStatusTagByAbilityTag(AbilitySystemComponent, AbilityTag).MatchesTagExact(
+		FAuraGameplayTags::Get().Abilities_Status_Equipped
+	);
 }
 
 bool UAuraAbilitySystemLibrary::GetWidgetControllerParams(

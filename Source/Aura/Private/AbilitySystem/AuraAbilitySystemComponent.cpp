@@ -9,10 +9,10 @@
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
+#include "Game/AuraSaveGame.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
-#include "UI/WidgetController/SpellMenuWidgetController.h"
 
 
 void UAuraAbilitySystemComponent::ForEachAbility(const FForEachAbility& ForEachAbilityDelegate)
@@ -126,7 +126,6 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(
 	{
 		const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 		const FGameplayTag PreviousSlot = UAuraAbilitySystemLibrary::GetInputTagFromSpec(*AbilitySpec);
-		const FGameplayTag Status = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec);
 		if (UAuraAbilitySystemLibrary::CanEquipAbility(this, AbilityTag))
 		{
 			if (FGameplayAbilitySpec* SpecWithSlot = GetAbilitySpecWithSlot(SlotTag))
@@ -159,6 +158,10 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(
 			}
 			if (!UAuraAbilitySystemLibrary::AbilityHasAnySlot(*AbilitySpec))
 			{
+				AbilitySpec->GetDynamicSpecSourceTags().RemoveTag(
+					UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec)
+				);
+				AbilitySpec->GetDynamicSpecSourceTags().AddTag(GameplayTags.Abilities_Status_Equipped);
 				// ability is not yet equipped/active
 				if (UAuraAbilitySystemLibrary::IsPassiveAbility(GetAvatarActor(), *AbilitySpec))
 				{
@@ -249,6 +252,76 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(
 	);
 	OutDescription.NextLevelDescription = FString();
 	return false;
+}
+
+void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
+{
+	UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
+		GetAvatarActor(),
+		this,
+		SaveData
+	);
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	for (const FSavedAbility& SavedAbility : SaveData->SavedAbilities)
+	{
+		const TSubclassOf<UGameplayAbility> AbilityClass = SavedAbility.GameplayAbilityClass;
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, SavedAbility.AbilityLevel);
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilitySlotTag);
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilityStatusTag);
+		if (SavedAbility.AbilityTypeTag.MatchesTagExact(GameplayTags.Abilities_Type_Passive))
+		{
+			if (SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
+			{
+				GiveAbilityAndActivateOnce(AbilitySpec);
+			}
+			else
+			{
+				GiveAbility(AbilitySpec);
+			}
+		}
+		else if (SavedAbility.AbilityTypeTag.MatchesTagExact(GameplayTags.Abilities_Type_Offensive))
+		{
+			GiveAbility(AbilitySpec);
+		}
+	}
+	bAbilitiesGiven = true;
+	OnAbilitiesGivenDelegate.Broadcast();
+}
+
+void UAuraAbilitySystemComponent::ToSaveData(UAuraSaveGame* SaveData)
+{
+	if (!GetAvatarActor()->HasAuthority())
+	{
+		return;
+	}
+	const AActor* Actor = GetAvatarActor();
+	FForEachAbility SaveAbilityDelegate;
+	SaveAbilityDelegate.BindLambda(
+		[Actor, SaveData](FGameplayAbilitySpec& AbilitySpec)
+		{
+			const FGameplayTag AbilityTag = UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(AbilitySpec);
+			if (AbilityTag.IsValid())
+			{
+				const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(Actor);
+				const FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+				FSavedAbility SavedAbility;
+				SavedAbility.GameplayAbilityClass = Info.Ability;
+				SavedAbility.AbilityLevel = AbilitySpec.Level;
+				SavedAbility.AbilityTag = AbilityTag;
+				SavedAbility.AbilityTypeTag = Info.AbilityType;
+				SavedAbility.AbilitySlotTag = UAuraAbilitySystemLibrary::GetInputTagFromSpec(AbilitySpec);
+				SavedAbility.AbilityStatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(AbilitySpec);
+				SaveData->AddSavedAbility(SavedAbility);
+			}
+			else
+			{
+				UE_LOG(LogAura, Warning, TEXT("No ability tag for ability: [%s]"), *AbilitySpec.Ability.GetName());
+			}
+		}
+	);
+	// clear abilities -- just in case!
+	SaveData->SavedAbilities.Empty();
+	ForEachAbility(SaveAbilityDelegate);
 }
 
 void UAuraAbilitySystemComponent::BeginPlay()
@@ -346,6 +419,7 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(
 	for (const TSubclassOf PassiveAbilityClass : StartupPassiveAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(PassiveAbilityClass, 1);
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().Abilities_Status_Equipped);
 		GiveAbilityAndActivateOnce(AbilitySpec);
 	}
 	// NOTE: This is client-side only! OnRep_ActivateAbilities handles server-side.

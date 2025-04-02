@@ -51,3 +51,11 @@ void IPlayerInterface::SpendSpellPoints(UObject* Object, const int32 SpentPoints
 		Execute_SpendSpellPoints(Object, SpentPoints);
 	}
 }
+
+void IPlayerInterface::SaveProgress(UObject* Object, const FName& CheckpointTag)
+{
+	if (IsValid(Object) && Object->Implements<UPlayerInterface>())
+	{
+		Execute_SaveProgress(Object, CheckpointTag);
+	}
+}

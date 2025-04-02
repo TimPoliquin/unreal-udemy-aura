@@ -5,11 +5,8 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
-#include "NativeGameplayTags.h"
-#include "SWarningOrErrorBox.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
-#include "Aura/AuraLogChannels.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
@@ -17,6 +14,8 @@
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
+#include "Game/AuraSaveGame.h"
+
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -132,6 +131,18 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 		SetMana(GetMaxMana());
 		bTopOffMana = false;
 	}
+}
+
+void UAuraAttributeSet::FromSaveData(const UAuraSaveGame* SaveData)
+{
+}
+
+void UAuraAttributeSet::ToSaveData(UAuraSaveGame* SaveData) const
+{
+	SaveData->Strength = GetStrength();
+	SaveData->Intelligence = GetIntelligence();
+	SaveData->Resilience = GetResilience();
+	SaveData->Vigor = GetVigor();
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const

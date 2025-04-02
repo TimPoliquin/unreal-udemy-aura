@@ -6,6 +6,7 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
+#include "Game/AuraSaveGame.h"
 #include "Net/UnrealNetwork.h"
 
 AAuraPlayerState::AAuraPlayerState()
@@ -35,6 +36,23 @@ UAttributeSet* AAuraPlayerState::GetAttributeSet() const
 {
 	return AttributeSet;
 }
+
+void AAuraPlayerState::FromSaveData(const UAuraSaveGame* SaveData)
+{
+	InitializeLevel(SaveData->PlayerLevel);
+	SetXP(SaveData->PlayerXP);
+	SetAttributePoints(SaveData->AttributePoints);
+	SetSpellPoints(SaveData->SpellPoints);
+}
+
+void AAuraPlayerState::ToSaveData(UAuraSaveGame* SaveData) const
+{
+	SaveData->PlayerLevel = GetCharacterLevel();
+	SaveData->PlayerXP = GetXP();
+	SaveData->AttributePoints = GetAttributePoints();
+	SaveData->SpellPoints = GetSpellPoints();
+}
+
 
 float AAuraPlayerState::GetXPToNextLevelPercentage() const
 {

@@ -65,6 +65,8 @@ public:
 	FOnAttributeChangedSignature OnXPPercentageChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Level")
+	FOnPlayerStatChangedSignature OnPlayerLevelInitializedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Level")
 	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
@@ -80,6 +82,8 @@ protected:
 private:
 	UFUNCTION()
 	void OnPlayerXPChange(const int32 XP);
+	UFUNCTION()
+	void OnPlayerLevelInitialized(int32 NewValue);
 	UFUNCTION()
 	void OnPlayerLevelChange(const int32 InLevel);
 	UFUNCTION()

@@ -288,6 +288,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Passive"),
 		FString("Passive ability tag")
 	);
+	Instance.Abilities_Passive_ListenForEvent = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Passive.ListenForEvent"),
+		FString("ListenForEvent ability tag")
+	);
 	Instance.Abilities_Passive_HaloOfProtection = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Passive.HaloOfProtection"),
 		FString("Passive 1 ability tag")

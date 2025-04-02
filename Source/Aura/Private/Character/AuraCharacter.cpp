@@ -10,8 +10,12 @@
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Game/AuraGameModeBase.h"
+#include "Game/AuraSaveGame.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tags/AuraGameplayTags.h"
@@ -46,6 +50,7 @@ void AAuraCharacter::BeginPlay()
 	Super::BeginPlay();
 }
 
+
 void AAuraCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -61,8 +66,50 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	// Init ability actor info for the server
 	InitializeAbilityActorInfo();
-	// Add startup abilities (server-side)
-	AddCharacterAbilities();
+	LoadProgress();
+	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
+	GameMode->LoadWorldState(GetWorld());
+}
+
+
+void AAuraCharacter::LoadProgress()
+{
+	if (const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+	{
+		const UAuraSaveGame* SaveData = GameMode->GetInGameSaveData();
+		if (!SaveData)
+		{
+			return;
+		}
+		switch (SaveData->SaveSlotAttributeSource)
+		{
+		case FromDefault:
+			InitializeDefaultAttributes();
+			AddCharacterAbilities();
+			break;
+		case FromDisk:
+			if (UAuraAttributeSet* AuraAttributeSet = GetAuraAttributeSet())
+			{
+				AuraAttributeSet->FromSaveData(SaveData);
+			}
+			if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
+			{
+				AuraPlayerState->FromSaveData(SaveData);
+			}
+			if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+			{
+				AuraAbilitySystemComponent->FromSaveData(SaveData);
+			}
+			break;
+		default:
+			UE_LOG(
+				LogAura,
+				Warning,
+				TEXT("Unexpected SaveData->SaveSlotAttributeSource: [%d]"),
+				SaveData->SaveSlotAttributeSource.GetValue()
+			);
+		}
+	}
 }
 
 void AAuraCharacter::OnRep_PlayerState()
@@ -111,9 +158,24 @@ void AAuraCharacter::OnRep_StatusEffectTags()
 	}
 }
 
+AAuraPlayerState* AAuraCharacter::GetAuraPlayerState() const
+{
+	return Cast<AAuraPlayerState>(GetPlayerState());
+}
+
+UAuraAttributeSet* AAuraCharacter::GetAuraAttributeSet() const
+{
+	return Cast<UAuraAttributeSet>(GetAttributeSet());
+}
+
+UAuraAbilitySystemComponent* AAuraCharacter::GetAuraAbilitySystemComponent() const
+{
+	return Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());
+}
+
 void AAuraCharacter::InitializeAbilityActorInfo()
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	AAuraPlayerState* AuraPlayerState = GetAuraPlayerState();
 	check(AuraPlayerState);
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
@@ -122,7 +184,6 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	{
 		InitializePlayerControllerHUD(PlayerController, AuraPlayerState);
 	}
-	InitializeDefaultAttributes();
 	// Broadcast Ability System Setup
 	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
 }
@@ -259,5 +320,43 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		AuraPlayerController->HideMagicCircle();
+	}
+}
+
+void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
+{
+	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
+	UAuraSaveGame* SaveData = GameMode
+		                          ? GameMode->GetInGameSaveData()
+		                          : nullptr;
+	if (SaveData)
+	{
+		if (const AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
+		{
+			AuraPlayerState->ToSaveData(SaveData);
+		}
+		else
+		{
+			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No player state!"))
+		}
+		if (const UAuraAttributeSet* AuraAttributeSet = GetAuraAttributeSet())
+		{
+			AuraAttributeSet->ToSaveData(SaveData);
+		}
+		else
+		{
+			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No attribute set!"))
+		}
+		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+		{
+			AuraAbilitySystemComponent->ToSaveData(SaveData);
+		}
+		else
+		{
+			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No AuraAbilitySystemComponent set!"))
+		}
+		SaveData->SaveSlotAttributeSource = FromDisk;
+		SaveData->PlayerStartTag = CheckpointTag;
+		GameMode->SaveInGameProgressData(SaveData);
 	}
 }

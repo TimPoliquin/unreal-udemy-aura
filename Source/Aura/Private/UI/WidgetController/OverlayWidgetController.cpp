@@ -21,6 +21,10 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	Super::BindCallbacksToDependencies();
 	GetAuraPlayerState()->OnXPChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerXPChange);
+	GetAuraPlayerState()->OnLevelInitializedDelegate.AddDynamic(
+		this,
+		&UOverlayWidgetController::OnPlayerLevelInitialized
+	);
 	GetAuraPlayerState()->OnLevelChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerLevelChange);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetHealthAttribute())
 	                      .AddLambda(
@@ -87,6 +91,11 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)
 {
 	OnXPPercentageChanged.Broadcast(GetAuraPlayerState()->GetXPToNextLevelPercentage());
+}
+
+void UOverlayWidgetController::OnPlayerLevelInitialized(int32 NewValue)
+{
+	OnPlayerLevelInitializedDelegate.Broadcast(NewValue);
 }
 
 void UOverlayWidgetController::OnPlayerLevelChange(const int32 InLevel)
