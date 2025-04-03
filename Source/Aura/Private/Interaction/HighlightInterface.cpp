@@ -25,3 +25,12 @@ bool IHighlightInterface::IsHighlightActor(const UObject* Actor)
 {
 	return IsValid(Actor) && Actor->Implements<UHighlightInterface>();
 }
+
+bool IHighlightInterface::SetMoveToLocation(UObject* Actor, FVector& OutDestination)
+{
+	if (IsValid(Actor) && Actor->Implements<UHighlightInterface>())
+	{
+		return Execute_SetMoveToLocation(Actor, OutDestination);
+	}
+	return false;
+}

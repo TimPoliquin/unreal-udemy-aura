@@ -29,6 +29,12 @@ public:
 	// IHighlightInterface
 	virtual void HighlightActor_Implementation() override;
 	virtual void UnHighlightActor_Implementation() override;
+
+	virtual bool SetMoveToLocation_Implementation(FVector& OutDestination) override
+	{
+		// do not override destination
+		return false;
+	};
 	// ICombatInterface
 	FORCEINLINE virtual int GetCharacterLevel_Implementation() const override
 	{

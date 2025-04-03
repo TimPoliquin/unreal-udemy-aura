@@ -205,7 +205,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 			LocalAbilitySystem->AbilityInputTagHeld(InputTag);
 		}
 	}
-	else if (IsNotTargeting())
+	else if (!IsTargetingEnemy())
 	{
 		FollowTime += GetWorld()->GetDeltaSeconds();
 		if (CursorHit.bBlockingHit)
@@ -235,7 +235,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 			LocalAbilitySystemComponent->AbilityInputTagReleased(InputTag);
 		}
 	}
-	else if (IsNotTargeting())
+	else if (!IsTargetingEnemy())
 	{
 		AutoMove_Start();
 	}
@@ -252,6 +252,10 @@ void AAuraPlayerController::AutoMove_Start()
 	}
 	if (const APawn* ControlledPawn = GetPawn<APawn>(); FollowTime <= ShortPressThreshold)
 	{
+		if (HighlightContext.HasCurrentTarget())
+		{
+			IHighlightInterface::SetMoveToLocation(HighlightContext.CurrentActor, CachedDestination);
+		}
 		// DEVNOTE: this only works in multiplayer if the Allow Client-side Navigation toggle is checked
 		// in the Unreal Engine Project Settings. (see corresponding change in DefaultEngine.ini)
 		if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
