@@ -107,6 +107,15 @@ void AAuraEnemy::OnStatusShockRemoved()
 	}
 }
 
+ECharacterClass AAuraEnemy::GetCharacterClass() const
+{
+	return CharacterClass;
+}
+
+void AAuraEnemy::SetCharacterClass(const ECharacterClass InCharacterClass)
+{
+	this->CharacterClass = InCharacterClass;
+}
 
 void AAuraEnemy::InitializeStartupAbilities() const
 {
@@ -198,6 +207,7 @@ void AAuraEnemy::Die()
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
 	}
 	SetLifeSpan(LifeSpan);
+	SpawnLoot();
 }
 
 void AAuraEnemy::OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

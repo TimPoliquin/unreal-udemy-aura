@@ -21,13 +21,12 @@ public:
 	ACheckpoint(const FObjectInitializer& ObjectInitializer);
 
 	/**
-	 * Checkpoint Interface
+	 * Save Interface
 	 */
 	FORCEINLINE virtual bool ShouldLoadTransform_Implementation() const override { return false; }
 	virtual void LoadActor_Implementation() override;
-
 	/**
-	 *Checkpoint Interface End
+	 *Save Interface End
 	 */
 
 protected:
@@ -45,6 +44,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void CheckpointReached(UMaterialInstanceDynamic* DynamicInstance);
 
+	UFUNCTION(BlueprintCallable)
 	void HandleGlowEffects();
 
 	/** Highlight Interface*/
@@ -59,9 +59,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> Sphere;
 
-private:
-	UPROPERTY(SaveGame)
+	UPROPERTY(BlueprintReadWrite, SaveGame)
 	bool bHasBeenActivated = false;
+
+private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> MoveToComponent;
 };

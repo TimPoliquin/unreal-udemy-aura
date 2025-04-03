@@ -35,6 +35,7 @@ public:
 	// ICombatInterface
 	virtual int32 GetCharacterLevel_Implementation() const override;
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
+	virtual void Die() override;
 
 	// Player Interface
 	virtual int32 GetXP_Implementation() override;
@@ -67,6 +68,10 @@ private:
 	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USoundBase> LevelUpSound;
+	UPROPERTY(EditDefaultsOnly)
+	float DeathTime = 5.f;
+	UPROPERTY()
+	FTimerHandle DeathTimer;
 
 	virtual void InitializeAbilityActorInfo() override;
 	void InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState) const;

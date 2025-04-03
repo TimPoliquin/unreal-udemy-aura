@@ -54,6 +54,12 @@ public:
 	void SetMapName(const FString& InMapName);
 	TEnumAsByte<ESaveSlotStatus> GetLoadSlotStatus() const;
 	void SetLoadSlotStatus(const TEnumAsByte<ESaveSlotStatus>& InLoadSlotStatus);
+	int32 GetPlayerLevel() const;
+	void SetPlayerLevel(const int32 InPlayerLevel);
+	FName GetPlayerStartTag() const;
+	void SetPlayerStartTag(const FName& InPlayerStartTag);
+	FString GetMapAssetName() const;
+	void SetMapAssetName(const FString& InMapAssetName);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))
@@ -64,22 +70,12 @@ private:
 	FString PlayerName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))
 	int32 PlayerLevel;
-
-public:
-	int32 GetPlayerLevel() const;
-	void SetPlayerLevel(const int32 InPlayerLevel);
-
-private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))
 	FString MapName;
 	UPROPERTY()
 	FName PlayerStartTag;
-
-public:
-	FName GetPlayerStartTag() const;
-	void SetPlayerStartTag(const FName& InPlayerStartTag);
-
-private:
 	UPROPERTY()
 	TEnumAsByte<ESaveSlotStatus> LoadSlotStatus;
+	UPROPERTY()
+	FString MapAssetName;
 };

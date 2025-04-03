@@ -196,6 +196,11 @@ UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldCont
 	return nullptr;
 }
 
+ULootTiers* UAuraAbilitySystemLibrary::GetLootTiers(const UObject* WorldContextObject)
+{
+	return AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->GetLootTiers();
+}
+
 bool UAuraAbilitySystemLibrary::IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle)
 {
 	return SpecHandle.Data.Get()->Def.Get()->DurationPolicy ==

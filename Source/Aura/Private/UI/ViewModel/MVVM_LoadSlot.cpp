@@ -53,6 +53,16 @@ void UMVVM_LoadSlot::SetPlayerStartTag(const FName& InPlayerStartTag)
 	this->PlayerStartTag = InPlayerStartTag;
 }
 
+FString UMVVM_LoadSlot::GetMapAssetName() const
+{
+	return MapAssetName;
+}
+
+void UMVVM_LoadSlot::SetMapAssetName(const FString& InMapAssetName)
+{
+	this->MapAssetName = InMapAssetName;
+}
+
 FString UMVVM_LoadSlot::GetMapName() const
 {
 	return MapName;

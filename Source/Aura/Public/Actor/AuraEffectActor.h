@@ -50,6 +50,7 @@ class AURA_API AAuraEffectActor : public AActor
 
 public:
 	AAuraEffectActor();
+	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -69,11 +70,38 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
 	TArray<FName> ApplyToTags;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Applied Effects")
 	float ActorLevel = 1.f;
 
 	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	bool bRotates = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	float RotationRate = 45.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	bool bSinusoidalMovement = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	float SineAmplitude = 8.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	float SinePeriodMultiplier = 2.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	FVector InitialLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Movement")
+	bool bPlaySpawnEffect = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickup Sound")
+	TObjectPtr<USoundBase> SpawnSound;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickup Sound")
+	TObjectPtr<USoundBase> PickupSound;
+
+	UFUNCTION(BlueprintCallable)
+	void StartSinusoidalMovement();
+	UFUNCTION(BlueprintCallable)
+	void StartRotation();
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void PlaySpawnEffect();
 
 private:
 	void RemoveEffectsFromTarget(AActor* TargetActor);
+	void Bob(const float DeltaTime);
+	float RunningTime = 0.f;
 };

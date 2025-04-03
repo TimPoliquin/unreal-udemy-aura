@@ -9,21 +9,50 @@
 #include "ActiveGameplayEffectHandle.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Utils/TagUtils.h"
 
 
 AAuraEffectActor::AAuraEffectActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot")));
 	ApplyToTags.Add(TAG_PLAYER);
 	ApplyToTags.Add(TAG_ENEMY);
+}
+
+void AAuraEffectActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (bSinusoidalMovement || bRotates)
+	{
+		const float SinePeriod = 2 * PI / SinePeriodMultiplier;
+		RunningTime += DeltaSeconds;
+		if (RunningTime > SinePeriod)
+		{
+			RunningTime -= SinePeriod;
+		}
+		Bob(DeltaSeconds);
+	}
 }
 
 
 void AAuraEffectActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (bSinusoidalMovement)
+	{
+		InitialLocation = GetActorLocation();
+	}
+	if (bPlaySpawnEffect)
+	{
+		PlaySpawnEffect();
+		if (SpawnSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation(), GetActorRotation());
+		}
+	}
 }
 
 void AAuraEffectActor::OnOverlap(AActor* TargetActor)
@@ -39,6 +68,10 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 		{
 			ApplyEffectToTarget(TargetActor, GameplayEffectConfig);
 		}
+	}
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation(), GetActorRotation());
 	}
 }
 
@@ -91,6 +124,7 @@ void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, const FGameplayE
 	}
 }
 
+
 void AAuraEffectActor::RemoveEffectsFromTarget(AActor* TargetActor)
 {
 	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
@@ -110,5 +144,30 @@ void AAuraEffectActor::RemoveEffectsFromTarget(AActor* TargetActor)
 		{
 			ActiveEffectHandles.FindAndRemoveChecked(Handle);
 		}
+	}
+}
+
+void AAuraEffectActor::StartSinusoidalMovement()
+{
+	bSinusoidalMovement = true;
+	InitialLocation = GetActorLocation();
+}
+
+void AAuraEffectActor::StartRotation()
+{
+	bRotates = true;
+}
+
+void AAuraEffectActor::Bob(const float DeltaTime)
+{
+	if (bRotates)
+	{
+		const FRotator DeltaRotation(0.f, DeltaTime * RotationRate, 0.f);
+		SetActorRelativeRotation(UKismetMathLibrary::ComposeRotators(GetActorRotation(), DeltaRotation));
+	}
+	if (bSinusoidalMovement)
+	{
+		const float Sine = SineAmplitude * FMath::Sin(RunningTime * SinePeriodMultiplier);
+		SetActorLocation(InitialLocation + FVector(0.f, 0.f, Sine));
 	}
 }

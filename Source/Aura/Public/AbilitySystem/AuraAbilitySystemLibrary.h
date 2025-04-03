@@ -9,6 +9,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
+class ULootTiers;
 class UAuraSaveGame;
 DECLARE_DELEGATE_OneParam(FMakeEffectSpecSignature, FGameplayEffectSpecHandle&);
 
@@ -82,6 +83,12 @@ public:
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|AbilityInfo")
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
+	UFUNCTION(
+		BlueprintCallable,
+		Category = "AuraAbilitySystemLibrary|LootTiers",
+		meta=(DefaultToSelf="WorldContextObject")
+	)
+	static ULootTiers* GetLootTiers(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static bool IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle);

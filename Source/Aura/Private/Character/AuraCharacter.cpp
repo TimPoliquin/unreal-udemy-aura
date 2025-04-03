@@ -218,6 +218,23 @@ TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation() const
 	return IgnoreTags;
 }
 
+void AAuraCharacter::Die()
+{
+	Super::Die();
+	FTimerDelegate DeathTimerDelegate;
+	DeathTimerDelegate.BindLambda(
+		[this]()
+		{
+			if (AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+			{
+				GameMode->PlayerDied(this);
+			}
+		}
+	);
+	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
+	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
 int32 AAuraCharacter::GetXP_Implementation()
 {
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();

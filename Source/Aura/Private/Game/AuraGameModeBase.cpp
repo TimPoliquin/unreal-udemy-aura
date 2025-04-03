@@ -7,6 +7,7 @@
 #include "Game/AuraGameInstance.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/PlayerStart.h"
+#include "GameFramework/Character.h"
 #include "Interaction/SaveInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
@@ -22,6 +23,7 @@ void AAuraGameModeBase::SaveSlotData(const UMVVM_LoadSlot* LoadSlot)
 	SaveGame->SlotIndex = LoadSlot->GetSlotIndex();
 	SaveGame->SlotName = LoadSlot->GetLoadSlotName();
 	SaveGame->PlayerName = LoadSlot->GetPlayerName();
+	SaveGame->MapAssetName = LoadSlot->GetMapAssetName();
 	SaveGame->MapName = LoadSlot->GetMapName();
 	SaveGame->SaveSlotStatus = LoadSlot->GetLoadSlotStatus();
 	SaveGame->PlayerStartTag = LoadSlot->GetPlayerStartTag();
@@ -57,13 +59,23 @@ void AAuraGameModeBase::LoadMap(const UMVVM_LoadSlot* LoadSlot)
 	UGameplayStatics::OpenLevelBySoftObjectPtr(LoadSlot, MapsByName.FindChecked(LoadSlot->GetMapName()));
 }
 
-void AAuraGameModeBase::SaveWorldState(UWorld* World) const
+void AAuraGameModeBase::SaveWorldState(UWorld* World, const FString& DestinationMapAssetName) const
 {
 	FString WorldName = World->GetMapName();
 	WorldName.RemoveFromStart(World->StreamingLevelsPrefix);
 	UAuraGameInstance* AuraGameInstance = GetAuraGameInstance();
 	if (UAuraSaveGame* SaveData = GetSaveSlotData(AuraGameInstance->LoadSlotName, AuraGameInstance->LoadSlotIndex))
 	{
+		if (!DestinationMapAssetName.IsEmpty())
+		{
+			SaveData->MapAssetName = DestinationMapAssetName;
+			SaveData->MapName = GetMapNameFromMapAssetName(DestinationMapAssetName);
+		}
+		else
+		{
+			SaveData->MapAssetName = World->GetMapName();
+			SaveData->MapName = WorldName;
+		}
 		if (!SaveData->HasMap(WorldName))
 		{
 			FSavedMap NewSavedMap;
@@ -136,6 +148,11 @@ FString AAuraGameModeBase::GetDefaultMapName() const
 	return DefaultMapName;
 }
 
+FString AAuraGameModeBase::GetDefaultMapAssetName() const
+{
+	return DefaultMap.ToSoftObjectPath().GetAssetName();
+}
+
 AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
 	UAuraGameInstance* AuraGameInstance = Cast<UAuraGameInstance>(GetGameInstance());
@@ -182,6 +199,16 @@ void AAuraGameModeBase::SetDefaultPlayerLevel(const int32 InDefaultPlayerLevel)
 	this->DefaultPlayerLevel = InDefaultPlayerLevel;
 }
 
+void AAuraGameModeBase::PlayerDied(ACharacter* PlayerCharacter)
+{
+	UAuraSaveGame* SaveData = GetInGameSaveData();
+	if (!IsValid(SaveData))
+	{
+		return;
+	}
+	UGameplayStatics::OpenLevel(PlayerCharacter, FName(SaveData->MapAssetName));
+}
+
 FName AAuraGameModeBase::GetDefaultPlayerStartTag() const
 {
 	return DefaultPlayerStartTag;
@@ -201,4 +228,16 @@ UAuraSaveGame* AAuraGameModeBase::GetInGameSaveData() const
 AAuraGameModeBase* AAuraGameModeBase::GetAuraGameMode(const UObject* WorldContextObject)
 {
 	return Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+}
+
+FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetName) const
+{
+	for (auto& Map : MapsByName)
+	{
+		if (Map.Value.ToSoftObjectPath().GetAssetName().Equals(MapAssetName))
+		{
+			return Map.Key;
+		}
+	}
+	return FString("");
 }

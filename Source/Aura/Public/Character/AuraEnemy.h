@@ -62,6 +62,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOnAttributeChangedSignature OnMaxHealthChanged;
 
+	void SetLevel(const int32 InLevel) { Level = InLevel; }
+	ECharacterClass GetCharacterClass() const;
+	void SetCharacterClass(const ECharacterClass InCharacterClass);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SpawnLoot();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeAbilityActorInfo() override;
