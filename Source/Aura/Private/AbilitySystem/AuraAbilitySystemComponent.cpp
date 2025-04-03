@@ -266,7 +266,7 @@ void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
 	{
 		const TSubclassOf<UGameplayAbility> AbilityClass = SavedAbility.GameplayAbilityClass;
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, SavedAbility.AbilityLevel);
-		AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilitySlotTag);
+		AssignSlotTagToAbilitySpec(AbilitySpec, SavedAbility.AbilitySlotTag);
 		AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilityStatusTag);
 		if (SavedAbility.AbilityTypeTag.MatchesTagExact(GameplayTags.Abilities_Type_Passive))
 		{

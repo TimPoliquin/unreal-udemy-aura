@@ -18,19 +18,38 @@ struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
 
+enum class ETargetingStatus
+{
+	NotTargeting,
+	TargetingEnemy,
+	TargetingOther,
+};
+
+USTRUCT()
 struct FHighlightContext
 {
+	GENERATED_BODY()
+
 	FHighlightContext()
 	{
 	}
 
-	TScriptInterface<IHighlightInterface> LastActor;
-	TScriptInterface<IHighlightInterface> CurrentActor;
+	UPROPERTY()
+	TObjectPtr<AActor> LastActor;
+	UPROPERTY()
+	TObjectPtr<AActor> CurrentActor;
 
 	void Track(AActor* Actor)
 	{
 		LastActor = CurrentActor;
-		CurrentActor = Actor;
+		if (IHighlightInterface::IsHighlightActor(Actor))
+		{
+			CurrentActor = Actor;
+		}
+		else
+		{
+			CurrentActor = nullptr;
+		}
 		if (IsDifferentPtr())
 		{
 			UnHighlightLast();
@@ -60,7 +79,7 @@ struct FHighlightContext
 	{
 		if (CurrentActor != nullptr)
 		{
-			CurrentActor->HighlightActor();
+			IHighlightInterface::HighlightActor(CurrentActor);
 		}
 	}
 
@@ -68,7 +87,7 @@ struct FHighlightContext
 	{
 		if (CurrentActor != nullptr)
 		{
-			CurrentActor->UnHighlightActor();
+			IHighlightInterface::UnHighlightActor(CurrentActor);
 		}
 	}
 
@@ -76,7 +95,7 @@ struct FHighlightContext
 	{
 		if (LastActor != nullptr)
 		{
-			LastActor->UnHighlightActor();
+			IHighlightInterface::UnHighlightActor(LastActor);
 		}
 	}
 };
@@ -144,7 +163,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float ShortPressThreshold = 0.5f;
 	bool bAutoRunning = false;
-	bool bTargeting = false;
+	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float AutoRunAcceptanceRadius = 50.f;
 	UPROPERTY(VisibleAnywhere, Category = "Movement")
@@ -161,4 +180,8 @@ private:
 	void AutoMove_Process();
 	void AutoMove_End();
 	void UpdateMagicCircleLocation();
+
+	bool IsTargetingEnemy() const;
+	bool IsTargetingOther() const;
+	bool IsNotTargeting() const;
 };

@@ -13,6 +13,7 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Actor/MagicCircle.h"
 #include "Aura/Aura.h"
+#include "Character/EnemyInterface.h"
 #include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Tags/AuraGameplayTags.h"
@@ -145,6 +146,18 @@ void AAuraPlayerController::CursorTrace()
 	if (CursorHit.bBlockingHit)
 	{
 		HighlightContext.Track(CursorHit.GetActor());
+		if (HighlightContext.HasCurrentTarget())
+		{
+			TargetingStatus = HighlightContext.HasCurrentTarget() && IEnemyInterface::IsEnemyActor(
+				                  HighlightContext.CurrentActor
+			                  )
+				                  ? ETargetingStatus::TargetingEnemy
+				                  : ETargetingStatus::TargetingOther;
+		}
+		else
+		{
+			TargetingStatus = ETargetingStatus::NotTargeting;
+		}
 	}
 }
 
@@ -169,7 +182,6 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	}
 	if (FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
-		bTargeting = HighlightContext.HasCurrentTarget();
 		bAutoRunning = false;
 	}
 	if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
@@ -186,14 +198,14 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	{
 		return;
 	}
-	if (bTargeting || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
+	if (IsTargetingEnemy() || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
 		if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
 		{
 			LocalAbilitySystem->AbilityInputTagHeld(InputTag);
 		}
 	}
-	else if (!bTargeting)
+	else if (IsNotTargeting())
 	{
 		FollowTime += GetWorld()->GetDeltaSeconds();
 		if (CursorHit.bBlockingHit)
@@ -216,14 +228,14 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	{
 		return;
 	}
-	if (bTargeting || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
+	if (IsTargetingEnemy() || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
 		if (UAuraAbilitySystemComponent* LocalAbilitySystemComponent = GetAuraAbilitySystemComponent())
 		{
 			LocalAbilitySystemComponent->AbilityInputTagReleased(InputTag);
 		}
 	}
-	else if (!bTargeting)
+	else if (IsNotTargeting())
 	{
 		AutoMove_Start();
 	}
@@ -266,7 +278,6 @@ void AAuraPlayerController::AutoMove_Start()
 		}
 	}
 	FollowTime = 0.f;
-	bTargeting = false;
 }
 
 void AAuraPlayerController::AutoMove_Process()
@@ -305,4 +316,19 @@ void AAuraPlayerController::UpdateMagicCircleLocation()
 	{
 		MagicCircle->SetActorLocation(CursorHit.ImpactPoint);
 	}
+}
+
+bool AAuraPlayerController::IsTargetingEnemy() const
+{
+	return TargetingStatus == ETargetingStatus::TargetingEnemy;
+}
+
+bool AAuraPlayerController::IsTargetingOther() const
+{
+	return TargetingStatus == ETargetingStatus::TargetingOther;
+}
+
+bool AAuraPlayerController::IsNotTargeting() const
+{
+	return TargetingStatus == ETargetingStatus::NotTargeting;
 }

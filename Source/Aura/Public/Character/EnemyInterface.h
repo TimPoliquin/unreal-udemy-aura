@@ -26,4 +26,6 @@ public:
 	AActor* GetCombatTarget() const;
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetCombatTarget(AActor* InCombatTarget);
+
+	static bool IsEnemyActor(const UObject* Actor);
 };

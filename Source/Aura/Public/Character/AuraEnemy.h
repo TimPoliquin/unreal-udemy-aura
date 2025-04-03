@@ -27,8 +27,8 @@ public:
 	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
 
 	// IHighlightInterface
-	virtual void HighlightActor() override;
-	virtual void UnHighlightActor() override;
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnHighlightActor_Implementation() override;
 	// ICombatInterface
 	FORCEINLINE virtual int GetCharacterLevel_Implementation() const override
 	{
