@@ -130,6 +130,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.Passive2"),
 		FString("Input tag for Passive Ability 2")
 	);
+	Instance.InputTag_Interact = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Interact"),
+		FString("Input tag for player interacting with an object")
+	);
 
 	// Effect Tags
 	Instance.Effect_HitReact = TagManager.AddNativeGameplayTag(
@@ -304,6 +308,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Passive.ManaSiphon"),
 		FString("Passive 3 ability tag")
 	);
+	Instance.Abilities_Other_Interact = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Other.Interact"),
+		FString("Interact with objects in the world")
+	);
 	Instance.Abilities_Status = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Status"),
 		FString("Status Ability root")
@@ -410,6 +418,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Player_Block_InputReleased = TagManager.AddNativeGameplayTag(
 		FName("Player.Block.InputReleased"),
 		FString("Block Input Released callback for input")
+	);
+	Instance.Player_State_InteractionAvailable = TagManager.AddNativeGameplayTag(
+		FName("Player.State.InteractionAvailable"),
+		FString("Interaction is available for the player")
 	);
 }
 

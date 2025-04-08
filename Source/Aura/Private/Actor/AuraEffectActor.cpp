@@ -73,6 +73,7 @@ void AAuraEffectActor::OnOverlap(AActor* TargetActor)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation(), GetActorRotation());
 	}
+	OnPlayerOverlapStart.Broadcast(TargetActor);
 }
 
 void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
@@ -93,6 +94,7 @@ void AAuraEffectActor::OnEndOverlap(AActor* TargetActor)
 			RemoveEffectsFromTarget(TargetActor);
 		}
 	}
+	OnPlayerOverlapEnd.Broadcast(TargetActor);
 }
 
 void AAuraEffectActor::ApplyEffectToTarget(AActor* TargetActor, const FGameplayEffectConfig& GameplayEffectConfig)

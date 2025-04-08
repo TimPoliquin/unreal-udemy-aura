@@ -13,6 +13,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
@@ -40,7 +41,7 @@ AAuraCharacter::AAuraCharacter()
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->SetUsingAbsoluteRotation(true);
 	SpringArmComponent->bDoCollisionTest = false;
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
+	CameraComponent = CreateDefaultSubobject<UAuraCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
 }
@@ -376,4 +377,34 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		SaveData->PlayerStartTag = CheckpointTag;
 		GameMode->SaveInGameProgressData(SaveData);
 	}
+}
+
+void AAuraCharacter::MoveCameraToPoint_Implementation(
+	const FVector& Destination,
+	const FVector& Direction,
+	UCurveFloat* AnimationCurve
+)
+{
+	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	CameraComponent->MoveToLocation(Destination, Direction, AnimationCurve);
+}
+
+void AAuraCharacter::ReturnCamera_Implementation(
+	UCurveFloat* AnimationCurve
+)
+{
+	FOnCameraMoveFinishedSignature Callback;
+	Callback.AddLambda(
+		[this]()
+		{
+			CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
+		}
+	);
+	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
+	CameraComponent->MoveToLocation(
+		SpringArmComponent->GetSocketTransform(USpringArmComponent::SocketName).GetLocation(),
+		FVector::ForwardVector,
+		AnimationCurve,
+		&Callback
+	);
 }

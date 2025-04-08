@@ -59,6 +59,7 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_Action4;
 	FGameplayTag InputTag_Passive1;
 	FGameplayTag InputTag_Passive2;
+	FGameplayTag InputTag_Interact;
 
 	/** Effect Tags **/
 	FGameplayTag Effect_HitReact;
@@ -108,6 +109,7 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;
+	FGameplayTag Abilities_Other_Interact;
 	FGameplayTag Abilities_Status;
 	FGameplayTag Abilities_Status_Locked;
 	FGameplayTag Abilities_Status_Eligible;
@@ -138,6 +140,7 @@ struct FAuraGameplayTags
 	FGameplayTag Player_Block_InputPressed;
 	FGameplayTag Player_Block_InputHeld;
 	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_State_InteractionAvailable;
 
 	/**
 	 * Montage Attack Tags 

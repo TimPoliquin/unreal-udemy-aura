@@ -3,6 +3,7 @@
 
 #include "Actor/AuraPOI.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
@@ -21,6 +22,8 @@ AAuraPOI::AAuraPOI()
 	POIWidget->SetupAttachment(GetRootComponent());
 	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	InteractionWidget->SetupAttachment(GetRootComponent());
+	ApplyToTags.AddUnique(TAG_PLAYER);
+	ApplyToTags.Remove(TAG_ENEMY);
 }
 
 void AAuraPOI::BeginPlay()
@@ -42,7 +45,7 @@ void AAuraPOI::OnSphereBeginOverlap(
 	// if player, show interaction widget
 	if (IsPlayerActor(OtherActor))
 	{
-		ShowInteractionWidget();
+		OnOverlap(OtherActor);
 	}
 }
 
@@ -56,7 +59,7 @@ void AAuraPOI::OnSphereEndOverlap(
 	// if player, hide interaction widget
 	if (IsPlayerActor(OtherActor))
 	{
-		HideInteractionWidget();
+		OnEndOverlap(OtherActor);
 	}
 }
 

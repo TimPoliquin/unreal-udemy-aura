@@ -8,6 +8,7 @@
 #include "Player/AuraPlayerState.h"
 #include "AuraCharacter.generated.h"
 
+class UAuraCameraComponent;
 class UAuraAbilitySystemComponent;
 class UAuraAttributeSet;
 class USpringArmComponent;
@@ -54,6 +55,14 @@ public:
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() override;
 	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
+	virtual void MoveCameraToPoint_Implementation(
+		const FVector& Destination,
+		const FVector& Direction,
+		UCurveFloat* AnimationCurve
+	) override;
+	virtual void ReturnCamera_Implementation(
+		UCurveFloat* AnimationCurve
+	) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,7 +70,7 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> CameraComponent;
+	TObjectPtr<UAuraCameraComponent> CameraComponent;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	UPROPERTY(EditDefaultsOnly)

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraEffectActor.h"
 #include "GameFramework/Actor.h"
 #include "AuraPOI.generated.h"
 
@@ -10,7 +11,7 @@ class USphereComponent;
 class UWidgetComponent;
 
 UCLASS()
-class AURA_API AAuraPOI : public AActor
+class AURA_API AAuraPOI : public AAuraEffectActor
 {
 	GENERATED_BODY()
 
@@ -45,9 +46,9 @@ protected:
 	);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void ShowInteractionWidget();
+	void OnPlayerStartOverlap(AActor* PlayerActor);
 	UFUNCTION(BlueprintImplementableEvent)
-	void HideInteractionWidget();
+	void OnPlayerEndOverlap(AActor* PlayerActor);
 
 private:
 	bool IsPlayerActor(const AActor* Actor) const;
