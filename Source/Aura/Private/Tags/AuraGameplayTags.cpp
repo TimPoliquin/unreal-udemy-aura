@@ -134,6 +134,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.Interact"),
 		FString("Input tag for player interacting with an object")
 	);
+	Instance.InputTag_Cancel = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Cancel"),
+		FString("Input tag for canceling player interaction and abilities")
+	);
 
 	// Effect Tags
 	Instance.Effect_HitReact = TagManager.AddNativeGameplayTag(
@@ -311,6 +315,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Abilities_Other_Interact = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Other.Interact"),
 		FString("Interact with objects in the world")
+	);
+	Instance.Abilities_Other_Cancel = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Other.Cancel"),
+		FString("Cancels active abilities and interactions")
 	);
 	Instance.Abilities_Status = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Status"),

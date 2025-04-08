@@ -87,4 +87,6 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_LevelUpParticles() const;
+
+	FVector DesiredCameraForwardVector;
 };

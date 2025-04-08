@@ -179,7 +179,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
 		FAuraGameplayTags::Get().Player_Block_InputPressed
-	))
+	) && !InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_Cancel))
 	{
 		return;
 	}
@@ -197,7 +197,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
 		FAuraGameplayTags::Get().Player_Block_InputHeld
-	))
+	) && !InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_Cancel))
 	{
 		return;
 	}
@@ -227,7 +227,7 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
 		FAuraGameplayTags::Get().Player_Block_InputReleased
-	))
+	) && !InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_Cancel))
 	{
 		return;
 	}

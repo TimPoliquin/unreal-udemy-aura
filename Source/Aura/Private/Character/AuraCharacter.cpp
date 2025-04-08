@@ -385,6 +385,7 @@ void AAuraCharacter::MoveCameraToPoint_Implementation(
 	UCurveFloat* AnimationCurve
 )
 {
+	DesiredCameraForwardVector = CameraComponent->GetForwardVector();
 	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	CameraComponent->MoveToLocation(Destination, Direction, AnimationCurve);
 }
@@ -400,10 +401,14 @@ void AAuraCharacter::ReturnCamera_Implementation(
 			CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 		}
 	);
-	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
+	CameraComponent->AttachToComponent(
+		SpringArmComponent,
+		FAttachmentTransformRules::KeepWorldTransform,
+		USpringArmComponent::SocketName
+	);
 	CameraComponent->MoveToLocation(
 		SpringArmComponent->GetSocketTransform(USpringArmComponent::SocketName).GetLocation(),
-		FVector::ForwardVector,
+		DesiredCameraForwardVector,
 		AnimationCurve,
 		&Callback
 	);
