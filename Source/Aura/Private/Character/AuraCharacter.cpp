@@ -135,9 +135,9 @@ void AAuraCharacter::OnRep_StatusEffectTags()
 		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 		FGameplayTagContainer BlockedTags;
 		BlockedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
-		BlockedTags.AddTag(GameplayTags.Player_Block_InputHeld);
-		BlockedTags.AddTag(GameplayTags.Player_Block_InputPressed);
-		BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Movement);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Ability_Offensive);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Interaction);
 		if (IsShocked())
 		{
 			AuraAbilitySystemComponent->AddLooseGameplayTags(BlockedTags);

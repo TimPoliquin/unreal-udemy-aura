@@ -415,17 +415,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Player.Block.CursorTrace"),
 		FString("Block tracing under the cursor")
 	);
-	Instance.Player_Block_InputPressed = TagManager.AddNativeGameplayTag(
-		FName("Player.Block.InputPressed"),
-		FString("Block Input Pressed callback for input")
+	Instance.Player_Block_Movement = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.Movement"),
+		FString("Blocks player movement")
 	);
-	Instance.Player_Block_InputHeld = TagManager.AddNativeGameplayTag(
-		FName("Player.Block.InputHeld"),
-		FString("Block Input Held callback for input")
+	Instance.Player_Block_Interaction = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.Interaction"),
+		FString("Blocks player's ability to interact with the environment")
 	);
-	Instance.Player_Block_InputReleased = TagManager.AddNativeGameplayTag(
-		FName("Player.Block.InputReleased"),
-		FString("Block Input Released callback for input")
+	Instance.Player_Block_Ability_Offensive = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.Ability.Offensive"),
+		FString("Blocks player offensive abilities")
 	);
 	Instance.Player_State_InteractionAvailable = TagManager.AddNativeGameplayTag(
 		FName("Player.State.InteractionAvailable"),

@@ -139,9 +139,9 @@ struct FAuraGameplayTags
 
 	/** Player Tags **/
 	FGameplayTag Player_Block_CursorTrace;
-	FGameplayTag Player_Block_InputPressed;
-	FGameplayTag Player_Block_InputHeld;
-	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_Block_Movement;
+	FGameplayTag Player_Block_Ability_Offensive;
+	FGameplayTag Player_Block_Interaction;
 	FGameplayTag Player_State_InteractionAvailable;
 
 	/**
