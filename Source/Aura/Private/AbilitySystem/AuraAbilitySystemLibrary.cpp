@@ -715,6 +715,47 @@ FDamageEffectParams UAuraAbilitySystemLibrary::MakeCustomDamageEffectParams(
 	return DamageEffectParams;
 }
 
+FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
+	AActor* TargetActor,
+	const TSubclassOf<UGameplayEffect>& GameplayEffect,
+	const int32 Level
+)
+{
+	UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	);
+	FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(TargetActor);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
+		GameplayEffect,
+		Level,
+		EffectContextHandle
+	);
+	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
+		*EffectSpecHandle.Data.Get()
+	);
+	return ActiveEffectHandle;
+}
+
+void UAuraAbilitySystemLibrary::RemoveGameplayEffect(
+	AActor* TargetActor,
+	const FActiveGameplayEffectHandle& GameplayEffectHandle,
+	bool bRemoveAll
+)
+{
+	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	))
+	{
+		AbilitySystemComponent->RemoveActiveGameplayEffect(
+			GameplayEffectHandle,
+			bRemoveAll
+				? -1
+				: 1
+		);
+	}
+}
+
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FAuraGameplayEffectContext* AuraEffectContext = static_cast<const FAuraGameplayEffectContext*>(

@@ -7,6 +7,9 @@
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "PlayerInterface.generated.h"
 
+
+DECLARE_DELEGATE(FOnCameraMoveFinishedSignature);
+
 // This class does not need to be modified.
 UINTERFACE()
 class UPlayerInterface : public UInterface
@@ -56,11 +59,16 @@ public:
 		const FVector& Direction,
 		UCurveFloat* AnimationCurve
 	);
+	virtual void MoveCameraToPointWithCallback(
+		const FVector& Destination,
+		const FVector& Direction,
+		UCurveFloat* AnimationCurve,
+		FOnCameraMoveFinishedSignature& OnCameraMoveFinishedSignature
+	) = 0;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void ReturnCamera(
 		UCurveFloat* AnimationCurve
 	);
-
 
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUp();

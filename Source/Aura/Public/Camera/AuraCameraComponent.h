@@ -5,12 +5,11 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TimelineComponent.h"
+#include "Interaction/PlayerInterface.h"
 #include "AuraCameraComponent.generated.h"
 
 
 class UTimelineComponent;
-
-DECLARE_MULTICAST_DELEGATE(FOnCameraMoveFinishedSignature);
 
 struct FCameraAnimationParams
 {

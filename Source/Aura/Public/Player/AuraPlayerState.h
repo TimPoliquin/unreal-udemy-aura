@@ -6,8 +6,8 @@
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
-#include "Aura/AuraLogChannels.h"
 #include "GameFramework/PlayerState.h"
+#include "Item/AuraItemTypes.h"
 #include "AuraPlayerState.generated.h"
 class UAuraSaveGame;
 class ULevelUpInfo;
@@ -15,6 +15,13 @@ class ULevelUpInfo;
 
 class UAttributeSet;
 class UAbilitySystemComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FOnPlayerInventoryChangedSignature,
+	TArray<FAuraItemInventoryEntry>,
+	NewInventory
+);
+
 /**
  * 
  */
@@ -109,17 +116,15 @@ public:
 	FOnPlayerStatChangedSignature OnLevelInitializedDelegate;
 	FOnPlayerStatChangedSignature OnAttributePointsChangeDelegate;
 	FOnPlayerStatChangedSignature OnSpellPointsChangeDelegate;
+	FOnPlayerInventoryChangedSignature OnPlayerInventoryChangedDelegate;
 
-protected
-:
+protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
-	UPROPERTY
-	()
+	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 
-private
-:
+private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Level)
@@ -131,33 +136,27 @@ private
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_SpellPoints)
 	int32 SpellPoints;
 
-	UFUNCTION
-	()
+	UFUNCTION()
 	FORCEINLINE void OnRep_Level(int32 OldLevel) const
 	{
 		OnLevelChangeDelegate.Broadcast(Level);
 	}
 
-	UFUNCTION
-	()
+	UFUNCTION()
 	FORCEINLINE void OnRep_XP(int32 OldXP) const
 	{
-		UE_LOG(LogAura, Warning, TEXT("OnRep_XP: [%d]"), XP)
 		OnXPChangeDelegate.Broadcast(XP);
 	}
 
-	UFUNCTION
-	()
+	UFUNCTION()
 	FORCEINLINE void OnRep_AttributePoints(int32 InAttributePoints) const
 	{
 		OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
 	}
 
-	UFUNCTION
-	()
+	UFUNCTION()
 	FORCEINLINE void OnRep_SpellPoints(int32 InSpellPoints) const
 	{
-		UE_LOG(LogAura, Warning, TEXT("OnRep_SpellPoints: [%d]"), SpellPoints);
 		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
 	}
 };

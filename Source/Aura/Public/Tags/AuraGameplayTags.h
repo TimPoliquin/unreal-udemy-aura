@@ -143,6 +143,8 @@ struct FAuraGameplayTags
 	FGameplayTag Player_Block_Ability_Offensive;
 	FGameplayTag Player_Block_Interaction;
 	FGameplayTag Player_State_InteractionAvailable;
+	FGameplayTag Player_Equipped_Tool;
+	FGameplayTag Player_Equipped_Weapon;
 
 	/**
 	 * Montage Attack Tags 

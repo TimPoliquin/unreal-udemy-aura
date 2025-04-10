@@ -431,6 +431,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Player.State.InteractionAvailable"),
 		FString("Interaction is available for the player")
 	);
+	Instance.Player_Equipped_Tool = TagManager.AddNativeGameplayTag(
+		FName("Player.Equipped.Tool"),
+		FString("Player has a tool equipped")
+	);
+	Instance.Player_Equipped_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Player.Equipped.Weapon"),
+		FString("Player has a weapon equipped")
+	);
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

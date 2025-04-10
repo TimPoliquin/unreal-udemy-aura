@@ -10,17 +10,19 @@
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
-#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Aura/AuraLogChannels.h"
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUD.h"
+#include "Interaction/PlayerInterface.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -44,11 +46,14 @@ AAuraCharacter::AAuraCharacter()
 	CameraComponent = CreateDefaultSubobject<UAuraCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
+	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("Player Inventory"));
 }
 
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	OnEquipAnimationCompleteDelegate.AddDynamic(this, &AAuraCharacter::OnEquipmentAnimationComplete);
+	OnCameraReturnDelegate.BindUObject(this, &AAuraCharacter::OnCameraReturned);
 }
 
 
@@ -205,6 +210,27 @@ void AAuraCharacter::InitializePlayerControllerHUD(
 	}
 }
 
+void AAuraCharacter::OnCameraReturned()
+{
+	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
+}
+
+void AAuraCharacter::OnEquipmentAnimationComplete(const EAuraEquipmentSlot& Slot)
+{
+	switch (Slot)
+	{
+	case EAuraEquipmentSlot::Tool:
+		if (PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod))
+		{
+			OnFishingRodEquippedDelegate.Broadcast();
+		}
+		break;
+	default:
+		// nothing to do here
+		break;
+	}
+}
+
 int32 AAuraCharacter::GetCharacterLevel_Implementation() const
 {
 	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -234,6 +260,11 @@ void AAuraCharacter::Die()
 	);
 	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
 	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+USkeletalMeshComponent* AAuraCharacter::GetWeapon_Implementation() const
+{
+	return PlayerInventoryComponent->GetWeapon();
 }
 
 int32 AAuraCharacter::GetXP_Implementation()
@@ -390,17 +421,22 @@ void AAuraCharacter::MoveCameraToPoint_Implementation(
 	CameraComponent->MoveToLocation(Destination, Direction, AnimationCurve);
 }
 
+void AAuraCharacter::MoveCameraToPointWithCallback(
+	const FVector& Destination,
+	const FVector& Direction,
+	UCurveFloat* AnimationCurve,
+	FOnCameraMoveFinishedSignature& OnCameraMoveFinishedSignature
+)
+{
+	DesiredCameraForwardVector = CameraComponent->GetForwardVector();
+	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	CameraComponent->MoveToLocation(Destination, Direction, AnimationCurve, &OnCameraMoveFinishedSignature);
+}
+
 void AAuraCharacter::ReturnCamera_Implementation(
 	UCurveFloat* AnimationCurve
 )
 {
-	FOnCameraMoveFinishedSignature Callback;
-	Callback.AddLambda(
-		[this]()
-		{
-			CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
-		}
-	);
 	CameraComponent->AttachToComponent(
 		SpringArmComponent,
 		FAttachmentTransformRules::KeepWorldTransform,
@@ -410,6 +446,46 @@ void AAuraCharacter::ReturnCamera_Implementation(
 		SpringArmComponent->GetSocketTransform(USpringArmComponent::SocketName).GetLocation(),
 		DesiredCameraForwardVector,
 		AnimationCurve,
-		&Callback
+		&OnCameraReturnDelegate
 	);
+}
+
+bool AAuraCharacter::HasFishingRod_Implementation()
+{
+	return PlayerInventoryComponent->HasItemInInventory(EAuraItemType::FishingRod);
+}
+
+bool AAuraCharacter::HasFishingRodEquipped_Implementation()
+{
+	return PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod);
+}
+
+void AAuraCharacter::EquipFishingRod_Implementation()
+{
+	PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Tool, EAuraItemType::FishingRod);
+	PlayEquipAnimation(EAuraEquipmentSlot::Tool);
+}
+
+void AAuraCharacter::CastFishingRod_Implementation(const FVector& FishingLocation)
+{
+	PlayFishingCastAnimation();
+	// // todo - play animation
+	// OnFishingRodCastDelegate.Broadcast();
+}
+
+FOnFishingRodEquippedSignature& AAuraCharacter::GetOnFishingRodEquippedDelegate()
+{
+	return OnFishingRodEquippedDelegate;
+}
+
+FOnFishingRodCastSignature& AAuraCharacter::GetOnFishingRodCastDelegate()
+{
+	return OnFishingRodCastDelegate;
+}
+
+void AAuraCharacter::EndFishing_Implementation()
+{
+	OnFishingRodEquippedDelegate.Clear();
+	OnFishingRodCastDelegate.Clear();
+	PlayEquipAnimation(EAuraEquipmentSlot::Weapon);
 }

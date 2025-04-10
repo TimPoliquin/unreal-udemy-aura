@@ -30,6 +30,9 @@ AAuraEnemy::AAuraEnemy()
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>(TEXT("AttributeSet"));
 	HealthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
 	HealthWidget->SetupAttachment(GetRootComponent());
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
+	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
+	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AAuraEnemy::InitializeAttributeDelegates()
@@ -190,6 +193,11 @@ void AAuraEnemy::UnHighlightActor_Implementation()
 int32 AAuraEnemy::GetXPReward_Implementation() const
 {
 	return UAuraAbilitySystemLibrary::GetXPReward(this, CharacterClass, Level);
+}
+
+USkeletalMeshComponent* AAuraEnemy::GetWeapon_Implementation() const
+{
+	return Weapon;
 }
 
 TArray<FName> AAuraEnemy::GetTargetTagsToIgnore_Implementation() const

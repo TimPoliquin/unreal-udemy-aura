@@ -299,6 +299,13 @@ public:
 		float PitchOverride = 0.f
 	);
 
+	static FActiveGameplayEffectHandle ApplyBasicGameplayEffect(
+		AActor* TargetActor,
+		const TSubclassOf<UGameplayEffect>& GameplayEffect,
+		int32 Level = 1
+	);
+	static void RemoveGameplayEffect(AActor* TargetActor, const FActiveGameplayEffectHandle& GameplayEffectHandle, bool bRemoveAll = true);
+
 private:
 	static bool GetWidgetControllerParams(
 		const UObject* WorldContextObject,

@@ -3,6 +3,8 @@
 
 #include "Camera/AuraCameraComponent.h"
 
+#include "Aura/AuraLogChannels.h"
+
 UAuraCameraComponent::UAuraCameraComponent()
 {
 	CameraTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("CameraTimeline"));
@@ -48,7 +50,15 @@ void UAuraCameraComponent::OnTimelineFinished()
 	SetWorldLocation(AnimationParams.EndLocation);
 	if (AnimationParams.Callback)
 	{
-		AnimationParams.Callback->Broadcast();
+		bool Success = AnimationParams.Callback->ExecuteIfBound();
+		if (!Success)
+		{
+			UE_LOG(
+				LogAura,
+				Warning,
+				TEXT("Error executing delegate callback in AuraCameraComponent::OnTimelineFinished")
+			);
+		}
 	}
 	AnimationParams = FCameraAnimationParams();
 }

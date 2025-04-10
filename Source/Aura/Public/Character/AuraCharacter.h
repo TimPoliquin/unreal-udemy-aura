@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AuraBaseCharacter.h"
+#include "Camera/AuraCameraComponent.h"
+#include "Interaction/FishingInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerState.h"
 #include "AuraCharacter.generated.h"
 
+class UPlayerInventoryComponent;
 class UAuraCameraComponent;
 class UAuraAbilitySystemComponent;
 class UAuraAttributeSet;
@@ -16,8 +19,14 @@ class UCameraComponent;
 class UNiagaraComponent;
 class APlayerState;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FOnAnimationCompleteSignature,
+	const EAuraEquipmentSlot&,
+	Slot
+);
+
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IFishingInterface
 {
 	GENERATED_BODY()
 
@@ -37,6 +46,7 @@ public:
 	virtual int32 GetCharacterLevel_Implementation() const override;
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
 	virtual void Die() override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
 
 	// Player Interface
 	virtual int32 GetXP_Implementation() override;
@@ -60,13 +70,44 @@ public:
 		const FVector& Direction,
 		UCurveFloat* AnimationCurve
 	) override;
+	virtual void MoveCameraToPointWithCallback(
+		const FVector& Destination,
+		const FVector& Direction,
+		UCurveFloat* AnimationCurve,
+		FOnCameraMoveFinishedSignature& OnCameraMoveFinishedSignature
+	) override;
 	virtual void ReturnCamera_Implementation(
 		UCurveFloat* AnimationCurve
 	) override;
 
+	/** FishingInterface Start */
+	virtual bool HasFishingRod_Implementation() override;
+	virtual bool HasFishingRodEquipped_Implementation() override;
+	virtual void EquipFishingRod_Implementation() override;
+	virtual void CastFishingRod_Implementation(const FVector& FishingLocation) override;
+	virtual FOnFishingRodEquippedSignature& GetOnFishingRodEquippedDelegate() override;
+	virtual FOnFishingRodCastSignature& GetOnFishingRodCastDelegate() override;
+	virtual void EndFishing_Implementation() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayEquipAnimation(const EAuraEquipmentSlot& Slot);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayFishingCastAnimation();
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnFishingRodEquippedSignature OnFishingRodEquippedDelegate;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnFishingRodCastSignature OnFishingRodCastDelegate;
+	/** FishingInterface End */
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnAnimationCompleteSignature OnEquipAnimationCompleteDelegate;
+
 protected:
 	virtual void BeginPlay() override;
 	void LoadProgress();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -81,12 +122,17 @@ private:
 	float DeathTime = 5.f;
 	UPROPERTY()
 	FTimerHandle DeathTimer;
+	FOnCameraMoveFinishedSignature OnCameraReturnDelegate;
 
 	virtual void InitializeAbilityActorInfo() override;
 	void InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState) const;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_LevelUpParticles() const;
+	UFUNCTION()
+	void OnCameraReturned();
+	UFUNCTION()
+	void OnEquipmentAnimationComplete(const EAuraEquipmentSlot& Slot);
 
 	FVector DesiredCameraForwardVector;
 };
