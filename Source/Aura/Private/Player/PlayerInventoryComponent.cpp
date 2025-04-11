@@ -48,9 +48,8 @@ void UPlayerInventoryComponent::UseTool()
 	{
 		Weapon->SetHidden(true);
 		Weapon->GetMesh()->SetVisibility(false);
+		Weapon->UnEquip(GetOwner());
 	}
-	ClearEquipmentAbility(EAuraEquipmentSlot::Weapon);
-	ClearEquipmentAbility(EAuraEquipmentSlot::Tool);
 	EquipmentUseMode = EAuraEquipmentUseMode::Tool;
 	if (!IsValid(Tool))
 	{
@@ -60,7 +59,7 @@ void UPlayerInventoryComponent::UseTool()
 	{
 		Tool->SetHidden(false);
 		Tool->GetMesh()->SetVisibility(true);
-		ActivateEquipmentAbility(EAuraEquipmentSlot::Tool);
+		Tool->Equip(GetOwner());
 	}
 	OnUseTool.Broadcast();
 }
@@ -71,9 +70,8 @@ void UPlayerInventoryComponent::UseWeapon()
 	{
 		Tool->SetHidden(true);
 		Tool->GetMesh()->SetVisibility(false);
+		Tool->UnEquip(GetOwner());
 	}
-	ClearEquipmentAbility(EAuraEquipmentSlot::Tool);
-	ClearEquipmentAbility(EAuraEquipmentSlot::Weapon);
 	EquipmentUseMode = EAuraEquipmentUseMode::Weapon;
 	if (!IsValid(Weapon))
 	{
@@ -83,7 +81,7 @@ void UPlayerInventoryComponent::UseWeapon()
 	{
 		Weapon->SetHidden(false);
 		Weapon->GetMesh()->SetVisibility(true);
-		ActivateEquipmentAbility(EAuraEquipmentSlot::Weapon);
+		Weapon->Equip(GetOwner());
 	}
 	OnUseWeapon.Broadcast();
 }
@@ -165,27 +163,4 @@ AAuraItemBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipmentSlo
 		SocketName
 	);
 	return Equipment;
-}
-
-void UPlayerInventoryComponent::ClearEquipmentAbility(const EAuraEquipmentSlot& Slot)
-{
-	if (ActiveEquipGameplayEffects.Contains(Slot))
-	{
-		UAuraAbilitySystemLibrary::RemoveGameplayEffect(GetOwner(), ActiveEquipGameplayEffects[Slot]);
-		ActiveEquipGameplayEffects.Remove(Slot);
-	}
-}
-
-void UPlayerInventoryComponent::ActivateEquipmentAbility(const EAuraEquipmentSlot& Slot)
-{
-	if (EquipGameplayEffectClasses.Contains(Slot))
-	{
-		ActiveEquipGameplayEffects.Add(
-			Slot,
-			UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
-				GetOwner(),
-				EquipGameplayEffectClasses[Slot]
-			)
-		);
-	}
 }

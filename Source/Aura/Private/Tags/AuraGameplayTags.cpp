@@ -435,6 +435,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Player.Equipped.Tool"),
 		FString("Player has a tool equipped")
 	);
+	Instance.Player_Equipped_Tool = TagManager.AddNativeGameplayTag(
+		FName("Player.Equipped.Tool.FishingRod"),
+		FString("Player has a fishing rod tool equipped")
+	);
 	Instance.Player_Equipped_Weapon = TagManager.AddNativeGameplayTag(
 		FName("Player.Equipped.Weapon"),
 		FString("Player has a weapon equipped")

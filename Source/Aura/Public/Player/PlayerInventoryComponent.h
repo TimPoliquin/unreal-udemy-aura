@@ -51,10 +51,6 @@ protected:
 	TMap<EAuraEquipmentSlot, EAuraItemType> EquipmentSlots;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory|Equipment")
 	TMap<EAuraEquipmentSlot, FName> EquipmentSocketNames;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Equipment")
-	TMap<EAuraEquipmentSlot, TSubclassOf<UGameplayEffect>> EquipGameplayEffectClasses;;
-	UPROPERTY(VisibleAnywhere, Category="Inventory|Equipment")
-	TMap<EAuraEquipmentSlot, FActiveGameplayEffectHandle> ActiveEquipGameplayEffects;
 
 	UPROPERTY()
 	TObjectPtr<AAuraItemBase> Weapon;
@@ -63,6 +59,4 @@ protected:
 
 private:
 	AAuraItemBase* SpawnEquipment(const EAuraEquipmentSlot& Slot);
-	void ClearEquipmentAbility(const EAuraEquipmentSlot& Slot);
-	void ActivateEquipmentAbility(const EAuraEquipmentSlot& Slot);
 };

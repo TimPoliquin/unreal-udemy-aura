@@ -144,6 +144,7 @@ struct FAuraGameplayTags
 	FGameplayTag Player_Block_Interaction;
 	FGameplayTag Player_State_InteractionAvailable;
 	FGameplayTag Player_Equipped_Tool;
+	FGameplayTag Player_Equipped_Tool_FishingRod;
 	FGameplayTag Player_Equipped_Weapon;
 
 	/**

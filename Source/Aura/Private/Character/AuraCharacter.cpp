@@ -469,8 +469,6 @@ void AAuraCharacter::EquipFishingRod_Implementation()
 void AAuraCharacter::CastFishingRod_Implementation(const FVector& FishingLocation)
 {
 	PlayFishingCastAnimation();
-	// // todo - play animation
-	// OnFishingRodCastDelegate.Broadcast();
 }
 
 FOnFishingRodEquippedSignature& AAuraCharacter::GetOnFishingRodEquippedDelegate()
