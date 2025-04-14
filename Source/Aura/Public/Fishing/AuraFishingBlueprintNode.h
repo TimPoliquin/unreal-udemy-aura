@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interaction/FishingInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "AuraFishingBlueprintNode.generated.h"
@@ -89,4 +88,6 @@ private:
 	void OnFishingRodCast();
 	UFUNCTION()
 	void OnFishingRodEquipped();
+	UFUNCTION()
+	void OnFishingStateChanged(EFishingState FishingState);
 };

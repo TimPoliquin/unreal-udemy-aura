@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
+#include "Item/AuraFishingRod.h"
 #include "Item/AuraItemBase.h"
 #include "Item/AuraItemBlueprintLibrary.h"
 #include "Tags/AuraGameplayTags.h"
@@ -113,6 +114,53 @@ USkeletalMeshComponent* UPlayerInventoryComponent::GetWeapon() const
 		return Weapon->GetMesh();
 	}
 	return nullptr;
+}
+
+EAuraItemType UPlayerInventoryComponent::GetToolType() const
+{
+	if (EquipmentSlots.Contains(EAuraEquipmentSlot::Tool))
+	{
+		return EquipmentSlots[EAuraEquipmentSlot::Tool];
+	}
+	return EAuraItemType::None;
+}
+
+EAuraItemType UPlayerInventoryComponent::GetWeaponType() const
+{
+	if (EquipmentSlots.Contains(EAuraEquipmentSlot::Weapon))
+	{
+		return EquipmentSlots[EAuraEquipmentSlot::Weapon];
+	}
+	return EAuraItemType::None;
+}
+
+AAuraFishingRod* UPlayerInventoryComponent::GetFishingRod() const
+{
+	if (IsValid(Tool) && Tool->GetItemType() == EAuraItemType::FishingRod)
+	{
+		return Cast<AAuraFishingRod>(Tool);
+	}
+	return nullptr;
+}
+
+EAuraItemType UPlayerInventoryComponent::GetEquippedItem(const EAuraEquipmentSlot Slot) const
+{
+	if (EquipmentSlots.Contains(Slot))
+	{
+		return EquipmentSlots[Slot];
+	}
+	return EAuraItemType::None;
+}
+
+EAuraEquipmentUseMode UPlayerInventoryComponent::GetEquipmentUseMode() const
+{
+	return EquipmentUseMode;
+}
+
+void UPlayerInventoryComponent::PlayEquipAnimation(EAuraEquipmentSlot Slot)
+{
+	EAuraItemType ItemType = GetEquippedItem(Slot);
+	OnEquipmentAnimationRequest.Broadcast(Slot, ItemType);
 }
 
 void UPlayerInventoryComponent::BeginPlay()

@@ -4,15 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "FishingInterface.generated.h"
+#include "FishingComponentInterface.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFishingRodEquippedSignature);
+UENUM(BlueprintType)
+enum class EFishingState : uint8
+{
+	None,
+	Equipping,
+	Equipped,
+	Casting,
+	Cast,
+	Waiting,
+	Biting,
+	Reeling
+};
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFishingRodCastSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFishingStateChangedSignature, EFishingState, FishingState);
+
 
 // This class does not need to be modified.
 UINTERFACE()
-class UFishingInterface : public UInterface
+class UFishingComponentInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -20,7 +32,7 @@ class UFishingInterface : public UInterface
 /**
  * 
  */
-class AURA_API IFishingInterface
+class AURA_API IFishingComponentInterface
 {
 	GENERATED_BODY()
 
@@ -33,10 +45,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void EquipFishingRod();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void CastFishingRod(const FVector& FishingLocation);
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void EndFishing();
+	void CastFishingRod();
 
-	virtual FOnFishingRodEquippedSignature& GetOnFishingRodEquippedDelegate() = 0;
-	virtual FOnFishingRodCastSignature& GetOnFishingRodCastDelegate() = 0;
+	virtual void SetupForFishing(const FVector& FishingDestination) = 0;
+	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate() = 0;
+	virtual void EndFishing() = 0;
 };

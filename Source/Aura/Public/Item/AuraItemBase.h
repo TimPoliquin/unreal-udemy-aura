@@ -20,8 +20,9 @@ public:
 
 	USkeletalMeshComponent* GetMesh() const;
 	bool IsEquipped() const;
-	void Equip(AActor* InOwner);
-	void UnEquip(AActor* InOwner);
+	virtual void Equip(AActor* InOwner);
+	virtual void UnEquip(AActor* InOwner);
+	EAuraItemType GetItemType() const { return ItemType; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
@@ -29,10 +30,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	TSubclassOf<UGameplayEffect> EquipGameplayEffect;
 
-private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> MeshComponent;
 
+private:
 	UPROPERTY()
 	FActiveGameplayEffectHandle EquippedHandle;
 	bool bIsEquipped;

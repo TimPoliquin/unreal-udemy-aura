@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "AuraBaseCharacter.h"
 #include "Camera/AuraCameraComponent.h"
-#include "Interaction/FishingInterface.h"
+#include "Interaction/FishingActorInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerState.h"
 #include "AuraCharacter.generated.h"
 
+class UFishingComponentInterface;
+class UAuraFishingComponent;
 class UPlayerInventoryComponent;
 class UAuraCameraComponent;
 class UAuraAbilitySystemComponent;
@@ -26,7 +28,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IFishingInterface
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IFishingActorInterface
 {
 	GENERATED_BODY()
 
@@ -80,34 +82,17 @@ public:
 		UCurveFloat* AnimationCurve
 	) override;
 
-	/** FishingInterface Start */
-	virtual bool HasFishingRod_Implementation() override;
-	virtual bool HasFishingRodEquipped_Implementation() override;
-	virtual void EquipFishingRod_Implementation() override;
-	virtual void CastFishingRod_Implementation(const FVector& FishingLocation) override;
-	virtual FOnFishingRodEquippedSignature& GetOnFishingRodEquippedDelegate() override;
-	virtual FOnFishingRodCastSignature& GetOnFishingRodCastDelegate() override;
-	virtual void EndFishing_Implementation() override;
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayEquipAnimation(const EAuraEquipmentSlot& Slot);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayFishingCastAnimation();
-	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnFishingRodEquippedSignature OnFishingRodEquippedDelegate;
-	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnFishingRodCastSignature OnFishingRodCastDelegate;
-	/** FishingInterface End */
-
-	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnAnimationCompleteSignature OnEquipAnimationCompleteDelegate;
+	/** FishingActorInterface Start */
+	virtual TScriptInterface<IFishingComponentInterface> GetFishingComponent_Implementation() const override;
+	/** FishingActorInterface End */
 
 protected:
 	virtual void BeginPlay() override;
 	void LoadProgress();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAuraFishingComponent> FishingComponent;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -131,8 +116,6 @@ private:
 	void Multicast_LevelUpParticles() const;
 	UFUNCTION()
 	void OnCameraReturned();
-	UFUNCTION()
-	void OnEquipmentAnimationComplete(const EAuraEquipmentSlot& Slot);
 
 	FVector DesiredCameraForwardVector;
 };

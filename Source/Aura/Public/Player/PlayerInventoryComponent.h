@@ -8,8 +8,24 @@
 #include "Item/AuraItemTypes.h"
 #include "PlayerInventoryComponent.generated.h"
 
+class AAuraFishingRod;
 class UGameplayEffect;
 DECLARE_MULTICAST_DELEGATE(FOnEquipmentUseModeChangeSignature)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FOnEquipmentAnimationRequestSignature,
+	EAuraEquipmentSlot,
+	EquipmentSlot,
+	EAuraItemType,
+	EquippedItem
+);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FOnEquipmentAnimationCompleteSignature,
+	EAuraEquipmentSlot,
+	EquipmentSlot,
+	EAuraItemType,
+	EquippedItem
+);
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -33,9 +49,23 @@ public:
 	void UseNothing();
 	void Equip(const EAuraEquipmentSlot& Slot, const EAuraItemType& ItemType);
 	USkeletalMeshComponent* GetWeapon() const;
+	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
+	EAuraItemType GetToolType() const;
+	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
+	EAuraItemType GetWeaponType() const;
+	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
+	AAuraFishingRod* GetFishingRod() const;
+	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
+	EAuraItemType GetEquippedItem(const EAuraEquipmentSlot Slot) const;
+	EAuraEquipmentUseMode GetEquipmentUseMode() const;
+	void PlayEquipAnimation(EAuraEquipmentSlot Slot);
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;
+	UPROPERTY(BlueprintAssignable, Category="Item|Equipment")
+	FOnEquipmentAnimationRequestSignature OnEquipmentAnimationRequest;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnEquipmentAnimationCompleteSignature OnEquipmentAnimationCompleteDelegate;
 
 protected:
 	virtual void BeginPlay() override;

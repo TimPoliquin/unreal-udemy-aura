@@ -15,6 +15,7 @@
 #include "Aura/AuraLogChannels.h"
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Fishing/AuraFishingComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -47,12 +48,13 @@ AAuraCharacter::AAuraCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
 	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("Player Inventory"));
+	FishingComponent = CreateDefaultSubobject<UAuraFishingComponent>(TEXT("Fishing Component"));
+	FishingComponent->SetPlayerInventoryComponent(PlayerInventoryComponent);
 }
 
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	OnEquipAnimationCompleteDelegate.AddDynamic(this, &AAuraCharacter::OnEquipmentAnimationComplete);
 	OnCameraReturnDelegate.BindUObject(this, &AAuraCharacter::OnCameraReturned);
 }
 
@@ -213,22 +215,6 @@ void AAuraCharacter::InitializePlayerControllerHUD(
 void AAuraCharacter::OnCameraReturned()
 {
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
-}
-
-void AAuraCharacter::OnEquipmentAnimationComplete(const EAuraEquipmentSlot& Slot)
-{
-	switch (Slot)
-	{
-	case EAuraEquipmentSlot::Tool:
-		if (PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod))
-		{
-			OnFishingRodEquippedDelegate.Broadcast();
-		}
-		break;
-	default:
-		// nothing to do here
-		break;
-	}
 }
 
 int32 AAuraCharacter::GetCharacterLevel_Implementation() const
@@ -450,40 +436,7 @@ void AAuraCharacter::ReturnCamera_Implementation(
 	);
 }
 
-bool AAuraCharacter::HasFishingRod_Implementation()
+TScriptInterface<IFishingComponentInterface> AAuraCharacter::GetFishingComponent_Implementation() const
 {
-	return PlayerInventoryComponent->HasItemInInventory(EAuraItemType::FishingRod);
-}
-
-bool AAuraCharacter::HasFishingRodEquipped_Implementation()
-{
-	return PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod);
-}
-
-void AAuraCharacter::EquipFishingRod_Implementation()
-{
-	PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Tool, EAuraItemType::FishingRod);
-	PlayEquipAnimation(EAuraEquipmentSlot::Tool);
-}
-
-void AAuraCharacter::CastFishingRod_Implementation(const FVector& FishingLocation)
-{
-	PlayFishingCastAnimation();
-}
-
-FOnFishingRodEquippedSignature& AAuraCharacter::GetOnFishingRodEquippedDelegate()
-{
-	return OnFishingRodEquippedDelegate;
-}
-
-FOnFishingRodCastSignature& AAuraCharacter::GetOnFishingRodCastDelegate()
-{
-	return OnFishingRodCastDelegate;
-}
-
-void AAuraCharacter::EndFishing_Implementation()
-{
-	OnFishingRodEquippedDelegate.Clear();
-	OnFishingRodCastDelegate.Clear();
-	PlayEquipAnimation(EAuraEquipmentSlot::Weapon);
+	return FishingComponent;
 }

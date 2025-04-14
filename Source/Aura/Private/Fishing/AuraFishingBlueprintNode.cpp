@@ -3,9 +3,11 @@
 
 #include "Fishing/AuraFishingBlueprintNode.h"
 
+#include "Aura/AuraLogChannels.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Interaction/CombatInterface.h"
-#include "Interaction/FishingInterface.h"
+#include "Interaction/FishingActorInterface.h"
+#include "Interaction/FishingComponentInterface.h"
 #include "Interaction/PlayerInterface.h"
 
 
@@ -25,12 +27,15 @@ UAuraFishingBlueprintNode* UAuraFishingBlueprintNode::GoFishing(
 
 void UAuraFishingBlueprintNode::Activate()
 {
-	if (IFishingInterface* FishingInterface = Cast<IFishingInterface>(PlayerActor))
+	if (const TScriptInterface<IFishingComponentInterface> FishingComponent =
+		IFishingActorInterface::GetFishingComponent(
+			PlayerActor
+		))
 	{
-		FishingInterface->GetOnFishingRodCastDelegate().AddDynamic(this, &UAuraFishingBlueprintNode::OnFishingRodCast);
-		FishingInterface->GetOnFishingRodEquippedDelegate().AddDynamic(
+		FishingComponent->SetupForFishing(GoFishingParams.FishingTarget->GetActorLocation());
+		FishingComponent->GetOnFishingStateChangedDelegate().AddDynamic(
 			this,
-			&UAuraFishingBlueprintNode::OnFishingRodEquipped
+			&UAuraFishingBlueprintNode::OnFishingStateChanged
 		);
 	}
 	MoveCameraToPosition();
@@ -41,16 +46,15 @@ void UAuraFishingBlueprintNode::End()
 {
 	OnFishingCancelledDelegate.Broadcast(PlayerActor);
 	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(PlayerMoveToTargetTimerHandle);
-	if (IFishingInterface* FishingInterface = Cast<IFishingInterface>(PlayerActor))
+	if (TScriptInterface<IFishingComponentInterface> FishingComponent = IFishingActorInterface::GetFishingComponent(
+		PlayerActor
+	))
 	{
-		FishingInterface->GetOnFishingRodCastDelegate().RemoveDynamic(
+		FishingComponent->GetOnFishingStateChangedDelegate().RemoveDynamic(
 			this,
-			&UAuraFishingBlueprintNode::OnFishingRodCast
+			&UAuraFishingBlueprintNode::OnFishingStateChanged
 		);
-		FishingInterface->GetOnFishingRodEquippedDelegate().RemoveDynamic(
-			this,
-			&UAuraFishingBlueprintNode::OnFishingRodEquipped
-		);
+		FishingComponent->EndFishing();
 	}
 	SetReadyToDestroy();
 }
@@ -105,4 +109,20 @@ void UAuraFishingBlueprintNode::OnFishingRodCast()
 void UAuraFishingBlueprintNode::OnFishingRodEquipped()
 {
 	OnFishingRodEquippedDelegate.Broadcast(PlayerActor);
+}
+
+void UAuraFishingBlueprintNode::OnFishingStateChanged(EFishingState FishingState)
+{
+	UE_LOG(LogAura, Warning, TEXT("Fishing state has changed: [%d]"), FishingState);
+	switch (FishingState)
+	{
+	case EFishingState::Equipped:
+		OnFishingRodEquipped();
+		break;
+	case EFishingState::Cast:
+		OnFishingRodCast();
+		break;
+	default:
+		break;
+	}
 }
