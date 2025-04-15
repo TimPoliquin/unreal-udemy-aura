@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraFishTypes.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "AuraFishingBlueprintNode.generated.h"
@@ -17,6 +18,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingCameraInPositionSignature,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingRodEquippedSignature, AActor*, FishingActor);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingRodCastSignature, AActor*, FishingActor);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FGoFishingFishBiteSignature,
+	AActor*,
+	FishingActor
+);
 
 USTRUCT(BlueprintType)
 struct FAuraGoFishingParams
@@ -65,6 +72,8 @@ protected:
 	FGoFishingRodEquippedSignature OnFishingRodEquippedDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FGoFishingRodCastSignature OnFishingRodCastDelegate;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FGoFishingFishBiteSignature OnFishingBiteDelegate;
 
 	UFUNCTION(BlueprintCallable)
 	void End();

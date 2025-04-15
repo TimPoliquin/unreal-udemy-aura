@@ -3,10 +3,10 @@
 
 #include "Actor/AuraPOI.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "UI/Widget/InteractionWidgetInterface.h"
 
 
 AAuraPOI::AAuraPOI()
@@ -31,6 +31,7 @@ void AAuraPOI::BeginPlay()
 	Super::BeginPlay();
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPOI::OnSphereBeginOverlap);
 	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPOI::OnSphereEndOverlap);
+	IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget(), false);
 }
 
 void AAuraPOI::OnSphereBeginOverlap(
@@ -46,6 +47,7 @@ void AAuraPOI::OnSphereBeginOverlap(
 	if (IsPlayerActor(OtherActor))
 	{
 		OnOverlap(OtherActor);
+		IInteractionWidgetInterface::Show(InteractionWidget->GetWidget());
 	}
 }
 
@@ -60,6 +62,7 @@ void AAuraPOI::OnSphereEndOverlap(
 	if (IsPlayerActor(OtherActor))
 	{
 		OnEndOverlap(OtherActor);
+		IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget());
 	}
 }
 

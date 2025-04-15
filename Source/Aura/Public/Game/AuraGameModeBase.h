@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "AuraGameModeBase.generated.h"
 
+class UFishInfo;
 class UAuraItemInfo;
 class ULootTiers;
 class UAuraSaveGame;
@@ -36,6 +37,11 @@ public:
 	FORCEINLINE UAuraItemInfo* GetItemInfo() const
 	{
 		return ItemInfo;
+	}
+
+	FORCEINLINE UFishInfo* GetFishInfo() const
+	{
+		return FishInfo;
 	}
 
 	UFUNCTION()
@@ -74,6 +80,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Loot Tiers")
 	TObjectPtr<ULootTiers> LootTiers;
+
+	UPROPERTY(EditDefaultsOnly, Category="Fishing")
+	TObjectPtr<UFishInfo> FishInfo;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Save Game")
 	int32 DefaultPlayerLevel = 1;

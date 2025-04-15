@@ -1,0 +1,37 @@
+﻿// Copyright Alien Shores
+
+
+#include "Fishing/AuraFishInfo.h"
+
+FAuraFishDefinition UFishInfo::GetFishDefinitionByFishType(const EFishType& FishType) const
+{
+	const FAuraFishDefinition* Match = FishInfos.FindByPredicate(
+		[FishType](const FAuraFishDefinition& FishInfo)
+		{
+			return FishInfo.FishType == FishType;
+		}
+	);
+	if (Match)
+	{
+		return *Match;
+	}
+	return FAuraFishDefinition();
+}
+
+float UFishInfo::GetFishRarityMultiplierByRarity(const EFishRarity& Rarity) const
+{
+	const FAuraFishRarity* Match = FishRarityInfos.FindByPredicate(
+		[Rarity](const FAuraFishRarity& FishRarity)
+		{
+			return FishRarity.Rarity == Rarity;
+		}
+	);
+	return Match
+		       ? Match->RarityMultiplier
+		       : 0.f;
+}
+
+float UFishInfo::GetFishRarityMultiplierByFishType(const EFishType& FishType) const
+{
+	return GetFishRarityMultiplierByRarity(GetFishDefinitionByFishType(FishType).Rarity);
+}
