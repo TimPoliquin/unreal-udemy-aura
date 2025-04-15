@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Fishing/AuraFishTypes.h"
 #include "UObject/Interface.h"
 #include "FishingComponentInterface.generated.h"
 
@@ -15,6 +16,7 @@ enum class EFishingState : uint8
 	Casting,
 	Cast,
 	Waiting,
+	Lured,
 	Biting,
 	Reeling
 };
@@ -46,8 +48,12 @@ public:
 	void EquipFishingRod();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void CastFishingRod();
-
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Reel();
 	virtual void SetupForFishing(const FVector& FishingDestination) = 0;
 	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate() = 0;
+	virtual void FishStateChanged(const EFishState& FishState) = 0;
 	virtual void EndFishing() = 0;
+
+	static void FishStateChanged(const UObject* Actor, const EFishState& FishState);
 };

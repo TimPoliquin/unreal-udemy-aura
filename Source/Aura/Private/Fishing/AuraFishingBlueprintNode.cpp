@@ -9,6 +9,7 @@
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/FishingComponentInterface.h"
 #include "Interaction/PlayerInterface.h"
+#include "Utils/RandUtils.h"
 
 
 UAuraFishingBlueprintNode* UAuraFishingBlueprintNode::GoFishing(
@@ -23,6 +24,82 @@ UAuraFishingBlueprintNode* UAuraFishingBlueprintNode::GoFishing(
 	// Register with the game instance to avoid being garbage collected
 	BlueprintNode->RegisterWithGameInstance(WorldContextObject);
 	return BlueprintNode;
+}
+
+void UAuraFishingBlueprintNode::WaitForFishToBeLured()
+{
+	FTimerDelegate InterestTimerDelegate;
+	InterestTimerDelegate.BindLambda(
+		[this]()
+		{
+			OnFishingLuredDelegate.Broadcast(PlayerActor);
+		}
+	);
+	PlayerActor->GetWorld()->GetTimerManager().SetTimer(
+		FishInterestToLureTimerHandle,
+		InterestTimerDelegate,
+		GoFishingParams.TimeToLure.Value(),
+		false
+	);
+}
+
+void UAuraFishingBlueprintNode::LureAndWaitForABite(const EFishType& FishType)
+{
+	ActiveFishType = FishType;
+	SetFishState(EFishState::Lured);
+	FTimerDelegate LureCallbackDelegate;
+	LureCallbackDelegate.BindLambda(
+		[this]()
+		{
+			BiteAndWaitForPlayerOrFlee();
+		}
+	);
+	PlayerActor->GetWorld()->GetTimerManager().SetTimer(
+		FishLureToBiteTimerHandle,
+		LureCallbackDelegate,
+		GoFishingParams.LureToBiteTime.Value(),
+		false
+	);
+}
+
+void UAuraFishingBlueprintNode::BiteAndWaitForPlayerOrFlee()
+{
+	SetFishState(EFishState::Biting);
+	OnFishingBiteDelegate.Broadcast(PlayerActor);
+	FTimerDelegate BiteToFleeCallbackDelegate;
+	BiteToFleeCallbackDelegate.BindLambda(
+		[this]()
+		{
+			Flee();
+		}
+	);
+	PlayerActor->GetWorld()->GetTimerManager().SetTimer(
+		FishBiteToFleeTimerHandle,
+		BiteToFleeCallbackDelegate,
+		GoFishingParams.BiteToFleeTime.Value(),
+		false
+	);
+}
+
+void UAuraFishingBlueprintNode::Flee()
+{
+	ActiveFishType = EFishType::None;
+	SetFishState(EFishState::None);
+	OnFishingFishHasFledDelegate.Broadcast(PlayerActor);
+}
+
+void UAuraFishingBlueprintNode::Reel()
+{
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishBiteToFleeTimerHandle);
+	SetFishState(EFishState::Fighting);
+	OnFishingFishReelingDelegate.Broadcast(PlayerActor);
+}
+
+void UAuraFishingBlueprintNode::Catch()
+{
+	OnFishingFishCaughtDelegate.Broadcast(PlayerActor);
+	ActiveFishType = EFishType::None;
+	SetFishState(EFishState::None);
 }
 
 void UAuraFishingBlueprintNode::Activate()
@@ -46,9 +123,13 @@ void UAuraFishingBlueprintNode::End()
 {
 	OnFishingCancelledDelegate.Broadcast(PlayerActor);
 	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(PlayerMoveToTargetTimerHandle);
-	if (TScriptInterface<IFishingComponentInterface> FishingComponent = IFishingActorInterface::GetFishingComponent(
-		PlayerActor
-	))
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishInterestToLureTimerHandle);
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishLureToBiteTimerHandle);
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishBiteToFleeTimerHandle);
+	if (const TScriptInterface<IFishingComponentInterface> FishingComponent =
+		IFishingActorInterface::GetFishingComponent(
+			PlayerActor
+		))
 	{
 		FishingComponent->GetOnFishingStateChangedDelegate().RemoveDynamic(
 			this,
@@ -101,14 +182,15 @@ void UAuraFishingBlueprintNode::OnCameraInPosition()
 	OnCameraInPositionDelegate.Broadcast(PlayerActor);
 }
 
-void UAuraFishingBlueprintNode::OnFishingRodCast()
-{
-	OnFishingRodCastDelegate.Broadcast(PlayerActor);
-}
-
 void UAuraFishingBlueprintNode::OnFishingRodEquipped()
 {
 	OnFishingRodEquippedDelegate.Broadcast(PlayerActor);
+}
+
+void UAuraFishingBlueprintNode::OnFishingRodCast()
+{
+	OnFishingRodCastDelegate.Broadcast(PlayerActor);
+	WaitForFishToBeLured();
 }
 
 void UAuraFishingBlueprintNode::OnFishingStateChanged(EFishingState FishingState)
@@ -122,7 +204,16 @@ void UAuraFishingBlueprintNode::OnFishingStateChanged(EFishingState FishingState
 	case EFishingState::Cast:
 		OnFishingRodCast();
 		break;
+	case EFishingState::Reeling:
+		Reel();
+		break;
 	default:
 		break;
 	}
+}
+
+void UAuraFishingBlueprintNode::SetFishState(const EFishState& InFishState)
+{
+	ActiveFishState = InFishState;
+	IFishingComponentInterface::FishStateChanged(PlayerActor, InFishState);
 }

@@ -38,6 +38,8 @@ public:
 	virtual bool HasFishingRodEquipped_Implementation() override;
 	virtual void EquipFishingRod_Implementation() override;
 	virtual void CastFishingRod_Implementation() override;
+	virtual void FishStateChanged(const EFishState& FishState) override;
+	virtual void Reel_Implementation() override;
 	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void EndFishing() override;

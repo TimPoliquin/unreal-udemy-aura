@@ -53,6 +53,34 @@ void UAuraFishingComponent::CastFishingRod_Implementation()
 	OnFishingComponentCastAnimationDelegate.Broadcast();
 }
 
+void UAuraFishingComponent::FishStateChanged(const EFishState& FishState)
+{
+	switch (FishState)
+	{
+	case EFishState::None:
+
+		break;
+	case EFishState::Lured:
+		SetFishingState(EFishingState::Lured);
+		FishingBob->Lured();
+		break;
+	case EFishState::Biting:
+		SetFishingState(EFishingState::Biting);
+		FishingBob->Biting();
+		break;
+	case EFishState::Fighting:
+		// DEVNOTE - nothing to do here - yet.
+		break;
+	case EFishState::Caught:
+		break;
+	}
+}
+
+void UAuraFishingComponent::Reel_Implementation()
+{
+	SetFishingState(EFishingState::Reeling);
+}
+
 FOnFishingStateChangedSignature& UAuraFishingComponent::GetOnFishingStateChangedDelegate()
 {
 	return OnFishingStateChangedDelegate;
@@ -60,9 +88,14 @@ FOnFishingStateChangedSignature& UAuraFishingComponent::GetOnFishingStateChanged
 
 void UAuraFishingComponent::EndFishing()
 {
+	if (FishingState == EFishingState::None)
+	{
+		UE_LOG(LogAura, Warning, TEXT("Fishing has already ended"));
+		return;
+	}
+	SetFishingState(EFishingState::None);
 	FishingDestination = FVector::ZeroVector;
 	OnFishingStateChangedDelegate.Clear();
-	OnFishingComponentCastAnimationDelegate.Clear();
 	if (FishingRod)
 	{
 		// TODO - clear fishing rod data
@@ -71,6 +104,7 @@ void UAuraFishingComponent::EndFishing()
 	if (FishingBob)
 	{
 		FishingBob->OnFishingStateChanged.RemoveDynamic(this, &UAuraFishingComponent::OnFishingBobStateChanged);
+		FishingBob->Cancel();
 		FishingBob = nullptr;
 	}
 	switch (FishingRestore.UseMode)
@@ -86,7 +120,6 @@ void UAuraFishingComponent::EndFishing()
 		PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Weapon, FishingRestore.WeaponType);
 		PlayerInventoryComponent->PlayEquipAnimation(EAuraEquipmentSlot::Weapon);
 	}
-	SetFishingState(EFishingState::None);
 }
 
 void UAuraFishingComponent::ReleaseCast()
@@ -118,8 +151,15 @@ EFishingState UAuraFishingComponent::GetFishingState() const
 
 void UAuraFishingComponent::SetFishingState(EFishingState InFishingState)
 {
-	FishingState = InFishingState;
-	OnFishingStateChangedDelegate.Broadcast(InFishingState);
+	if (InFishingState != FishingState)
+	{
+		FishingState = InFishingState;
+		OnFishingStateChangedDelegate.Broadcast(InFishingState);
+	}
+	else
+	{
+		UE_LOG(LogAura, Warning, TEXT("AuraFishingComponent: Potential loop detected setting state"));
+	}
 }
 
 void UAuraFishingComponent::OnInventoryEquipAnimationComplete(

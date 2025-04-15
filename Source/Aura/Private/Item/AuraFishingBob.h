@@ -16,6 +16,8 @@ enum class EFishingBobState : uint8
 	None,
 	Casting,
 	Bobbing,
+	Lured,
+	Biting,
 	Reeling
 };
 
@@ -33,6 +35,9 @@ public:
 	FName GetMeshComponentName() const { return FName("Mesh"); }
 	UFUNCTION(BlueprintCallable)
 	void Launch(const FVector& InDestination);
+	void Lured();
+	void Biting();
+	void Cancel();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingBobStateChangedSignature OnFishingStateChanged;
@@ -61,6 +66,8 @@ private:
 
 	void HandleCastingTick(float DeltaTime);
 	void HandleBobbingTick(float DeltaTime);
+	void HandleLuredTick(float DeltaTime);
+	void HandleBitingTick(float DeltaTime);
 	void HandleReelingTick(float DeltaTime);
 
 	void SetFishingState(const EFishingBobState InFishingState)

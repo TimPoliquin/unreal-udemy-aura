@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actor/AuraPOI.h"
 #include "Fishing/AuraFishTypes.h"
+#include "Utils/RandUtils.h"
 #include "AuraFishingPOI.generated.h"
 
 enum class EFishTag : uint8;
@@ -52,6 +53,12 @@ protected:
 	TArray<FFishConfig> FishConfigs;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fishing")
 	TArray<EFishTag> PoolTags;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fishing")
+	FRandRange InterestToLureTime = FRandRange(5.f, 10.f);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fishing")
+	FRandRange LureToBiteTime = FRandRange(5.f, 10.f);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fishing")
+	FRandRange BiteToFleeTime = FRandRange(1.f, 7.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fishing|Debug")
 	bool bDebug = false;
 };

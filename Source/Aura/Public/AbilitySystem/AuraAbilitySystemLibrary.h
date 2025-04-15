@@ -299,12 +299,18 @@ public:
 		float PitchOverride = 0.f
 	);
 
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static FActiveGameplayEffectHandle ApplyBasicGameplayEffect(
 		AActor* TargetActor,
 		const TSubclassOf<UGameplayEffect>& GameplayEffect,
 		int32 Level = 1
 	);
-	static void RemoveGameplayEffect(AActor* TargetActor, const FActiveGameplayEffectHandle& GameplayEffectHandle, bool bRemoveAll = true);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static void RemoveGameplayEffect(
+		AActor* TargetActor,
+		const FActiveGameplayEffectHandle& GameplayEffectHandle,
+		bool bRemoveAll = true
+	);
 
 private:
 	static bool GetWidgetControllerParams(

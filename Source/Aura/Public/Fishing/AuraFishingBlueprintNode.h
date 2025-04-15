@@ -6,24 +6,11 @@
 #include "AuraFishTypes.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
+#include "Utils/RandUtils.h"
 #include "AuraFishingBlueprintNode.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingCancelledSignature, AActor*, FishingActor);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingPlayerInPositionSignature, AActor*, FishingActor);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingCameraInPositionSignature, AActor*, FishingActor);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingRodEquippedSignature, AActor*, FishingActor);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingRodCastSignature, AActor*, FishingActor);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
-	FGoFishingFishBiteSignature,
-	AActor*,
-	FishingActor
-);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingEventSignature, AActor*, FishingActor);
 
 USTRUCT(BlueprintType)
 struct FAuraGoFishingParams
@@ -37,6 +24,12 @@ struct FAuraGoFishingParams
 	AActor* FishingTarget = nullptr;
 	UPROPERTY(BlueprintReadWrite)
 	UCurveFloat* CameraMovementCurve = nullptr;
+	UPROPERTY(BlueprintReadWrite)
+	FRandRange TimeToLure;
+	UPROPERTY(BlueprintReadWrite)
+	FRandRange LureToBiteTime;
+	UPROPERTY(BlueprintReadWrite)
+	FRandRange BiteToFleeTime;
 };
 
 /**
@@ -58,22 +51,47 @@ public:
 		AActor* Player,
 		const FAuraGoFishingParams& Params
 	);
+	UFUNCTION(BlueprintCallable)
+	void WaitForFishToBeLured();
+	UFUNCTION(BlueprintCallable)
+	void LureAndWaitForABite(const EFishType& FishType);
+	UFUNCTION(BlueprintCallable)
+	void BiteAndWaitForPlayerOrFlee();
+	UFUNCTION(BlueprintCallable)
+	void Flee();
+	UFUNCTION(BlueprintCallable)
+	void Reel();
+	UFUNCTION(BlueprintCallable)
+	void Catch();
 
 	virtual void Activate() override;
 
 protected:
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingCameraInPositionSignature OnCameraInPositionDelegate;
+	FGoFishingEventSignature OnCameraInPositionDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingCancelledSignature OnFishingCancelledDelegate;
+	FGoFishingEventSignature OnFishingCancelledDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingPlayerInPositionSignature OnPlayerInPositionDelegate;
+	FGoFishingEventSignature OnPlayerInPositionDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingRodEquippedSignature OnFishingRodEquippedDelegate;
+	FGoFishingEventSignature OnFishingRodEquippedDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingRodCastSignature OnFishingRodCastDelegate;
+	FGoFishingEventSignature OnFishingRodCastDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FGoFishingEventSignature OnFishingLuredDelegate;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FGoFishingFishBiteSignature OnFishingBiteDelegate;
+	FGoFishingEventSignature OnFishingBiteDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FGoFishingEventSignature OnFishingFishHasFledDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FGoFishingEventSignature OnFishingFishReelingDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FGoFishingEventSignature OnFishingFishCaughtDelegate;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	EFishType ActiveFishType = EFishType::None;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	EFishState ActiveFishState = EFishState::None;
 
 	UFUNCTION(BlueprintCallable)
 	void End();
@@ -87,6 +105,12 @@ private:
 	UPROPERTY()
 	FTimerHandle PlayerMoveToTargetTimerHandle;
 	FTimerDelegate PlayerMoveToTargetTimerDelegate;
+	UPROPERTY()
+	FTimerHandle FishInterestToLureTimerHandle;
+	UPROPERTY()
+	FTimerHandle FishLureToBiteTimerHandle;
+	UPROPERTY()
+	FTimerHandle FishBiteToFleeTimerHandle;
 
 	FOnCameraMoveFinishedSignature OnCameraMoveFinishedDelegate;
 	void MoveCameraToPosition();
@@ -99,4 +123,5 @@ private:
 	void OnFishingRodEquipped();
 	UFUNCTION()
 	void OnFishingStateChanged(EFishingState FishingState);
+	void SetFishState(const EFishState& InFishState);
 };

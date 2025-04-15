@@ -134,6 +134,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.Interact"),
 		FString("Input tag for player interacting with an object")
 	);
+	Instance.InputTag_Fishing_Reel = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Fishing.Reel"),
+		FString("Input tag for reeling in the fishing line during the fishing minigame")
+	);
 	Instance.InputTag_Cancel = TagManager.AddNativeGameplayTag(
 		FName("InputTag.Cancel"),
 		FString("Input tag for canceling player interaction and abilities")
@@ -315,6 +319,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Abilities_Other_Interact = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Other.Interact"),
 		FString("Interact with objects in the world")
+	);
+	Instance.Abilities_Other_Interact_Fishing = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Other.Interact.Fishing"),
+		FString("Active while the player is fishing")
 	);
 	Instance.Abilities_Other_Cancel = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Other.Cancel"),

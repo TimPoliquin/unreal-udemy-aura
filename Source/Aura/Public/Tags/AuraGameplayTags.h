@@ -60,6 +60,7 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_Passive1;
 	FGameplayTag InputTag_Passive2;
 	FGameplayTag InputTag_Interact;
+	FGameplayTag InputTag_Fishing_Reel;
 	FGameplayTag InputTag_Cancel;
 
 	/** Effect Tags **/
@@ -111,6 +112,7 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;
 	FGameplayTag Abilities_Other_Interact;
+	FGameplayTag Abilities_Other_Interact_Fishing;
 	FGameplayTag Abilities_Other_Cancel;
 	FGameplayTag Abilities_Status;
 	FGameplayTag Abilities_Status_Locked;

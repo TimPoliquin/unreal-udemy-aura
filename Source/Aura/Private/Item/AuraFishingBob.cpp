@@ -39,6 +39,12 @@ void AAuraFishingBob::Tick(float DeltaTime)
 	case EFishingBobState::Bobbing:
 		HandleBobbingTick(DeltaTime);
 		break;
+	case EFishingBobState::Lured:
+		HandleLuredTick(DeltaTime);
+		break;
+	case EFishingBobState::Biting:
+		HandleBitingTick(DeltaTime);
+		break;
 	case EFishingBobState::Reeling:
 		HandleReelingTick(DeltaTime);
 	}
@@ -77,6 +83,24 @@ void AAuraFishingBob::Launch(const FVector& InDestination)
 	Mesh->SetVisibility(true);
 }
 
+void AAuraFishingBob::Lured()
+{
+	SetFishingState(EFishingBobState::Lured);
+}
+
+void AAuraFishingBob::Biting()
+{
+	SetFishingState(EFishingBobState::Biting);
+	SetActorLocation(Destination + FVector::DownVector * BobbingAmplitude * 3.f);
+}
+
+void AAuraFishingBob::Cancel()
+{
+	SetFishingState(EFishingBobState::None);
+	Destination = FVector::ZeroVector;
+	OnFishingStateChanged.Clear();
+}
+
 void AAuraFishingBob::HandleCastingTick(float DeltaTime)
 {
 	if (FVector::Distance(GetActorLocation(), Destination) <= DestinationThreshold)
@@ -105,6 +129,23 @@ void AAuraFishingBob::HandleBobbingTick(const float DeltaTime)
 		BobbingAmplitude,
 		Destination
 	);
+}
+
+void AAuraFishingBob::HandleLuredTick(float DeltaTime)
+{
+	UAuraActorBlueprintFunctionLibrary::SinusoidalMovement(
+		this,
+		DeltaTime,
+		BobbingTime,
+		BobbingPeriodMultiplier * 5.f,
+		BobbingAmplitude * 2.f,
+		Destination + FVector::DownVector * BobbingAmplitude * 1.5
+	);
+}
+
+void AAuraFishingBob::HandleBitingTick(float DeltaTime)
+{
+	// Maybe nothing to do here
 }
 
 void AAuraFishingBob::HandleReelingTick(float DeltaTime)

@@ -31,6 +31,16 @@ enum class EFishTag: uint8
 	Night,
 };
 
+UENUM(BlueprintType)
+enum class EFishState : uint8
+{
+	None,
+	Lured,
+	Biting,
+	Fighting,
+	Caught
+};
+
 USTRUCT(BlueprintType)
 struct FAuraFishDefinition
 {
