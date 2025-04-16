@@ -7,6 +7,7 @@
 #include "GameplayAbilitySpec.h"
 #include "GameplayTagContainer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemLibrary.generated.h"
 
 class ULootTiers;
@@ -17,7 +18,6 @@ struct FDamageEffectParams;
 class UAuraAbilitySystemComponent;
 class UAbilityInfo;
 class USpellMenuWidgetController;
-struct FGameplayAbilitySpec;
 class UGameplayAbility;
 struct FGameplayEffectSpecHandle;
 struct FGameplayEffectContextHandle;
@@ -147,9 +147,17 @@ public:
 	static FVector GetKnockbackVector(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
-	static void SetIsBlockedHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool InIsBlocked);
+	static void SetIsBlockedHit(
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
+		bool InIsBlocked
+	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
-	static void SetIsCriticalHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, bool InIsCriticalHit);
+	static void SetIsCriticalHit(
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
+		bool InIsCriticalHit
+	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDebuff(
 		FGameplayEffectContextHandle& EffectContextHandle,
@@ -160,42 +168,50 @@ public:
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetIsSuccessfulDebuff(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		bool InIsSuccessfulDebuff
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDebuffDamage(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		float InDebuffDamage
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDebuffDuration(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		float InDebuffDuration
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDebuffFrequency(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		float InDebuffFrequency
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDebuffTypeTag(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		const FGameplayTag& InDebuffTypeTag
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDamageTypeTag(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		const FGameplayTag& InDamageTypeTag
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetDeathImpulse(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		const FVector& InDeathImpulse
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static void SetKnockbackVector(
-		UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle,
+		UPARAM(ref)
+		FGameplayEffectContextHandle& EffectContextHandle,
 		const FVector& InKnockbackVector
 	);
 
@@ -271,14 +287,16 @@ public:
 	/** Damage effect params **/
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static void SetKnockbackDirection(
-		UPARAM(ref) FDamageEffectParams& DamageEffectParams,
+		UPARAM(ref)
+		FDamageEffectParams& DamageEffectParams,
 		FVector KnockbackDirection,
 		const bool bOverrideMagnitude = false,
 		const float Magnitude = 0.f
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static void SetDeathImpulseDirection(
-		UPARAM(ref) FDamageEffectParams& DamageEffectParams,
+		UPARAM(ref)
+		FDamageEffectParams& DamageEffectParams,
 		FVector DeathImpulseDirection,
 		const bool bOverrideMagnitude = false,
 		const float Magnitude = 0.f
@@ -311,6 +329,8 @@ public:
 		const FActiveGameplayEffectHandle& GameplayEffectHandle,
 		bool bRemoveAll = true
 	);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static int32 GetAbilityLevelByAbilityTag(AActor* Actor, const FGameplayTag& AbilityTag);
 
 private:
 	static bool GetWidgetControllerParams(

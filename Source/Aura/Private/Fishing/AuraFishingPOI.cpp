@@ -6,6 +6,7 @@
 #include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
 #include "Game/AuraGameModeBase.h"
+#include "Interaction/FishingComponentInterface.h"
 #include "Utils/ArrayUtils.h"
 
 
@@ -19,9 +20,7 @@ AAuraFishingPOI::AAuraFishingPOI()
 TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* Player) const
 {
 	TArray<FWeightedFish> AvailableFish;
-	TArray<EFishTag> PlayerFishTags; // TODO - get fish tags from FishingActor/FishingComponent interface
-	// TODO - get fishing rarity multiplier from FishingActor/FishingComponent interface
-	constexpr float PlayerRarityMultiplier = 1.f;
+	TArray<EFishTag> PlayerFishTags = IFishingComponentInterface::GetFishingTags(Player);
 	TArray<EFishTag> CombinedFishTags;
 	CombinedFishTags.Append(PoolTags);
 	CombinedFishTags.Append(PlayerFishTags);
@@ -37,7 +36,8 @@ TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* P
 				FWeightedFish WeightedFish;
 				WeightedFish.FishType = FishConfig.FishType;
 				WeightedFish.Weight = 100.f * (FishConfig.RarityMultiplier * GameMode->GetFishInfo()->
-					GetFishRarityMultiplierByRarity(FishDefinition.Rarity) * PlayerRarityMultiplier);
+					GetFishRarityMultiplierByRarity(FishDefinition.Rarity) *
+					IFishingComponentInterface::GetRarityMultiplier(Player, FishDefinition.Rarity));
 				if (WeightedFish.Weight > 0)
 				{
 					AvailableFish.Add(WeightedFish);

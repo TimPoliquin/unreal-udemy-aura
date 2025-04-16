@@ -22,10 +22,14 @@ public:
 	float GetFishRarityMultiplierByRarity(const EFishRarity& Rarity) const;
 	UFUNCTION(BlueprintCallable)
 	float GetFishRarityMultiplierByFishType(const EFishType& FishType) const;
+	UFUNCTION(BlueprintCallable)
+	float GetFishRarityMultiplierByPlayerFishingLevel(const int32& PlayerFishingLevel, const EFishRarity& Rarity) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
 	TArray<FAuraFishDefinition> FishInfos;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
 	TArray<FAuraFishRarity> FishRarityInfos;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
+	TArray<FAuraPlayerFishingLevelRarity> PlayerFishingLevelRarityInfos;
 };

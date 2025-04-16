@@ -70,3 +70,13 @@ struct FAuraFishRarity
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FishInfo")
 	float RarityMultiplier = 1.0f;
 };
+
+USTRUCT(BlueprintType)
+struct FAuraPlayerFishingLevelRarity
+{
+	GENERATED_BODY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FishInfo")
+	int32 Level = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FishInfo")
+	TMap<EFishRarity, float> RarityMultipliers;
+};

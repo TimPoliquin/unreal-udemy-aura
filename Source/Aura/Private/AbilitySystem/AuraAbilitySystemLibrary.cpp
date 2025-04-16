@@ -3,8 +3,6 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
-#include <rapidjson/schema.h>
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
@@ -754,6 +752,20 @@ void UAuraAbilitySystemLibrary::RemoveGameplayEffect(
 				: 1
 		);
 	}
+}
+
+int32 UAuraAbilitySystemLibrary::GetAbilityLevelByAbilityTag(
+	AActor* Actor,
+	const FGameplayTag& AbilityTag
+)
+{
+	if (UAuraAbilitySystemComponent* AbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Actor)
+	))
+	{
+		return AbilitySystemComponent->GetSpecFromAbilityTag(AbilityTag)->Level;
+	}
+	return 0;
 }
 
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)

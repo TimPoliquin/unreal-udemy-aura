@@ -49,6 +49,10 @@ public:
 	bool IsFishing() const;
 	UFUNCTION(BlueprintCallable)
 	EFishingState GetFishingState() const;
+	UFUNCTION(BlueprintCallable)
+	float GetRarityMultiplier(const EFishRarity& Rarity) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<EFishTag> GetFishingTags() const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingStateChangedSignature OnFishingStateChangedDelegate;
@@ -58,6 +62,8 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFishingState FishingState = EFishingState::None;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<EFishTag> FishingTags;
 
 private:
 	void SetFishingState(EFishingState InFishingState);

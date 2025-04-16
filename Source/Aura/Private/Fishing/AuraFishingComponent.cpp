@@ -3,10 +3,14 @@
 
 #include "Fishing/AuraFishingComponent.h"
 
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/AuraLogChannels.h"
+#include "Fishing/AuraFishInfo.h"
+#include "Game/AuraGameModeBase.h"
 #include "Item/AuraFishingRod.h"
 #include "Item/AuraItemTypes.h"
 #include "Player/PlayerInventoryComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 
 UAuraFishingComponent::UAuraFishingComponent()
@@ -147,6 +151,24 @@ bool UAuraFishingComponent::IsFishing() const
 EFishingState UAuraFishingComponent::GetFishingState() const
 {
 	return FishingState;
+}
+
+float UAuraFishingComponent::GetRarityMultiplier(const EFishRarity& Rarity) const
+{
+	const int32 FishingLevel = UAuraAbilitySystemLibrary::GetAbilityLevelByAbilityTag(
+		GetOwner(),
+		FAuraGameplayTags::Get().Abilities_Fishing
+	);
+	return AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetFishInfo()->
+	                                                       GetFishRarityMultiplierByPlayerFishingLevel(
+		                                                       FishingLevel,
+		                                                       Rarity
+	                                                       );
+}
+
+TArray<EFishTag> UAuraFishingComponent::GetFishingTags() const
+{
+	return FishingTags;
 }
 
 void UAuraFishingComponent::SetFishingState(EFishingState InFishingState)
