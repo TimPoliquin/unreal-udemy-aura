@@ -112,8 +112,9 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;
 	FGameplayTag Abilities_Other_Interact;
-	FGameplayTag Abilities_Other_Interact_Fishing;
 	FGameplayTag Abilities_Other_Cancel;
+	FGameplayTag Abilities_Fishing;
+	FGameplayTag Abilities_Fishing_Reel;
 	FGameplayTag Abilities_Status;
 	FGameplayTag Abilities_Status_Locked;
 	FGameplayTag Abilities_Status_Eligible;
@@ -148,6 +149,8 @@ struct FAuraGameplayTags
 	FGameplayTag Player_Equipped_Tool;
 	FGameplayTag Player_Equipped_Tool_FishingRod;
 	FGameplayTag Player_Equipped_Weapon;
+	FGameplayTag Player_POI_Fishing;
+	FGameplayTag Player_POI_Fishing_CanReel;
 
 	/**
 	 * Montage Attack Tags 

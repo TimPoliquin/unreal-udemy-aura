@@ -320,13 +320,17 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Other.Interact"),
 		FString("Interact with objects in the world")
 	);
-	Instance.Abilities_Other_Interact_Fishing = TagManager.AddNativeGameplayTag(
-		FName("Abilities.Other.Interact.Fishing"),
-		FString("Active while the player is fishing")
-	);
 	Instance.Abilities_Other_Cancel = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Other.Cancel"),
 		FString("Cancels active abilities and interactions")
+	);
+	Instance.Abilities_Fishing = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Fishing"),
+		FString("Player's fishing ability.")
+	);
+	Instance.Abilities_Fishing_Reel = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Fishing.Reel"),
+		FString("Player's fishing reel ability.")
 	);
 	Instance.Abilities_Status = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Status"),
@@ -450,6 +454,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Player_Equipped_Weapon = TagManager.AddNativeGameplayTag(
 		FName("Player.Equipped.Weapon"),
 		FString("Player has a weapon equipped")
+	);
+	Instance.Player_POI_Fishing = TagManager.AddNativeGameplayTag(
+		FName("Player.POI.Fishing"),
+		FString("Player is at a fishing POI")
+	);
+	Instance.Player_POI_Fishing_CanReel = TagManager.AddNativeGameplayTag(
+		FName("Player.POI.Fishing.CanReel"),
+		FString("Player is fishing and can reel")
 	);
 }
 
