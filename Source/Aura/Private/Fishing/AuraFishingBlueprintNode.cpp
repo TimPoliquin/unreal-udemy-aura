@@ -86,7 +86,7 @@ void UAuraFishingBlueprintNode::BiteAndWaitForPlayerOrFlee()
 void UAuraFishingBlueprintNode::Flee()
 {
 	ActiveFishType = EFishType::None;
-	SetFishState(EFishState::None);
+	SetFishState(EFishState::Fled);
 	OnFishingFishHasFledDelegate.Broadcast(PlayerActor);
 }
 

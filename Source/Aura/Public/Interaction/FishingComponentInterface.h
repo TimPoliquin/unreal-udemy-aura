@@ -23,7 +23,8 @@ enum class EFishingState : uint8
 	Lured,
 	Biting,
 	Reeling,
-	Caught
+	Caught,
+	Fled,
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFishingStateChangedSignature, EFishingState, FishingState);

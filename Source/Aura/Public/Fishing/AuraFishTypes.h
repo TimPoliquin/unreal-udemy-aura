@@ -39,7 +39,8 @@ enum class EFishState : uint8
 	Lured,
 	Biting,
 	Fighting,
-	Caught
+	Caught,
+	Fled,
 };
 
 USTRUCT(BlueprintType)

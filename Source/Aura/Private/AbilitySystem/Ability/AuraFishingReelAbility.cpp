@@ -25,16 +25,8 @@ void UAuraFishingReelAbility::ReelIn(AActor* Player)
 
 void UAuraFishingReelAbility::OnFishingStateChanged(EFishingState FishingState)
 {
-	switch (FishingState)
+	if (FishingState != EFishingState::Reeling)
 	{
-	case EFishingState::None:
 		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
-		break;
-	case EFishingState::Caught:
-		EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
-		break;
-	default:
-		// not sure yet
-		break;
 	}
 }

@@ -73,6 +73,7 @@ void UAuraFishingComponent::FishStateChanged(const EFishState& FishState)
 	switch (FishState)
 	{
 	case EFishState::None:
+
 		break;
 	case EFishState::Lured:
 		SetFishingState(EFishingState::Lured);
@@ -87,6 +88,17 @@ void UAuraFishingComponent::FishStateChanged(const EFishState& FishState)
 		break;
 	case EFishState::Caught:
 		SetFishingState(EFishingState::Caught);
+		if (FishingRod)
+		{
+			FishingRod->Return();
+		}
+		if (FishingBob)
+		{
+			FishingBob->OnFishingStateChanged.RemoveDynamic(this, &UAuraFishingComponent::OnFishingBobStateChanged);
+		}
+		break;
+	case EFishState::Fled:
+		SetFishingState(EFishingState::Fled);
 		if (FishingRod)
 		{
 			FishingRod->Return();
