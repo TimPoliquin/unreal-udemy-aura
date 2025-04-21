@@ -63,6 +63,9 @@ public:
 	void Reel();
 	UFUNCTION(BlueprintCallable)
 	void Catch();
+	void Cleanup();
+	UFUNCTION(BlueprintCallable)
+	void PrepareForContinue();
 
 	virtual void Activate() override;
 
@@ -92,6 +95,8 @@ protected:
 	EFishType ActiveFishType = EFishType::None;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	EFishState ActiveFishState = EFishState::None;
+	UPROPERTY(BlueprintReadOnly)
+	FAuraFishCatch CaughtFish;
 
 	UFUNCTION(BlueprintCallable)
 	void End();

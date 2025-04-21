@@ -34,6 +34,20 @@ float IFishingComponentInterface::GetRarityMultiplier(const UObject* Actor, cons
 	return 0.f;
 }
 
+bool IFishingComponentInterface::IsFishing(const UObject* Actor)
+{
+	if (IsValid(Actor) && Actor->Implements<UFishingActorInterface>())
+	{
+		if (TScriptInterface<IFishingComponentInterface> FishingComponent = IFishingActorInterface::GetFishingComponent(
+			Actor
+		))
+		{
+			return FishingComponent->IsFishing();
+		}
+	}
+	return false;
+}
+
 TArray<EFishTag> IFishingComponentInterface::GetFishingTags(const UObject* Actor)
 {
 	if (IsValid(Actor) && Actor->Implements<UFishingActorInterface>())

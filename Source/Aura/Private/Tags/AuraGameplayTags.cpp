@@ -463,6 +463,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Player.POI.Fishing.CanReel"),
 		FString("Player is fishing and can reel")
 	);
+	Instance.Player_HUD_Hide = TagManager.AddNativeGameplayTag(
+		FName("Player.HUD.Hide"),
+		FString("Force the player HUD to hide")
+	);
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

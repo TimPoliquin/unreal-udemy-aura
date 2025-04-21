@@ -33,6 +33,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidge
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOverlayClearSlotSignature, const FGameplayTag&, SlotTag);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOverlayVisibilityChangedSignature, const bool, bVisible);
+
 
 /**
  * 
@@ -72,6 +74,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOverlayClearSlotSignature OnClearSlot;
 
+	UPROPERTY(BlueprintAssignable, Category="HUD")
+	FOverlayVisibilityChangedSignature OnHUDVisibilityChangedDelegate;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable> MessageDataTable;
@@ -88,6 +93,8 @@ private:
 	void OnPlayerLevelChange(const int32 InLevel);
 	UFUNCTION()
 	void OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload);
+	UFUNCTION()
+	void OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count);
 };
 
 template <typename T>

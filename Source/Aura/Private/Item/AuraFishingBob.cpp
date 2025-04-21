@@ -101,9 +101,25 @@ void AAuraFishingBob::Cancel()
 	OnFishingStateChanged.Clear();
 }
 
+void AAuraFishingBob::Return(AActor* InOwner, const FName& SocketName)
+{
+	SetOwner(InOwner);
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+	SetActorEnableCollision(false);
+	SetFishingState(EFishingBobState::None);
+	AttachToActor(InOwner, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+	ProjectileMovementComponent->StopMovementImmediately();
+	ProjectileMovementComponent->ProjectileGravityScale = 0;
+	Collider->SetEnableGravity(false);
+	Mesh->SetEnableGravity(false);
+	Mesh->SetVisibility(false);
+}
+
 void AAuraFishingBob::HandleCastingTick(float DeltaTime)
 {
-	if (FVector::Distance(GetActorLocation(), Destination) <= DestinationThreshold)
+	if (FVector::Distance(GetActorLocation(), Destination) <= DestinationThreshold || GetActorLocation().Z < Destination
+		.Z)
 	{
 		ProjectileMovementComponent->StopMovementImmediately();
 		ProjectileMovementComponent->ProjectileGravityScale = 0.f;

@@ -5,6 +5,8 @@
 
 #include "Aura/AuraLogChannels.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Fishing/AuraFishInfo.h"
+#include "Game/AuraGameModeBase.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/FishingComponentInterface.h"
@@ -97,10 +99,13 @@ void UAuraFishingBlueprintNode::Reel()
 
 void UAuraFishingBlueprintNode::Catch()
 {
+	CaughtFish = AAuraGameModeBase::GetAuraGameMode(PlayerActor)->GetFishInfo()->GetFishDefinitionByFishType(
+		ActiveFishType
+	).ToFishCatch();
+	SetFishState(EFishState::Caught);
 	OnFishingFishCaughtDelegate.Broadcast(PlayerActor);
-	ActiveFishType = EFishType::None;
-	SetFishState(EFishState::None);
 }
+
 
 void UAuraFishingBlueprintNode::Activate()
 {
@@ -115,17 +120,58 @@ void UAuraFishingBlueprintNode::Activate()
 			&UAuraFishingBlueprintNode::OnFishingStateChanged
 		);
 	}
-	MoveCameraToPosition();
-	MovePlayerToPosition();
+	if (!IFishingComponentInterface::IsFishing(PlayerActor))
+	{
+		MoveCameraToPosition();
+		MovePlayerToPosition();
+	}
+	else
+	{
+		OnPlayerInPositionDelegate.Broadcast(PlayerActor);
+	}
+}
+
+void UAuraFishingBlueprintNode::Cleanup()
+{
+	ActiveFishType = EFishType::None;
+	OnCameraInPositionDelegate.Clear();
+	OnFishingCancelledDelegate.Clear();
+	OnPlayerInPositionDelegate.Clear();
+	OnFishingRodEquippedDelegate.Clear();
+	OnFishingRodCastDelegate.Clear();
+	OnFishingLuredDelegate.Clear();
+	OnFishingBiteDelegate.Clear();
+	OnFishingFishHasFledDelegate.Clear();
+	OnFishingFishReelingDelegate.Clear();
+	OnFishingFishCaughtDelegate.Clear();
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(PlayerMoveToTargetTimerHandle);
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishInterestToLureTimerHandle);
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishLureToBiteTimerHandle);
+	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishBiteToFleeTimerHandle);
+}
+
+void UAuraFishingBlueprintNode::PrepareForContinue()
+{
+	SetFishState(EFishState::None);
+	ActiveFishType = EFishType::None;
+	Cleanup();
+	if (const TScriptInterface<IFishingComponentInterface> FishingComponent =
+		IFishingActorInterface::GetFishingComponent(
+			PlayerActor
+		))
+	{
+		FishingComponent->GetOnFishingStateChangedDelegate().RemoveDynamic(
+			this,
+			&UAuraFishingBlueprintNode::OnFishingStateChanged
+		);
+		FishingComponent->PrepareForContinue();
+	}
 }
 
 void UAuraFishingBlueprintNode::End()
 {
 	OnFishingCancelledDelegate.Broadcast(PlayerActor);
-	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(PlayerMoveToTargetTimerHandle);
-	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishInterestToLureTimerHandle);
-	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishLureToBiteTimerHandle);
-	PlayerActor->GetWorld()->GetTimerManager().ClearTimer(FishBiteToFleeTimerHandle);
+	Cleanup();
 	if (const TScriptInterface<IFishingComponentInterface> FishingComponent =
 		IFishingActorInterface::GetFishingComponent(
 			PlayerActor

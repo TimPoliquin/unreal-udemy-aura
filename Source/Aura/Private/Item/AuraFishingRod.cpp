@@ -65,6 +65,16 @@ void AAuraFishingRod::Cast(const FVector& Destination)
 	BobActor->Launch(Destination);
 }
 
+void AAuraFishingRod::Return()
+{
+	CableComponent->SetVisibility(false);
+	CableComponent->Deactivate();
+	if (BobActor)
+	{
+		BobActor->Return(this, RodTipSocket);
+	}
+}
+
 void AAuraFishingRod::UnEquip(AActor* InOwner)
 {
 	Super::UnEquip(InOwner);

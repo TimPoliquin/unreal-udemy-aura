@@ -104,3 +104,4 @@ EFishType AAuraFishingPOI::PickFishType(const TArray<FWeightedFish>& AvailableFi
 	}
 	return EFishType::None;
 }
+

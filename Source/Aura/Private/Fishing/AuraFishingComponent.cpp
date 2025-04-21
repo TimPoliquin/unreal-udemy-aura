@@ -30,9 +30,13 @@ void UAuraFishingComponent::SetupForFishing(const FVector& InFishingDestination)
 		this,
 		&UAuraFishingComponent::OnInventoryEquipAnimationComplete
 	);
-	FishingRestore.UseMode = PlayerInventoryComponent->GetEquipmentUseMode();
-	FishingRestore.WeaponType = PlayerInventoryComponent->GetWeaponType();
-	FishingRestore.ToolType = PlayerInventoryComponent->GetToolType();
+	if (!FishingRestore.bSet)
+	{
+		FishingRestore.UseMode = PlayerInventoryComponent->GetEquipmentUseMode();
+		FishingRestore.WeaponType = PlayerInventoryComponent->GetWeaponType();
+		FishingRestore.ToolType = PlayerInventoryComponent->GetToolType();
+		FishingRestore.bSet = true;
+	}
 }
 
 bool UAuraFishingComponent::HasFishingRod_Implementation()
@@ -47,8 +51,15 @@ bool UAuraFishingComponent::HasFishingRodEquipped_Implementation()
 
 void UAuraFishingComponent::EquipFishingRod_Implementation()
 {
-	PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Tool, EAuraItemType::FishingRod);
-	PlayerInventoryComponent->PlayEquipAnimation(EAuraEquipmentSlot::Tool);
+	if (PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod))
+	{
+		OnFishingRodEquipped();
+	}
+	else
+	{
+		PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Tool, EAuraItemType::FishingRod);
+		PlayerInventoryComponent->PlayEquipAnimation(EAuraEquipmentSlot::Tool);
+	}
 }
 
 void UAuraFishingComponent::CastFishingRod_Implementation()
@@ -62,7 +73,6 @@ void UAuraFishingComponent::FishStateChanged(const EFishState& FishState)
 	switch (FishState)
 	{
 	case EFishState::None:
-
 		break;
 	case EFishState::Lured:
 		SetFishingState(EFishingState::Lured);
@@ -76,11 +86,20 @@ void UAuraFishingComponent::FishStateChanged(const EFishState& FishState)
 		// DEVNOTE - nothing to do here - yet.
 		break;
 	case EFishState::Caught:
+		SetFishingState(EFishingState::Caught);
+		if (FishingRod)
+		{
+			FishingRod->Return();
+		}
+		if (FishingBob)
+		{
+			FishingBob->OnFishingStateChanged.RemoveDynamic(this, &UAuraFishingComponent::OnFishingBobStateChanged);
+		}
 		break;
 	}
 }
 
-void UAuraFishingComponent::Reel_Implementation()
+void UAuraFishingComponent::Reel()
 {
 	SetFishingState(EFishingState::Reeling);
 }
@@ -88,6 +107,12 @@ void UAuraFishingComponent::Reel_Implementation()
 FOnFishingStateChangedSignature& UAuraFishingComponent::GetOnFishingStateChangedDelegate()
 {
 	return OnFishingStateChangedDelegate;
+}
+
+void UAuraFishingComponent::PrepareForContinue()
+{
+	SetFishingState(EFishingState::Preparing);
+	OnFishingStateChangedDelegate.Clear();
 }
 
 void UAuraFishingComponent::EndFishing()
@@ -124,6 +149,7 @@ void UAuraFishingComponent::EndFishing()
 		PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Weapon, FishingRestore.WeaponType);
 		PlayerInventoryComponent->PlayEquipAnimation(EAuraEquipmentSlot::Weapon);
 	}
+	FishingRestore.Reset();
 }
 
 void UAuraFishingComponent::ReleaseCast()
@@ -184,6 +210,24 @@ void UAuraFishingComponent::SetFishingState(EFishingState InFishingState)
 	}
 }
 
+void UAuraFishingComponent::OnFishingRodEquipped()
+{
+	SetFishingState(EFishingState::Equipped);
+	FishingRod = PlayerInventoryComponent->GetFishingRod();
+	if (IsValid(FishingRod))
+	{
+		FishingBob = FishingRod->GetFishingBob();
+	}
+	if (IsValid(FishingBob))
+	{
+		FishingBob->OnFishingStateChanged.AddDynamic(this, &UAuraFishingComponent::OnFishingBobStateChanged);
+	}
+	PlayerInventoryComponent->OnEquipmentAnimationCompleteDelegate.RemoveDynamic(
+		this,
+		&UAuraFishingComponent::OnInventoryEquipAnimationComplete
+	);
+}
+
 void UAuraFishingComponent::OnInventoryEquipAnimationComplete(
 	EAuraEquipmentSlot EquipmentSlot,
 	EAuraItemType EquippedItem
@@ -191,20 +235,7 @@ void UAuraFishingComponent::OnInventoryEquipAnimationComplete(
 {
 	if (EquipmentSlot == EAuraEquipmentSlot::Tool && EquippedItem == EAuraItemType::FishingRod)
 	{
-		SetFishingState(EFishingState::Equipped);
-		FishingRod = PlayerInventoryComponent->GetFishingRod();
-		if (IsValid(FishingRod))
-		{
-			FishingBob = FishingRod->GetFishingBob();
-		}
-		if (IsValid(FishingBob))
-		{
-			FishingBob->OnFishingStateChanged.AddDynamic(this, &UAuraFishingComponent::OnFishingBobStateChanged);
-		}
-		PlayerInventoryComponent->OnEquipmentAnimationCompleteDelegate.RemoveDynamic(
-			this,
-			&UAuraFishingComponent::OnInventoryEquipAnimationComplete
-		);
+		OnFishingRodEquipped();
 	}
 }
 

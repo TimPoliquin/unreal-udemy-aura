@@ -151,6 +151,7 @@ struct FAuraGameplayTags
 	FGameplayTag Player_Equipped_Weapon;
 	FGameplayTag Player_POI_Fishing;
 	FGameplayTag Player_POI_Fishing_CanReel;
+	FGameplayTag Player_HUD_Hide;
 
 	/**
 	 * Montage Attack Tags 

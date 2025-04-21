@@ -26,6 +26,7 @@ public:
 	FRotator GetRodTipRotation() const;
 	UFUNCTION(BlueprintCallable)
 	void Cast(const FVector& Destination);
+	void Return();
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingBobLandedSignature OnFishingBobLandedDelegate;
 	virtual void UnEquip(AActor* InOwner) override;

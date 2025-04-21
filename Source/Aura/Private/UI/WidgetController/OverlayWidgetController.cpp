@@ -7,7 +7,9 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
+#include "Aura/AuraLogChannels.h"
 #include "Player/AuraPlayerState.h"
+#include "Tags/AuraGameplayTags.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -86,6 +88,10 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 			&UOverlayWidgetController::BroadcastAbilityInfo
 		);
 	}
+	AbilitySystemComponent->RegisterGameplayTagEvent(
+		FAuraGameplayTags::Get().Player_HUD_Hide,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(this, &UOverlayWidgetController::OnPlayerHideHUDTagChanged);
 }
 
 void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)
@@ -112,4 +118,10 @@ void UOverlayWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayload&
 	Info.StatusTag = EquipPayload.StatusTag;
 	Info.InputTag = EquipPayload.SlotTag;
 	AbilityInfoDelegate.Broadcast(Info);
+}
+
+void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count)
+{
+	UE_LOG(LogAura, Warning, TEXT("[%s]: %d"), *GameplayTag.ToString(), Count);
+	OnHUDVisibilityChangedDelegate.Broadcast(Count == 0);
 }

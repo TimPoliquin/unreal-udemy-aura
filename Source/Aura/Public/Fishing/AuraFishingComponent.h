@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "Components/ActorComponent.h"
 #include "Interaction/FishingComponentInterface.h"
 #include "Item/AuraFishingBob.h"
@@ -10,6 +11,7 @@
 #include "AuraFishingComponent.generated.h"
 
 
+struct FGameplayAbilitySpecHandle;
 class AAuraFishingBob;
 class AAuraFishingRod;
 class UPlayerInventoryComponent;
@@ -20,9 +22,18 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFishingComponentCastAnimationSignature);
 
 struct FAfterFishingRestore
 {
+	bool bSet = false;
 	EAuraEquipmentUseMode UseMode = EAuraEquipmentUseMode::None;
 	EAuraItemType WeaponType = EAuraItemType::None;
 	EAuraItemType ToolType = EAuraItemType::None;
+
+	void Reset()
+	{
+		bSet = false;
+		UseMode = EAuraEquipmentUseMode::None;
+		WeaponType = EAuraItemType::None;
+		ToolType = EAuraItemType::None;
+	}
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -39,20 +50,20 @@ public:
 	virtual void EquipFishingRod_Implementation() override;
 	virtual void CastFishingRod_Implementation() override;
 	virtual void FishStateChanged(const EFishState& FishState) override;
-	virtual void Reel_Implementation() override;
+	virtual void Reel() override;
 	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate() override;
+	virtual void PrepareForContinue() override;
 	UFUNCTION(BlueprintCallable)
 	virtual void EndFishing() override;
 	UFUNCTION(BlueprintCallable)
 	void ReleaseCast();
-	UFUNCTION(BlueprintCallable)
-	bool IsFishing() const;
+	virtual bool IsFishing() const override;
 	UFUNCTION(BlueprintCallable)
 	EFishingState GetFishingState() const;
 	UFUNCTION(BlueprintCallable)
-	float GetRarityMultiplier(const EFishRarity& Rarity) const;
+	virtual float GetRarityMultiplier(const EFishRarity& Rarity) const override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<EFishTag> GetFishingTags() const;
+	virtual TArray<EFishTag> GetFishingTags() const override;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingStateChangedSignature OnFishingStateChangedDelegate;
@@ -67,6 +78,7 @@ protected:
 
 private:
 	void SetFishingState(EFishingState InFishingState);
+	void OnFishingRodEquipped();
 	UFUNCTION()
 	void OnFishingBobStateChanged(EFishingBobState FishingBobState);
 	UFUNCTION()
@@ -80,4 +92,6 @@ private:
 	UPROPERTY()
 	FVector FishingDestination = FVector::ZeroVector;
 	FAfterFishingRestore FishingRestore;
+	UPROPERTY()
+	FGameplayAbilitySpecHandle ActiveReelAbilityHandle;
 };

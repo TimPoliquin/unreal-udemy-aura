@@ -61,4 +61,5 @@ protected:
 	FRandRange BiteToFleeTime = FRandRange(1.f, 7.f);
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fishing|Debug")
 	bool bDebug = false;
+
 };

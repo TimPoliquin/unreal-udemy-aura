@@ -38,6 +38,7 @@ public:
 	void Lured();
 	void Biting();
 	void Cancel();
+	void Return(AActor* InOwner, const FName& SocketName);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingBobStateChangedSignature OnFishingStateChanged;

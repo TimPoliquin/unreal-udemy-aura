@@ -3,11 +3,13 @@
 
 #include "UI/Library/AuraWidgetFunctionLibrary.h"
 
+#include "EnhancedInputSubsystems.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/OverlaySlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Brushes/SlateColorBrush.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/Panel/PanelInterface.h"
 
 void UAuraWidgetFunctionLibrary::SetBoxSizeOverride(USizeBox* SizeBox, float Height, float Width)
@@ -59,4 +61,33 @@ void UAuraWidgetFunctionLibrary::InterpolateProgressBarValue(
 		return;
 	}
 	ProgressBar->SetPercent(FMath::FInterpTo(ProgressBar->GetPercent(), TargetValue, DeltaTime, InterpSpeed));
+}
+
+APlayerController* UAuraWidgetFunctionLibrary::GetPlayerController(const AActor* Player)
+{
+	if (const APawn* Pawn = Cast<APawn>(Player))
+	{
+		return Cast<APlayerController>(Pawn->GetController());
+	}
+	return nullptr;
+}
+
+bool UAuraWidgetFunctionLibrary::IsInputActionBoundToKey(
+	const UObject* WorldContextObject,
+	const int32 PlayerIndex,
+	const UInputAction* InputAction,
+	const FKey& Key
+)
+{
+	const ULocalPlayer* LocalPlayer = IsValid(WorldContextObject)
+		                                  ? GEngine->GetGamePlayer(WorldContextObject->GetWorld(), PlayerIndex)
+		                                  : nullptr;
+	const UEnhancedInputLocalPlayerSubsystem* InputSubsystem = LocalPlayer
+		                                                           ? LocalPlayer->GetSubsystem<
+			                                                           UEnhancedInputLocalPlayerSubsystem>()
+		                                                           : nullptr;
+	const TArray<FKey>& Keys = InputSubsystem
+		                           ? InputSubsystem->QueryKeysMappedToAction(InputAction)
+		                           : TArray<FKey>();
+	return Keys.Contains(Key);
 }

@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraWidgetFunctionLibrary.generated.h"
 
+class UInputAction;
 class UWidget;
 class UProgressBar;
 class UOverlaySlot;
@@ -44,5 +45,15 @@ public:
 		float TargetValue,
 		float DeltaTime,
 		float InterpSpeed
+	);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AuraWidgetFunctionLibrary|Controller")
+	static APlayerController* GetPlayerController(const AActor* Player);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AuraWidgetFunctionLibrary|Input")
+	static bool IsInputActionBoundToKey(
+		const UObject* WorldContextObject,
+		int32 PlayerIndex,
+		const UInputAction* InputAction,
+		const FKey& Key
 	);
 };
