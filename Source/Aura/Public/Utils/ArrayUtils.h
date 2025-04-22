@@ -22,6 +22,8 @@ public:
 	 */
 	template <typename T>
 	static bool ContainsAll(const TArray<T>& Source, const TArray<T>& Elements);
+	template <typename T>
+	static TArray<T> RemoveAndCollapse(const TArray<T>& Source, T Element);
 };
 
 template <typename T>
@@ -46,4 +48,18 @@ bool UArrayUtils::ContainsAll(const TArray<T>& Source, const TArray<T>& Elements
 		}
 	}
 	return true;
+}
+
+template <typename T>
+TArray<T> UArrayUtils::RemoveAndCollapse(const TArray<T>& Source, T Element)
+{
+	TArray<T> Collapsed;
+	for (T Current : Source)
+	{
+		if (Current != Element)
+		{
+			Collapsed.Add(Current);
+		}
+	}
+	return Collapsed;
 }

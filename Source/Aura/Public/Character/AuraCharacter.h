@@ -110,7 +110,7 @@ private:
 	FOnCameraMoveFinishedSignature OnCameraReturnDelegate;
 
 	virtual void InitializeAbilityActorInfo() override;
-	void InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState) const;
+	void InitializePlayerControllerHUD(APlayerController* InPlayerController, APlayerState* InPlayerState);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_LevelUpParticles() const;

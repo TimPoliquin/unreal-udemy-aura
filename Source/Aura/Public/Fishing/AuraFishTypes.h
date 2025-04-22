@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Item/AuraItemTypes.h"
 #include "Utils/RandUtils.h"
 #include "AuraFishTypes.generated.h"
 
@@ -57,6 +58,8 @@ struct FAuraFishCatch
 	FString Description = FString("");
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
 	TObjectPtr<const UTexture2D> Icon = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
+	EAuraItemType ItemType;
 };
 
 USTRUCT(BlueprintType)
@@ -79,6 +82,8 @@ struct FAuraFishDefinition
 	TSubclassOf<AActor> FishClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
 	FRandRange WeightRange;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
+	EAuraItemType ItemType;
 
 	FAuraFishCatch ToFishCatch() const
 	{
@@ -88,6 +93,7 @@ struct FAuraFishDefinition
 		FishCatch.Size = WeightRange.Value();
 		FishCatch.Description = Description;
 		FishCatch.Icon = Icon;
+		FishCatch.ItemType = ItemType;
 		return FishCatch;
 	}
 };

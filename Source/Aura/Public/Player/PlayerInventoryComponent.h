@@ -27,6 +27,18 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	EquippedItem
 );
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
+	FOnItemAddedSignature,
+	const EAuraItemType&,
+	ItemType,
+	const int32,
+	Count,
+	const bool,
+	bAddedAll
+);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryFullSignature, const EAuraItemType&, ItemType);
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AURA_API UPlayerInventoryComponent : public UActorComponent
@@ -34,6 +46,9 @@ class AURA_API UPlayerInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="PlayerInventoryComponent|Utils")
+	static UPlayerInventoryComponent* GetPlayerInventoryComponent(const AActor* InActor);
+
 	UPlayerInventoryComponent();
 
 	bool HasItemInInventory(const EAuraItemType& ItemType) const;
@@ -58,7 +73,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
 	EAuraItemType GetEquippedItem(const EAuraEquipmentSlot Slot) const;
 	EAuraEquipmentUseMode GetEquipmentUseMode() const;
-	void PlayEquipAnimation(EAuraEquipmentSlot Slot);
+	void PlayEquipAnimation(EAuraEquipmentSlot Slot) const;
+	UFUNCTION(BlueprintCallable, Category="Item")
+	int32 AddToInventory(const EAuraItemType& ItemType, const int32 Count = 1);
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;
@@ -66,6 +83,10 @@ public:
 	FOnEquipmentAnimationRequestSignature OnEquipmentAnimationRequest;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnEquipmentAnimationCompleteSignature OnEquipmentAnimationCompleteDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnItemAddedSignature OnItemAddedDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnInventoryFullSignature OnInventoryFullDelegate;
 
 protected:
 	virtual void BeginPlay() override;

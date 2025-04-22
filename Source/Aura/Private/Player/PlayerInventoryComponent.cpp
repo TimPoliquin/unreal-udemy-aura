@@ -6,12 +6,23 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Game/AuraGameModeBase.h"
 #include "GameFramework/Character.h"
 #include "Item/AuraFishingRod.h"
 #include "Item/AuraItemBase.h"
 #include "Item/AuraItemBlueprintLibrary.h"
+#include "Item/AuraItemInfo.h"
 #include "Tags/AuraGameplayTags.h"
 
+
+UPlayerInventoryComponent* UPlayerInventoryComponent::GetPlayerInventoryComponent(const AActor* InActor)
+{
+	if (IsValid(InActor))
+	{
+		return InActor->FindComponentByClass<UPlayerInventoryComponent>();
+	}
+	return nullptr;
+}
 
 UPlayerInventoryComponent::UPlayerInventoryComponent()
 {
@@ -157,10 +168,45 @@ EAuraEquipmentUseMode UPlayerInventoryComponent::GetEquipmentUseMode() const
 	return EquipmentUseMode;
 }
 
-void UPlayerInventoryComponent::PlayEquipAnimation(EAuraEquipmentSlot Slot)
+void UPlayerInventoryComponent::PlayEquipAnimation(const EAuraEquipmentSlot Slot) const
 {
 	EAuraItemType ItemType = GetEquippedItem(Slot);
 	OnEquipmentAnimationRequest.Broadcast(Slot, ItemType);
+}
+
+int32 UPlayerInventoryComponent::AddToInventory(const EAuraItemType& ItemType, const int32 Count)
+{
+	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetItemInfo()->
+		FindItemByItemType(ItemType);
+	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
+		[ItemType](const FAuraItemInventoryEntry& Entry)
+		{
+			return Entry.ItemType == ItemType;
+		}
+	);
+	if (!ItemEntry)
+	{
+		if (Inventory.Num() + ItemDefinition.InventorySize <= MaxItems)
+		{
+			ItemEntry = new FAuraItemInventoryEntry();
+			ItemEntry->ItemType = ItemType;
+		}
+		else
+		{
+			OnInventoryFullDelegate.Broadcast(ItemType);
+			return 0;
+		}
+	}
+	if (ItemEntry->ItemCount >= ItemDefinition.InventoryMaxCount)
+	{
+		// This item is already at max capacity in the inventory
+		OnInventoryFullDelegate.Broadcast(ItemType);
+		return 0;
+	}
+	const int32 CountToAdd = FMath::Min(Count, ItemDefinition.InventoryMaxCount - ItemEntry->ItemCount);
+	ItemEntry->ItemCount += CountToAdd;
+	OnItemAddedDelegate.Broadcast(ItemType, CountToAdd, CountToAdd == Count);
+	return CountToAdd;
 }
 
 void UPlayerInventoryComponent::BeginPlay()

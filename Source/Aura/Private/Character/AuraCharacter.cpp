@@ -199,11 +199,12 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 void AAuraCharacter::InitializePlayerControllerHUD(
 	APlayerController* InPlayerController,
 	APlayerState* InPlayerState
-) const
+)
 {
 	if (AAuraHUD* HUD = Cast<AAuraHUD>(InPlayerController->GetHUD()))
 	{
 		HUD->InitializeWidgets(
+			this,
 			InPlayerController,
 			InPlayerState,
 			AbilitySystemComponent,

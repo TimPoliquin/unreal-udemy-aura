@@ -33,7 +33,7 @@ struct FAuraLevelUpInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 LevelUpRequirement;
+	int32 LevelUpRequirement = 0;
 	UPROPERTY(EditDefaultsOnly)
 	int32 AttributePointRewards = 1;
 	UPROPERTY(EditDefaultsOnly)

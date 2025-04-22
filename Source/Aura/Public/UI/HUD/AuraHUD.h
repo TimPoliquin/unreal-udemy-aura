@@ -28,6 +28,7 @@ class AURA_API AAuraHUD : public AHUD
 public:
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& WidgetControllerParams);
 	void InitializeWidgets(
+		AActor* InPlayer,
 		APlayerController* InPlayerController,
 		APlayerState* InPlayerState,
 		UAbilitySystemComponent* InAbilitySystemComponent,
@@ -65,6 +66,7 @@ private:
 	UAuraUserWidget* CreateAuraWidget(
 		TSubclassOf<UAuraUserWidget> WidgetClass,
 		TSubclassOf<UAuraWidgetController> WidgetControllerClass,
+		AActor* InOwner,
 		APlayerController* InPlayerController,
 		APlayerState* InPlayerState,
 		UAbilitySystemComponent* InAbilitySystemComponent,

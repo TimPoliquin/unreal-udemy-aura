@@ -8,6 +8,7 @@
 #include "UObject/Object.h"
 #include "AuraWidgetController.generated.h"
 
+class AAuraCharacter;
 class UAbilityInfo;
 class UAuraAttributeSet;
 class UAuraAbilitySystemComponent;
@@ -27,11 +28,13 @@ struct FWidgetControllerParams
 	}
 
 	FWidgetControllerParams(
+		AActor* InPlayer,
 		APlayerController* InPlayerController,
 		APlayerState* InPlayerState,
 		UAbilitySystemComponent* InAbilitySystemComponent,
 		UAttributeSet* InAttributeSet
 	) :
+		Player(InPlayer),
 		PlayerController(InPlayerController),
 		PlayerState(InPlayerState),
 		AbilitySystemComponent(InAbilitySystemComponent),
@@ -39,6 +42,8 @@ struct FWidgetControllerParams
 	{
 	}
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<AActor> Player = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<APlayerController> PlayerController = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -76,12 +81,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Messages")
 	FAbilityInfoSignature AbilityInfoDelegate;
 
+protected:
+	AAuraCharacter* GetAuraCharacter();
 	AAuraPlayerController* GetAuraPlayerController();
 	AAuraPlayerState* GetAuraPlayerState();
 	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent();
 	UAuraAttributeSet* GetAuraAttributeSet();
 
-protected:
+	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
+	TObjectPtr<AActor> Player;
 	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
 	TObjectPtr<APlayerController> PlayerController;
 	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
@@ -94,6 +102,8 @@ protected:
 	TObjectPtr<UAbilityInfo> AbilityInfo;
 
 private:
+	UPROPERTY()
+	TObjectPtr<AAuraCharacter> AuraCharacter;
 	UPROPERTY()
 	TObjectPtr<AAuraPlayerController> AuraPlayerController;
 	UPROPERTY()

@@ -8,11 +8,13 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
+#include "Character/AuraCharacter.h"
 #include "Player/AuraPlayerState.h"
 #include "Tags/AuraGameplayTags.h"
 
 void UAuraWidgetController::SetWidgetControllerParams(const FWidgetControllerParams& WidgetControllerParams)
 {
+	Player = WidgetControllerParams.Player;
 	PlayerController = WidgetControllerParams.PlayerController;
 	PlayerState = WidgetControllerParams.PlayerState;
 	AbilitySystemComponent = WidgetControllerParams.AbilitySystemComponent;
@@ -47,6 +49,16 @@ void UAuraWidgetController::BroadcastAbilityInfo()
 void UAuraWidgetController::UnbindAll_Implementation(const UObject* BoundObject)
 {
 	AbilityInfoDelegate.RemoveAll(BoundObject);
+}
+
+AAuraCharacter* UAuraWidgetController::GetAuraCharacter()
+{
+	if (AuraCharacter)
+	{
+		return AuraCharacter;
+	}
+	AuraCharacter = Cast<AAuraCharacter>(Player);
+	return AuraCharacter;
 }
 
 AAuraPlayerController* UAuraWidgetController::GetAuraPlayerController()

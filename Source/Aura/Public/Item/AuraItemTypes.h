@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "AuraItemTypes.generated.h"
 
 
@@ -17,6 +18,8 @@ enum class EAuraItemCategory : uint8
 	Equipment,
 	/** Instant type - these items have an effect immediately on contact with the player */
 	Instant,
+	/** Fish type - these items are fish **/
+	Fish
 };
 
 UENUM(BlueprintType)
@@ -49,7 +52,11 @@ enum class EAuraItemType : uint8
 	/** Staff Item Type - the basic staff that the player has equipped */
 	Staff,
 	/** Fishing Rod type - enables ability to fish */
-	FishingRod
+	FishingRod,
+	Fish_01,
+	Fish_02,
+	Fish_03,
+	Fish_04
 };
 
 UENUM(BlueprintType)
@@ -85,6 +92,8 @@ struct FAuraItemDefinition
 	/** If the item is equipment, this specifies which type of equipment it is */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item|Equipment")
 	EAuraEquipmentCategory EquipmentCategory = EAuraEquipmentCategory::None;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Message"))
+	FGameplayTag PickupMessageTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	TSubclassOf<AAuraItemBase> ItemClass;
 };
@@ -95,7 +104,21 @@ struct FAuraItemInventoryEntry
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Item")
-	EAuraItemType ItemType;
+	EAuraItemType ItemType = EAuraItemType::None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Item")
-	int32 ItemCount;
+	int32 ItemCount = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FMessageSubstitutions
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<FString, FString> Substitutions;
+
+	void Add(const FString& Key, const FString& Value)
+	{
+		Substitutions.Add(Key, Value);
+	}
 };

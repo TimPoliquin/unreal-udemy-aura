@@ -27,6 +27,7 @@ UOverlayWidgetController* AAuraHUD::GetOverlayWidgetController(const FWidgetCont
 }
 
 void AAuraHUD::InitializeWidgets(
+	AActor* InPlayer,
 	APlayerController* InPlayerController,
 	APlayerState* InPlayerState,
 	UAbilitySystemComponent* InAbilitySystemComponent,
@@ -36,6 +37,7 @@ void AAuraHUD::InitializeWidgets(
 	OverlayWidget = CreateAuraWidget(
 		OverlayWidgetClass,
 		OverlayWidgetControllerClass,
+		InPlayer,
 		InPlayerController,
 		InPlayerState,
 		InAbilitySystemComponent,
@@ -74,6 +76,7 @@ USpellMenuWidgetController* AAuraHUD::GetSpellMenuWidgetController(
 UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 	TSubclassOf<UAuraUserWidget> WidgetClass,
 	TSubclassOf<UAuraWidgetController> WidgetControllerClass,
+	AActor* InOwner,
 	APlayerController* InPlayerController,
 	APlayerState* InPlayerState,
 	UAbilitySystemComponent* InAbilitySystemComponent,
@@ -89,6 +92,7 @@ UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 	UAuraUserWidget* Widget = CreateWidget<UAuraUserWidget>(GetWorld(), WidgetClass);
 
 	const FWidgetControllerParams WidgetControllerParams(
+		InOwner,
 		InPlayerController,
 		InPlayerState,
 		InAbilitySystemComponent,
