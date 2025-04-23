@@ -40,32 +40,25 @@ TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* P
 					Player,
 					FishDefinition.Rarity
 				);
-				UE_LOG(
-					LogAura,
-					Warning,
-					TEXT("[%s]: Rarity multiplier for fish [%s] - [%f] * [%f]"),
-					*GetName(),
-					*FishConfig.FishType.ToString(),
-					BaseRarityMultiplier,
-					PlayerRarityMultiplier
-				);
 				FWeightedFish WeightedFish;
 				WeightedFish.FishType = FishConfig.FishType;
 				WeightedFish.Weight = 100.f * (FishConfig.RarityMultiplier * BaseRarityMultiplier *
 					PlayerRarityMultiplier);
-				if (WeightedFish.Weight > 0)
-				{
-					AvailableFish.Add(WeightedFish);
-				}
-				else if (bDebug)
+				if (bDebug)
 				{
 					UE_LOG(
 						LogAura,
 						Warning,
-						TEXT("[%s]: Fish has weight <= 0. [%s]"),
+						TEXT("[%s]: Rarity multiplier for fish [%s] | [%f] * [%f]"),
 						*GetName(),
-						*WeightedFish.FishType.ToString()
-					)
+						*FishConfig.FishType.ToString(),
+						BaseRarityMultiplier,
+						PlayerRarityMultiplier
+					);
+				}
+				if (WeightedFish.Weight > 0)
+				{
+					AvailableFish.Add(WeightedFish);
 				}
 			}
 		}
