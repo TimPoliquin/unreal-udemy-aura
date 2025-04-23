@@ -153,6 +153,37 @@ struct FAuraGameplayTags
 	FGameplayTag Player_POI_Fishing_CanReel;
 	FGameplayTag Player_HUD_Hide;
 
+	/* Item Tags */
+	FGameplayTag Item;
+	FGameplayTag Item_Type;
+	FGameplayTag Item_Type_Consumable;
+	FGameplayTag Item_Type_Equipment;
+	FGameplayTag Item_Type_Fish;
+	FGameplayTag Item_Type_Instant;
+	FGameplayTag Item_Type_None;
+
+	/* Equipment Tags */
+	FGameplayTag Item_Type_Equipment_Staff;
+	FGameplayTag Item_Type_Equipment_FishingRod;
+
+	/* Equipment Tags */
+	FGameplayTag Equipment;
+	FGameplayTag Equipment_Type;
+	FGameplayTag Equipment_Type_None;
+	FGameplayTag Equipment_Type_Tool;
+	FGameplayTag Equipment_Type_Weapon;
+	FGameplayTag Equipment_Slot;
+	FGameplayTag Equipment_Slot_None;
+	FGameplayTag Equipment_Slot_Tool;
+	FGameplayTag Equipment_Slot_Weapon;
+
+	/* Fishing Tags */
+	FGameplayTag Item_Type_Fish_None;
+	FGameplayTag Fish;
+	FGameplayTag Fish_Rarity;
+	FGameplayTag Fish_Tag;
+
+
 	/**
 	 * Montage Attack Tags 
 	 */

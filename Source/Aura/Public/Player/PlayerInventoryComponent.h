@@ -15,7 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FOnEquipmentAnimationRequestSignature,
 	EAuraEquipmentSlot,
 	EquipmentSlot,
-	EAuraItemType,
+	const FGameplayTag&,
 	EquippedItem
 );
 
@@ -23,13 +23,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FOnEquipmentAnimationCompleteSignature,
 	EAuraEquipmentSlot,
 	EquipmentSlot,
-	EAuraItemType,
+	const FGameplayTag&,
 	EquippedItem
 );
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
 	FOnItemAddedSignature,
-	const EAuraItemType&,
+	const FGameplayTag&,
 	ItemType,
 	const int32,
 	Count,
@@ -37,7 +37,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
 	bAddedAll
 );
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryFullSignature, const EAuraItemType&, ItemType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryFullSignature, const FGameplayTag&, ItemType);
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -51,8 +51,8 @@ public:
 
 	UPlayerInventoryComponent();
 
-	bool HasItemInInventory(const EAuraItemType& ItemType) const;
-	bool HasToolEquipped(const EAuraItemType& ItemType) const;
+	bool HasItemInInventory(const FGameplayTag& ItemType) const;
+	bool HasToolEquipped(const FGameplayTag& ItemType) const;
 
 	bool IsUsingTool() const;
 	bool IsUsingWeapon() const;
@@ -62,20 +62,20 @@ public:
 	void UseWeapon();
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
 	void UseNothing();
-	void Equip(const EAuraEquipmentSlot& Slot, const EAuraItemType& ItemType);
+	void Equip(const EAuraEquipmentSlot& Slot, const FGameplayTag& ItemType);
 	USkeletalMeshComponent* GetWeapon() const;
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
-	EAuraItemType GetToolType() const;
+	FGameplayTag GetToolType() const;
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
-	EAuraItemType GetWeaponType() const;
+	FGameplayTag GetWeaponType() const;
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
 	AAuraFishingRod* GetFishingRod() const;
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
-	EAuraItemType GetEquippedItem(const EAuraEquipmentSlot Slot) const;
+	FGameplayTag GetEquippedItem(const EAuraEquipmentSlot Slot) const;
 	EAuraEquipmentUseMode GetEquipmentUseMode() const;
 	void PlayEquipAnimation(EAuraEquipmentSlot Slot) const;
 	UFUNCTION(BlueprintCallable, Category="Item")
-	int32 AddToInventory(const EAuraItemType& ItemType, const int32 Count = 1);
+	int32 AddToInventory(const FGameplayTag& ItemType, int32 Count = 1);
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;
@@ -99,7 +99,7 @@ protected:
 	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Equipment")
-	TMap<EAuraEquipmentSlot, EAuraItemType> EquipmentSlots;
+	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory|Equipment")
 	TMap<EAuraEquipmentSlot, FName> EquipmentSocketNames;
 

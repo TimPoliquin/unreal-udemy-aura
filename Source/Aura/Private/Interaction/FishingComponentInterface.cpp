@@ -20,7 +20,7 @@ void IFishingComponentInterface::FishStateChanged(const UObject* Actor, const EF
 	}
 }
 
-float IFishingComponentInterface::GetRarityMultiplier(const UObject* Actor, const EFishRarity& Rarity)
+float IFishingComponentInterface::GetRarityMultiplier(const UObject* Actor, const FGameplayTag& Rarity)
 {
 	if (IsValid(Actor) && Actor->Implements<UFishingActorInterface>())
 	{
@@ -48,7 +48,7 @@ bool IFishingComponentInterface::IsFishing(const UObject* Actor)
 	return false;
 }
 
-TArray<EFishTag> IFishingComponentInterface::GetFishingTags(const UObject* Actor)
+FGameplayTagContainer IFishingComponentInterface::GetFishingTags(const UObject* Actor)
 {
 	if (IsValid(Actor) && Actor->Implements<UFishingActorInterface>())
 	{
@@ -59,5 +59,5 @@ TArray<EFishTag> IFishingComponentInterface::GetFishingTags(const UObject* Actor
 			return FishingComponent->GetFishingTags();
 		}
 	}
-	return TArray<EFishTag>();
+	return FGameplayTagContainer();
 }

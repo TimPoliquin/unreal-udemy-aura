@@ -41,23 +41,26 @@ void UAuraFishingComponent::SetupForFishing(const FVector& InFishingDestination)
 
 bool UAuraFishingComponent::HasFishingRod_Implementation()
 {
-	return PlayerInventoryComponent->HasItemInInventory(EAuraItemType::FishingRod);
+	return PlayerInventoryComponent->HasItemInInventory(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod);
 }
 
 bool UAuraFishingComponent::HasFishingRodEquipped_Implementation()
 {
-	return PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod);
+	return PlayerInventoryComponent->HasToolEquipped(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod);
 }
 
 void UAuraFishingComponent::EquipFishingRod_Implementation()
 {
-	if (PlayerInventoryComponent->HasToolEquipped(EAuraItemType::FishingRod))
+	if (PlayerInventoryComponent->HasToolEquipped(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod))
 	{
 		OnFishingRodEquipped();
 	}
 	else
 	{
-		PlayerInventoryComponent->Equip(EAuraEquipmentSlot::Tool, EAuraItemType::FishingRod);
+		PlayerInventoryComponent->Equip(
+			EAuraEquipmentSlot::Tool,
+			FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod
+		);
 		PlayerInventoryComponent->PlayEquipAnimation(EAuraEquipmentSlot::Tool);
 	}
 }
@@ -191,7 +194,7 @@ EFishingState UAuraFishingComponent::GetFishingState() const
 	return FishingState;
 }
 
-float UAuraFishingComponent::GetRarityMultiplier(const EFishRarity& Rarity) const
+float UAuraFishingComponent::GetRarityMultiplier(const FGameplayTag& Rarity) const
 {
 	const int32 FishingLevel = UAuraAbilitySystemLibrary::GetAbilityLevelByAbilityTag(
 		GetOwner(),
@@ -204,7 +207,7 @@ float UAuraFishingComponent::GetRarityMultiplier(const EFishRarity& Rarity) cons
 	                                                       );
 }
 
-TArray<EFishTag> UAuraFishingComponent::GetFishingTags() const
+FGameplayTagContainer UAuraFishingComponent::GetFishingTags() const
 {
 	return FishingTags;
 }
@@ -242,10 +245,11 @@ void UAuraFishingComponent::OnFishingRodEquipped()
 
 void UAuraFishingComponent::OnInventoryEquipAnimationComplete(
 	EAuraEquipmentSlot EquipmentSlot,
-	EAuraItemType EquippedItem
+	const FGameplayTag& EquippedItem
 )
 {
-	if (EquipmentSlot == EAuraEquipmentSlot::Tool && EquippedItem == EAuraItemType::FishingRod)
+	if (EquipmentSlot == EAuraEquipmentSlot::Tool && EquippedItem == FAuraGameplayTags::Get().
+		Item_Type_Equipment_FishingRod)
 	{
 		OnFishingRodEquipped();
 	}

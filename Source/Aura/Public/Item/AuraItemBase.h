@@ -22,11 +22,11 @@ public:
 	bool IsEquipped() const;
 	virtual void Equip(AActor* InOwner);
 	virtual void UnEquip(AActor* InOwner);
-	EAuraItemType GetItemType() const { return ItemType; }
+	FGameplayTag GetItemType() const { return ItemType; }
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
-	EAuraItemType ItemType;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Item.Type"))
+	FGameplayTag ItemType;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	TSubclassOf<UGameplayEffect> EquipGameplayEffect;
 

@@ -17,13 +17,16 @@ class AURA_API UFishInfo : public UDataAsset
 
 public:
 	UFUNCTION(BlueprintCallable)
-	FAuraFishDefinition GetFishDefinitionByFishType(const EFishType& FishType) const;
+	FAuraFishDefinition GetFishDefinitionByFishType(const FGameplayTag& FishType) const;
 	UFUNCTION(BlueprintCallable)
-	float GetFishRarityMultiplierByRarity(const EFishRarity& Rarity) const;
+	float GetFishRarityMultiplierByRarity(const FGameplayTag& Rarity) const;
 	UFUNCTION(BlueprintCallable)
-	float GetFishRarityMultiplierByFishType(const EFishType& FishType) const;
+	float GetFishRarityMultiplierByFishType(const FGameplayTag& FishType) const;
 	UFUNCTION(BlueprintCallable)
-	float GetFishRarityMultiplierByPlayerFishingLevel(const int32& PlayerFishingLevel, const EFishRarity& Rarity) const;
+	float GetFishRarityMultiplierByPlayerFishingLevel(
+		const int32& PlayerFishingLevel,
+		const FGameplayTag& Rarity
+	) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")

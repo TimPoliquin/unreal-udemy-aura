@@ -467,6 +467,73 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Player.HUD.Hide"),
 		FString("Force the player HUD to hide")
 	);
+	Instance.Item = TagManager.AddNativeGameplayTag(FName("Item"), FString("Item root tag"));
+	Instance.Item_Type = TagManager.AddNativeGameplayTag(FName("Item.Type"), FString("Item Type root tag"));
+	Instance.Item_Type_Consumable = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Consumable"),
+		FString("Consumable Item Type")
+	);
+	Instance.Item_Type_Equipment = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Equipment"),
+		FString("Equipment Item Type")
+	);
+	Instance.Item_Type_Fish = TagManager.AddNativeGameplayTag(FName("Item.Type.Fish"), FString("Fish Item Type"));
+	Instance.Item_Type_Instant = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Instant"),
+		FString("Instant Item Type")
+	);
+	Instance.Item_Type_None = TagManager.AddNativeGameplayTag(FName("Item.Type.None"), FString("None Item Type"));
+
+	Instance.Item_Type_Equipment_FishingRod = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Equipment.FishingRod"),
+		FString("Fishing rod - used for fishing!")
+	);
+	Instance.Item_Type_Equipment_Staff = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Equipment.Staff"),
+		FString("Staff - used for magic!")
+	);
+
+	Instance.Equipment = TagManager.AddNativeGameplayTag(FName("Equipment"), FString("Equipment root tag"));
+	Instance.Equipment_Type = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type"),
+		FString("Equipment Type root tag")
+	);
+	Instance.Equipment_Type_None = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type.None"),
+		FString("None Equipment Type")
+	);
+	Instance.Equipment_Type_Tool = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type.Tool"),
+		FString("Tool Equipment Type")
+	);
+	Instance.Equipment_Type_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type.Weapon"),
+		FString("Weapon Equipment Type")
+	);
+	Instance.Equipment_Slot = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot"),
+		FString("Equipment Slot root tag")
+	);
+	Instance.Equipment_Slot_None = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot.None"),
+		FString("None Equipment Slot")
+	);
+	Instance.Equipment_Slot_Tool = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot.Tool"),
+		FString("Tool Equipment Slot")
+	);
+	Instance.Equipment_Slot_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot.Weapon"),
+		FString("Weapon Equipment Slot")
+	);
+
+	Instance.Item_Type_Fish_None = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Fish.None"),
+		FString("None fish type")
+	);
+	Instance.Fish = TagManager.AddNativeGameplayTag(FName("Fish"), FString("Fish root tag"));
+	Instance.Fish_Rarity = TagManager.AddNativeGameplayTag(FName("Fish.Rarity"), FString("Fish Rarity root tag"));
+	Instance.Fish_Tag = TagManager.AddNativeGameplayTag(FName("Fish.Tag"), FString("Fish Tags root tag"));
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

@@ -17,7 +17,7 @@ class AURA_API UAuraItemInfo : public UDataAsset
 
 public:
 	FAuraItemDefinition FindItemByName(const FString& ItemName) const;
-	FAuraItemDefinition FindItemByItemType(const EAuraItemType ItemType) const;
+	FAuraItemDefinition FindItemByItemType(const FGameplayTag& ItemType) const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item")

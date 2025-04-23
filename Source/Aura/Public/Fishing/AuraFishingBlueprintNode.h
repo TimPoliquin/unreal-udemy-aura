@@ -54,7 +54,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void WaitForFishToBeLured();
 	UFUNCTION(BlueprintCallable)
-	void LureAndWaitForABite(const EFishType& FishType);
+	void LureAndWaitForABite(const FGameplayTag& FishType);
 	UFUNCTION(BlueprintCallable)
 	void BiteAndWaitForPlayerOrFlee();
 	UFUNCTION(BlueprintCallable)
@@ -92,7 +92,7 @@ protected:
 	FGoFishingEventSignature OnFishingFishCaughtDelegate;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	EFishType ActiveFishType = EFishType::None;
+	FGameplayTag ActiveFishType = FGameplayTag::EmptyTag;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	EFishState ActiveFishState = EFishState::None;
 	UPROPERTY(BlueprintReadOnly)

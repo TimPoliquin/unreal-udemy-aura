@@ -3,12 +3,14 @@
 
 #include "Item/AuraItemBlueprintLibrary.h"
 
+#include "Fishing/AuraFishInfo.h"
+#include "Fishing/AuraFishTypes.h"
 #include "Game/AuraGameModeBase.h"
 #include "Item/AuraItemInfo.h"
 
 FAuraItemDefinition UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(
 	const UObject* WorldContextObject,
-	const EAuraItemType ItemType
+	const FGameplayTag& ItemType
 )
 {
 	return AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->GetItemInfo()->FindItemByItemType(ItemType);
@@ -16,7 +18,7 @@ FAuraItemDefinition UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(
 
 FString UAuraItemBlueprintLibrary::GetItemNameByItemType(
 	const UObject* WorldContextObject,
-	const EAuraItemType ItemType
+	const FGameplayTag& ItemType
 )
 {
 	return GetItemDefinitionByItemType(WorldContextObject, ItemType).ItemName;
@@ -31,4 +33,18 @@ FString UAuraItemBlueprintLibrary::Substitute(const FString& Message, const FMes
 		Result.ReplaceInline(*Key, *Entry.Value);
 	}
 	return Result;
+}
+
+FAuraFishCatch UAuraItemBlueprintLibrary::ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType)
+{
+	const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject);
+	FAuraItemDefinition ItemDefinition = GameMode->GetItemInfo()->FindItemByItemType(FishType);
+	FAuraFishDefinition FishDefinition = GameMode->GetFishInfo()->GetFishDefinitionByFishType(FishType);
+	FAuraFishCatch Catch;
+	Catch.FishType = FishType;
+	Catch.Description = ItemDefinition.ItemDescription;
+	Catch.FishName = ItemDefinition.ItemName;
+	Catch.Icon = FishDefinition.Icon;
+	Catch.Size = FishDefinition.WeightRange.Value();
+	return Catch;
 }

@@ -57,14 +57,14 @@ public:
 	virtual void SetupForFishing(const FVector& FishingDestination) = 0;
 	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate() = 0;
 	virtual void FishStateChanged(const EFishState& FishState) = 0;
-	virtual float GetRarityMultiplier(const EFishRarity& Rarity) const = 0;
-	virtual TArray<EFishTag> GetFishingTags() const = 0;
+	virtual float GetRarityMultiplier(const FGameplayTag& Rarity) const = 0;
+	virtual FGameplayTagContainer GetFishingTags() const = 0;
 	virtual void Reel() = 0;
 	virtual void EndFishing() = 0;
 	virtual void PrepareForContinue() = 0;
 
 	static void FishStateChanged(const UObject* Actor, const EFishState& FishState);
-	static float GetRarityMultiplier(const UObject* Actor, const EFishRarity& Rarity);
+	static float GetRarityMultiplier(const UObject* Actor, const FGameplayTag& Rarity);
 	static bool IsFishing(const UObject* Actor);
-	static TArray<EFishTag> GetFishingTags(const UObject* Actor);
+	static FGameplayTagContainer GetFishingTags(const UObject* Actor);
 };

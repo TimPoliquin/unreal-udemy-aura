@@ -11,6 +11,7 @@
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/FishingComponentInterface.h"
 #include "Interaction/PlayerInterface.h"
+#include "Item/AuraItemBlueprintLibrary.h"
 #include "Utils/RandUtils.h"
 
 
@@ -45,7 +46,7 @@ void UAuraFishingBlueprintNode::WaitForFishToBeLured()
 	);
 }
 
-void UAuraFishingBlueprintNode::LureAndWaitForABite(const EFishType& FishType)
+void UAuraFishingBlueprintNode::LureAndWaitForABite(const FGameplayTag& FishType)
 {
 	ActiveFishType = FishType;
 	SetFishState(EFishState::Lured);
@@ -85,7 +86,7 @@ void UAuraFishingBlueprintNode::BiteAndWaitForPlayerOrFlee()
 
 void UAuraFishingBlueprintNode::Flee()
 {
-	ActiveFishType = EFishType::None;
+	ActiveFishType = FGameplayTag::EmptyTag;
 	SetFishState(EFishState::Fled);
 	OnFishingFishHasFledDelegate.Broadcast(PlayerActor);
 }
@@ -99,9 +100,7 @@ void UAuraFishingBlueprintNode::Reel()
 
 void UAuraFishingBlueprintNode::Catch()
 {
-	CaughtFish = AAuraGameModeBase::GetAuraGameMode(PlayerActor)->GetFishInfo()->GetFishDefinitionByFishType(
-		ActiveFishType
-	).ToFishCatch();
+	CaughtFish = UAuraItemBlueprintLibrary::ToFishCatch(PlayerActor, ActiveFishType);
 	SetFishState(EFishState::Caught);
 	OnFishingFishCaughtDelegate.Broadcast(PlayerActor);
 }
@@ -133,7 +132,7 @@ void UAuraFishingBlueprintNode::Activate()
 
 void UAuraFishingBlueprintNode::Cleanup()
 {
-	ActiveFishType = EFishType::None;
+	ActiveFishType = FGameplayTag::EmptyTag;
 	OnCameraInPositionDelegate.Clear();
 	OnFishingCancelledDelegate.Clear();
 	OnPlayerInPositionDelegate.Clear();
@@ -153,7 +152,7 @@ void UAuraFishingBlueprintNode::Cleanup()
 void UAuraFishingBlueprintNode::PrepareForContinue()
 {
 	SetFishState(EFishState::None);
-	ActiveFishType = EFishType::None;
+	ActiveFishType = FGameplayTag::EmptyTag;
 	Cleanup();
 	if (const TScriptInterface<IFishingComponentInterface> FishingComponent =
 		IFishingActorInterface::GetFishingComponent(

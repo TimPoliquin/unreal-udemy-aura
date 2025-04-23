@@ -24,15 +24,15 @@ struct FAfterFishingRestore
 {
 	bool bSet = false;
 	EAuraEquipmentUseMode UseMode = EAuraEquipmentUseMode::None;
-	EAuraItemType WeaponType = EAuraItemType::None;
-	EAuraItemType ToolType = EAuraItemType::None;
+	FGameplayTag WeaponType = FGameplayTag::EmptyTag;
+	FGameplayTag ToolType = FGameplayTag::EmptyTag;
 
 	void Reset()
 	{
 		bSet = false;
 		UseMode = EAuraEquipmentUseMode::None;
-		WeaponType = EAuraItemType::None;
-		ToolType = EAuraItemType::None;
+		WeaponType = FGameplayTag::EmptyTag;
+		ToolType = FGameplayTag::EmptyTag;
 	}
 };
 
@@ -61,9 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EFishingState GetFishingState() const;
 	UFUNCTION(BlueprintCallable)
-	virtual float GetRarityMultiplier(const EFishRarity& Rarity) const override;
+	virtual float GetRarityMultiplier(const FGameplayTag& Rarity) const override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	virtual TArray<EFishTag> GetFishingTags() const override;
+	virtual FGameplayTagContainer GetFishingTags() const override;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingStateChangedSignature OnFishingStateChangedDelegate;
@@ -74,7 +74,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFishingState FishingState = EFishingState::None;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<EFishTag> FishingTags;
+	FGameplayTagContainer FishingTags;
 
 private:
 	void SetFishingState(EFishingState InFishingState);
@@ -82,7 +82,7 @@ private:
 	UFUNCTION()
 	void OnFishingBobStateChanged(EFishingBobState FishingBobState);
 	UFUNCTION()
-	void OnInventoryEquipAnimationComplete(EAuraEquipmentSlot EquipmentSlot, EAuraItemType EquippedItem);
+	void OnInventoryEquipAnimationComplete(EAuraEquipmentSlot EquipmentSlot, const FGameplayTag& EquippedItem);
 	UPROPERTY()
 	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
 	UPROPERTY()

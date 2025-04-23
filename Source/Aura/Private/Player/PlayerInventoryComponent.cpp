@@ -29,7 +29,7 @@ UPlayerInventoryComponent::UPlayerInventoryComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-bool UPlayerInventoryComponent::HasItemInInventory(const EAuraItemType& ItemType) const
+bool UPlayerInventoryComponent::HasItemInInventory(const FGameplayTag& ItemType) const
 {
 	return Inventory.ContainsByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
@@ -39,7 +39,7 @@ bool UPlayerInventoryComponent::HasItemInInventory(const EAuraItemType& ItemType
 	);
 }
 
-bool UPlayerInventoryComponent::HasToolEquipped(const EAuraItemType& ItemType) const
+bool UPlayerInventoryComponent::HasToolEquipped(const FGameplayTag& ItemType) const
 {
 	return EquipmentUseMode == EAuraEquipmentUseMode::Tool && EquipmentSlots[EAuraEquipmentSlot::Tool] == ItemType;
 }
@@ -112,7 +112,7 @@ void UPlayerInventoryComponent::UseNothing()
 	}
 }
 
-void UPlayerInventoryComponent::Equip(const EAuraEquipmentSlot& Slot, const EAuraItemType& ItemType)
+void UPlayerInventoryComponent::Equip(const EAuraEquipmentSlot& Slot, const FGameplayTag& ItemType)
 {
 	EquipmentSlots[Slot] = ItemType;
 }
@@ -127,40 +127,40 @@ USkeletalMeshComponent* UPlayerInventoryComponent::GetWeapon() const
 	return nullptr;
 }
 
-EAuraItemType UPlayerInventoryComponent::GetToolType() const
+FGameplayTag UPlayerInventoryComponent::GetToolType() const
 {
 	if (EquipmentSlots.Contains(EAuraEquipmentSlot::Tool))
 	{
 		return EquipmentSlots[EAuraEquipmentSlot::Tool];
 	}
-	return EAuraItemType::None;
+	return FGameplayTag::EmptyTag;
 }
 
-EAuraItemType UPlayerInventoryComponent::GetWeaponType() const
+FGameplayTag UPlayerInventoryComponent::GetWeaponType() const
 {
 	if (EquipmentSlots.Contains(EAuraEquipmentSlot::Weapon))
 	{
 		return EquipmentSlots[EAuraEquipmentSlot::Weapon];
 	}
-	return EAuraItemType::None;
+	return FGameplayTag::EmptyTag;
 }
 
 AAuraFishingRod* UPlayerInventoryComponent::GetFishingRod() const
 {
-	if (IsValid(Tool) && Tool->GetItemType() == EAuraItemType::FishingRod)
+	if (IsValid(Tool) && Tool->GetItemType() == FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod)
 	{
 		return Cast<AAuraFishingRod>(Tool);
 	}
 	return nullptr;
 }
 
-EAuraItemType UPlayerInventoryComponent::GetEquippedItem(const EAuraEquipmentSlot Slot) const
+FGameplayTag UPlayerInventoryComponent::GetEquippedItem(const EAuraEquipmentSlot Slot) const
 {
 	if (EquipmentSlots.Contains(Slot))
 	{
 		return EquipmentSlots[Slot];
 	}
-	return EAuraItemType::None;
+	return FGameplayTag::EmptyTag;
 }
 
 EAuraEquipmentUseMode UPlayerInventoryComponent::GetEquipmentUseMode() const
@@ -170,11 +170,11 @@ EAuraEquipmentUseMode UPlayerInventoryComponent::GetEquipmentUseMode() const
 
 void UPlayerInventoryComponent::PlayEquipAnimation(const EAuraEquipmentSlot Slot) const
 {
-	EAuraItemType ItemType = GetEquippedItem(Slot);
+	const FGameplayTag& ItemType = GetEquippedItem(Slot);
 	OnEquipmentAnimationRequest.Broadcast(Slot, ItemType);
 }
 
-int32 UPlayerInventoryComponent::AddToInventory(const EAuraItemType& ItemType, const int32 Count)
+int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, const int32 Count)
 {
 	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetItemInfo()->
 		FindItemByItemType(ItemType);

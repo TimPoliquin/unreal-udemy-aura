@@ -3,7 +3,7 @@
 
 #include "Fishing/AuraFishInfo.h"
 
-FAuraFishDefinition UFishInfo::GetFishDefinitionByFishType(const EFishType& FishType) const
+FAuraFishDefinition UFishInfo::GetFishDefinitionByFishType(const FGameplayTag& FishType) const
 {
 	const FAuraFishDefinition* Match = FishInfos.FindByPredicate(
 		[FishType](const FAuraFishDefinition& FishInfo)
@@ -18,7 +18,7 @@ FAuraFishDefinition UFishInfo::GetFishDefinitionByFishType(const EFishType& Fish
 	return FAuraFishDefinition();
 }
 
-float UFishInfo::GetFishRarityMultiplierByRarity(const EFishRarity& Rarity) const
+float UFishInfo::GetFishRarityMultiplierByRarity(const FGameplayTag& Rarity) const
 {
 	const FAuraFishRarity* Match = FishRarityInfos.FindByPredicate(
 		[Rarity](const FAuraFishRarity& FishRarity)
@@ -31,14 +31,14 @@ float UFishInfo::GetFishRarityMultiplierByRarity(const EFishRarity& Rarity) cons
 		       : 0.f;
 }
 
-float UFishInfo::GetFishRarityMultiplierByFishType(const EFishType& FishType) const
+float UFishInfo::GetFishRarityMultiplierByFishType(const FGameplayTag& FishType) const
 {
 	return GetFishRarityMultiplierByRarity(GetFishDefinitionByFishType(FishType).Rarity);
 }
 
 float UFishInfo::GetFishRarityMultiplierByPlayerFishingLevel(
 	const int32& PlayerFishingLevel,
-	const EFishRarity& Rarity
+	const FGameplayTag& Rarity
 ) const
 {
 	const FAuraPlayerFishingLevelRarity* PlayerLevelRarity = PlayerFishingLevelRarityInfos.FindByPredicate(

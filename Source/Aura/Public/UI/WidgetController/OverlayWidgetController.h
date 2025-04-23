@@ -103,9 +103,9 @@ private:
 	UFUNCTION()
 	void OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count);
 	UFUNCTION()
-	void OnPlayerInventoryAddItem(const EAuraItemType& ItemType, const int32 Count, const bool BAddedAll);
+	void OnPlayerInventoryAddItem(const FGameplayTag& ItemType, int32 Count, bool BAddedAll);
 	UFUNCTION()
-	void OnPlayerInventoryFull(const EAuraItemType& ItemType);
+	void OnPlayerInventoryFull(const FGameplayTag& ItemType);
 };
 
 template <typename T>

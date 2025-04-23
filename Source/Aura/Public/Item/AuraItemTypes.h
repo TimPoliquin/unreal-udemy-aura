@@ -45,21 +45,6 @@ enum class EAuraEquipmentSlot : uint8
 };
 
 UENUM(BlueprintType)
-enum class EAuraItemType : uint8
-{
-	/** Default Item type - indicates a configuration error **/
-	None,
-	/** Staff Item Type - the basic staff that the player has equipped */
-	Staff,
-	/** Fishing Rod type - enables ability to fish */
-	FishingRod,
-	Fish_01,
-	Fish_02,
-	Fish_03,
-	Fish_04
-};
-
-UENUM(BlueprintType)
 enum class EAuraEquipmentUseMode : uint8
 {
 	/** The player is using nothing */
@@ -79,8 +64,8 @@ struct FAuraItemDefinition
 	FString ItemName = FString("INVALID");
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	FString ItemDescription = FString("");
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
-	EAuraItemType ItemType = EAuraItemType::None;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Item.Type"))
+	FGameplayTag ItemType = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	EAuraItemCategory ItemCategory = EAuraItemCategory::None;
 	/** Determines the maximum number of this item that can exist in the inventory **/
@@ -103,8 +88,8 @@ struct FAuraItemInventoryEntry
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Item")
-	EAuraItemType ItemType = EAuraItemType::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Item", meta=(Categories="Item.Type"))
+	FGameplayTag ItemType = FGameplayTag::EmptyTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Item")
 	int32 ItemCount = 0;
 };

@@ -20,10 +20,10 @@ AAuraFishingPOI::AAuraFishingPOI()
 TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* Player) const
 {
 	TArray<FWeightedFish> AvailableFish;
-	TArray<EFishTag> PlayerFishTags = IFishingComponentInterface::GetFishingTags(Player);
-	TArray<EFishTag> CombinedFishTags;
-	CombinedFishTags.Append(PoolTags);
-	CombinedFishTags.Append(PlayerFishTags);
+	FGameplayTagContainer PlayerFishTags = IFishingComponentInterface::GetFishingTags(Player);
+	FGameplayTagContainer CombinedFishTags;
+	CombinedFishTags.AppendTags(PoolTags);
+	CombinedFishTags.AppendTags(PlayerFishTags);
 	if (const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
 	{
 		for (const FFishConfig& FishConfig : FishConfigs)
@@ -31,13 +31,28 @@ TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* P
 			const FAuraFishDefinition& FishDefinition = GameMode->GetFishInfo()->GetFishDefinitionByFishType(
 				FishConfig.FishType
 			);
-			if (UArrayUtils::ContainsAll(CombinedFishTags, FishDefinition.Tags))
+			if (CombinedFishTags.HasAll(FishDefinition.Tags))
 			{
+				const float BaseRarityMultiplier = GameMode->GetFishInfo()->GetFishRarityMultiplierByRarity(
+					FishDefinition.Rarity
+				);
+				const float PlayerRarityMultiplier = IFishingComponentInterface::GetRarityMultiplier(
+					Player,
+					FishDefinition.Rarity
+				);
+				UE_LOG(
+					LogAura,
+					Warning,
+					TEXT("[%s]: Rarity multiplier for fish [%s] - [%f] * [%f]"),
+					*GetName(),
+					*FishConfig.FishType.ToString(),
+					BaseRarityMultiplier,
+					PlayerRarityMultiplier
+				);
 				FWeightedFish WeightedFish;
 				WeightedFish.FishType = FishConfig.FishType;
-				WeightedFish.Weight = 100.f * (FishConfig.RarityMultiplier * GameMode->GetFishInfo()->
-					GetFishRarityMultiplierByRarity(FishDefinition.Rarity) *
-					IFishingComponentInterface::GetRarityMultiplier(Player, FishDefinition.Rarity));
+				WeightedFish.Weight = 100.f * (FishConfig.RarityMultiplier * BaseRarityMultiplier *
+					PlayerRarityMultiplier);
 				if (WeightedFish.Weight > 0)
 				{
 					AvailableFish.Add(WeightedFish);
@@ -47,9 +62,9 @@ TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* P
 					UE_LOG(
 						LogAura,
 						Warning,
-						TEXT("[%s]: Fish has weight <= 0. [%hhd]"),
+						TEXT("[%s]: Fish has weight <= 0. [%s]"),
 						*GetName(),
-						WeightedFish.FishType
+						*WeightedFish.FishType.ToString()
 					)
 				}
 			}
@@ -58,7 +73,7 @@ TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* P
 	return AvailableFish;
 }
 
-EFishType AAuraFishingPOI::PickFishType(const TArray<FWeightedFish>& AvailableFish) const
+FGameplayTag AAuraFishingPOI::PickFishType(const TArray<FWeightedFish>& AvailableFish) const
 {
 	float TotalWeight = 0.f;
 	for (const auto& [FishType, Weight] : AvailableFish)
@@ -97,11 +112,10 @@ EFishType AAuraFishingPOI::PickFishType(const TArray<FWeightedFish>& AvailableFi
 		{
 			if (bDebug)
 			{
-				UE_LOG(LogAura, Warning, TEXT("[%s]: Chose a fish! [%hhd]"), *GetName(), FishType);
+				UE_LOG(LogAura, Warning, TEXT("[%s]: Chose a fish! [%s]"), *GetName(), *FishType.ToString());
 			}
 			return FishType;
 		}
 	}
-	return EFishType::None;
+	return FGameplayTag::EmptyTag;
 }
-

@@ -15,7 +15,7 @@ FAuraItemDefinition UAuraItemInfo::FindItemByName(const FString& ItemName) const
 	return FAuraItemDefinition();
 }
 
-FAuraItemDefinition UAuraItemInfo::FindItemByItemType(const EAuraItemType ItemType) const
+FAuraItemDefinition UAuraItemInfo::FindItemByItemType(const FGameplayTag& ItemType) const
 {
 	for (const FAuraItemDefinition& ItemDefinition : ItemInfo)
 	{

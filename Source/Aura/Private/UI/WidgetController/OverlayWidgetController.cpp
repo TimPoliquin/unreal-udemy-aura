@@ -143,7 +143,7 @@ void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTa
 }
 
 void UOverlayWidgetController::OnPlayerInventoryAddItem(
-	const EAuraItemType& ItemType,
+	const FGameplayTag& ItemType,
 	const int32 Count,
 	const bool BAddedAll
 )
@@ -164,6 +164,6 @@ void UOverlayWidgetController::OnPlayerInventoryAddItem(
 	}
 }
 
-void UOverlayWidgetController::OnPlayerInventoryFull(const EAuraItemType& ItemType)
+void UOverlayWidgetController::OnPlayerInventoryFull(const FGameplayTag& ItemType)
 {
 }
