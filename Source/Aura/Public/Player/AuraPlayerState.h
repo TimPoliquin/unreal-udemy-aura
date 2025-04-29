@@ -7,8 +7,10 @@
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "GameFramework/PlayerState.h"
+#include "Interaction/SavableInterface.h"
 #include "Item/AuraItemTypes.h"
 #include "AuraPlayerState.generated.h"
+
 class UAuraSaveGame;
 class ULevelUpInfo;
 
@@ -26,7 +28,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
  * 
  */
 UCLASS()
-class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface
+class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface, public ISavableInterface
 {
 	GENERATED_BODY()
 
@@ -108,8 +110,8 @@ public:
 	float GetXPToNextLevelPercentage() const;
 	int32 FindLevelByXP(const int32 InXP) const;
 	FAuraLevelUpRewards GetLevelUpRewards(int32 int32) const;
-	void FromSaveData(const UAuraSaveGame* SaveData);
-	void ToSaveData(UAuraSaveGame* SaveData) const;
+	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
+	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
 
 	FOnPlayerStatChangedSignature OnXPChangeDelegate;
 	FOnPlayerStatChangedSignature OnLevelChangeDelegate;

@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Game/AuraGameModeBase.h"
+#include "Game/AuraSaveGame.h"
 #include "GameFramework/Character.h"
 #include "Item/AuraFishingRod.h"
 #include "Item/AuraItemBase.h"
@@ -190,6 +191,7 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 		{
 			ItemEntry = new FAuraItemInventoryEntry();
 			ItemEntry->ItemType = ItemType;
+			Inventory.Add(*ItemEntry);
 		}
 		else
 		{
@@ -207,6 +209,22 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 	ItemEntry->ItemCount += CountToAdd;
 	OnItemAddedDelegate.Broadcast(ItemType, CountToAdd, CountToAdd == Count);
 	return CountToAdd;
+}
+
+void UPlayerInventoryComponent::FromSaveData(const UAuraSaveGame* SaveData)
+{
+	MaxItems = SaveData->SavedInventory.MaxItems;
+	EquipmentUseMode = SaveData->SavedInventory.EquipmentUseMode;
+	Inventory = SaveData->SavedInventory.Inventory;
+	EquipmentSlots = SaveData->SavedInventory.EquipmentSlots;
+}
+
+void UPlayerInventoryComponent::ToSaveData(UAuraSaveGame* SaveData) const
+{
+	SaveData->SavedInventory.MaxItems = MaxItems;
+	SaveData->SavedInventory.EquipmentUseMode = EquipmentUseMode;
+	SaveData->SavedInventory.Inventory = Inventory;
+	SaveData->SavedInventory.EquipmentSlots = EquipmentSlots;
 }
 
 void UPlayerInventoryComponent::BeginPlay()

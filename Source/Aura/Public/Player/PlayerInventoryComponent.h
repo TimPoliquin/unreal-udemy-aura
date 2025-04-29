@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActiveGameplayEffectHandle.h"
 #include "Components/ActorComponent.h"
+#include "Interaction/SavableInterface.h"
 #include "Item/AuraItemTypes.h"
 #include "PlayerInventoryComponent.generated.h"
 
@@ -41,7 +41,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryFullSignature, const FGa
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class AURA_API UPlayerInventoryComponent : public UActorComponent
+class AURA_API UPlayerInventoryComponent : public UActorComponent, public ISavableInterface
 {
 	GENERATED_BODY()
 
@@ -87,6 +87,11 @@ public:
 	FOnItemAddedSignature OnItemAddedDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryFullSignature OnInventoryFullDelegate;
+
+	/** ISavableInterface start **/
+	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
+	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
+	/** ISavableInterface end **/
 
 protected:
 	virtual void BeginPlay() override;

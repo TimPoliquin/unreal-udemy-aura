@@ -108,6 +108,10 @@ void AAuraCharacter::LoadProgress()
 			{
 				AuraAbilitySystemComponent->FromSaveData(SaveData);
 			}
+			if (PlayerInventoryComponent)
+			{
+				PlayerInventoryComponent->FromSaveData(SaveData);
+			}
 			break;
 		default:
 			UE_LOG(
@@ -390,6 +394,10 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		else
 		{
 			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No AuraAbilitySystemComponent set!"))
+		}
+		if (PlayerInventoryComponent)
+		{
+			PlayerInventoryComponent->ToSaveData(SaveData);
 		}
 		SaveData->SaveSlotAttributeSource = FromDisk;
 		SaveData->PlayerStartTag = CheckpointTag;
