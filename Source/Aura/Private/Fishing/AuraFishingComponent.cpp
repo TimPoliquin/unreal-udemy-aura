@@ -3,6 +3,7 @@
 
 #include "Fishing/AuraFishingComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
@@ -209,7 +210,19 @@ float UAuraFishingComponent::GetRarityMultiplier(const FGameplayTag& Rarity) con
 
 FGameplayTagContainer UAuraFishingComponent::GetFishingTags() const
 {
-	return FishingTags;
+	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		GetOwner()
+	))
+	{
+		const FGameplayTagContainer& TagContainer = AbilitySystemComponent->GetOwnedGameplayTags();
+		FGameplayTagContainer FishingTags;
+		FishingTags.AppendMatchingTags(
+			AbilitySystemComponent->GetOwnedGameplayTags(),
+			FAuraGameplayTags::Get().Fish_Tag.GetSingleTagContainer()
+		);
+		return FishingTags;
+	}
+	return FGameplayTagContainer();
 }
 
 void UAuraFishingComponent::SetFishingState(EFishingState InFishingState)

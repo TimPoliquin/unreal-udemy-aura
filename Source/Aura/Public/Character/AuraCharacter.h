@@ -84,6 +84,7 @@ public:
 
 	/** FishingActorInterface Start */
 	virtual TScriptInterface<IFishingComponentInterface> GetFishingComponent_Implementation() const override;
+	virtual void ShowFishingStatusEffect_Implementation(UNiagaraSystem* EffectSystem) override;
 	/** FishingActorInterface End */
 
 protected:
@@ -101,6 +102,8 @@ private:
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraComponent> FishingStatusEffectNiagaraComponent;
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USoundBase> LevelUpSound;
 	UPROPERTY(EditDefaultsOnly)

@@ -50,6 +50,9 @@ AAuraCharacter::AAuraCharacter()
 	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("Player Inventory"));
 	FishingComponent = CreateDefaultSubobject<UAuraFishingComponent>(TEXT("Fishing Component"));
 	FishingComponent->SetPlayerInventoryComponent(PlayerInventoryComponent);
+	FishingStatusEffectNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Fishing Status Effect"));
+	FishingStatusEffectNiagaraComponent->SetupAttachment(GetRootComponent());
+	FishingStatusEffectNiagaraComponent->SetAutoActivate(false);
 }
 
 void AAuraCharacter::BeginPlay()
@@ -448,4 +451,18 @@ void AAuraCharacter::ReturnCamera_Implementation(
 TScriptInterface<IFishingComponentInterface> AAuraCharacter::GetFishingComponent_Implementation() const
 {
 	return FishingComponent;
+}
+
+void AAuraCharacter::ShowFishingStatusEffect_Implementation(UNiagaraSystem* EffectSystem)
+{
+	if (EffectSystem)
+	{
+		FishingStatusEffectNiagaraComponent->SetAsset(EffectSystem);
+		FishingStatusEffectNiagaraComponent->Activate(true);
+	}
+	else
+	{
+		FishingStatusEffectNiagaraComponent->SetAsset(nullptr);
+		FishingStatusEffectNiagaraComponent->DeactivateImmediate();
+	}
 }

@@ -73,8 +73,6 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	EFishingState FishingState = EFishingState::None;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTagContainer FishingTags;
 
 private:
 	void SetFishingState(EFishingState InFishingState);
