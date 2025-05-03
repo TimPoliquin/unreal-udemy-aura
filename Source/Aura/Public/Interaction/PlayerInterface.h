@@ -7,6 +7,9 @@
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "PlayerInterface.generated.h"
 
+
+DECLARE_DELEGATE(FOnCameraMoveFinishedSignature);
+
 // This class does not need to be modified.
 UINTERFACE()
 class UPlayerInterface : public UInterface
@@ -31,6 +34,7 @@ public:
 	int32 FindLevelForXP(const int32 CurrentXP) const;
 
 
+	/** Abilities and levels **/
 	UFUNCTION(BlueprintNativeEvent)
 	FAuraLevelUpRewards GetLevelUpRewards(const int32 CurrentLevel) const;
 	UFUNCTION(BlueprintNativeEvent)
@@ -47,6 +51,24 @@ public:
 	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void HideMagicCircle();
+
+	/** Camera **/
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void MoveCameraToPoint(
+		const FVector& Destination,
+		const FVector& Direction,
+		UCurveFloat* AnimationCurve
+	);
+	virtual void MoveCameraToPointWithCallback(
+		const FVector& Destination,
+		const FVector& Direction,
+		UCurveFloat* AnimationCurve,
+		FOnCameraMoveFinishedSignature& OnCameraMoveFinishedSignature
+	) = 0;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void ReturnCamera(
+		UCurveFloat* AnimationCurve
+	);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void LevelUp();

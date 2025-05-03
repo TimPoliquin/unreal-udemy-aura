@@ -53,9 +53,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void PlayImpactEffect();
 
-private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
+
+private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> Sphere;
 	UPROPERTY(EditAnywhere)

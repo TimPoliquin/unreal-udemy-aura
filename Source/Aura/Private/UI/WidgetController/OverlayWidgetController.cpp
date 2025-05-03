@@ -7,7 +7,12 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
+#include "Aura/AuraLogChannels.h"
+#include "Game/AuraGameModeBase.h"
+#include "Item/AuraItemInfo.h"
 #include "Player/AuraPlayerState.h"
+#include "Player/PlayerInventoryComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
@@ -65,7 +70,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 				{
 					if (const FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageDataTable, Tag))
 					{
-						MessageWidgetRowDelegate.Broadcast(*Row);
+						MessageWidgetRowDelegate.Broadcast(*Row, FMessageSubstitutions());
 					}
 				}
 			}
@@ -84,6 +89,23 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		GetAuraAbilitySystemComponent()->OnAbilitiesGivenDelegate.AddUObject(
 			this,
 			&UOverlayWidgetController::BroadcastAbilityInfo
+		);
+	}
+	AbilitySystemComponent->RegisterGameplayTagEvent(
+		FAuraGameplayTags::Get().Player_HUD_Hide,
+		EGameplayTagEventType::NewOrRemoved
+	).AddUObject(this, &UOverlayWidgetController::OnPlayerHideHUDTagChanged);
+	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(
+		Player
+	))
+	{
+		PlayerInventoryComponent->OnItemAddedDelegate.AddDynamic(
+			this,
+			&UOverlayWidgetController::OnPlayerInventoryAddItem
+		);
+		PlayerInventoryComponent->OnInventoryFullDelegate.AddDynamic(
+			this,
+			&UOverlayWidgetController::OnPlayerInventoryFull
 		);
 	}
 }
@@ -112,4 +134,36 @@ void UOverlayWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayload&
 	Info.StatusTag = EquipPayload.StatusTag;
 	Info.InputTag = EquipPayload.SlotTag;
 	AbilityInfoDelegate.Broadcast(Info);
+}
+
+void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count)
+{
+	UE_LOG(LogAura, Warning, TEXT("[%s]: %d"), *GameplayTag.ToString(), Count);
+	OnHUDVisibilityChangedDelegate.Broadcast(Count == 0);
+}
+
+void UOverlayWidgetController::OnPlayerInventoryAddItem(
+	const FGameplayTag& ItemType,
+	const int32 Count,
+	const bool BAddedAll
+)
+{
+	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(Player)->GetItemInfo()->
+		FindItemByItemType(
+			ItemType
+		);
+	if (const FUIWidgetRow* WidgetRow = GetDataTableRowByTag<FUIWidgetRow>(
+		MessageDataTable,
+		ItemDefinition.PickupMessageTag
+	))
+	{
+		FMessageSubstitutions Substitutions;
+		Substitutions.Add(FString("ItemName"), ItemDefinition.ItemName);
+		Substitutions.Add(FString("Count"), FString::FromInt(Count));
+		MessageWidgetRowDelegate.Broadcast(*WidgetRow, Substitutions);
+	}
+}
+
+void UOverlayWidgetController::OnPlayerInventoryFull(const FGameplayTag& ItemType)
+{
 }

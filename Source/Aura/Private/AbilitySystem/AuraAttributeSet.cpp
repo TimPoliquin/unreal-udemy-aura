@@ -291,9 +291,9 @@ void UAuraAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	if (DebuffTypeTag.MatchesTagExact(GameplayTags.Debuff_Type_Shock))
 	{
 		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_CursorTrace);
-		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_InputHeld);
-		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_InputPressed);
-		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_InputReleased);
+		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_Interaction);
+		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_Movement);
+		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_Ability_Offensive);
 	}
 	TagsComponent.SetAndApplyTargetTagChanges(InheritedTagContainer);
 

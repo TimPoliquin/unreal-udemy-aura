@@ -26,9 +26,6 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_ExcludeCharacters, ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
-	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
-	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
-	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>(TEXT("Burn Debuff Niagara Component"));
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
 	BurnDebuffComponent->DebuffTag = FAuraGameplayTags::Get().Debuff_Type_Burn;
@@ -99,6 +96,7 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	))
 	{
 		const FName& SocketName = ActiveMontageDef->SocketName;
+		USkeletalMeshComponent* Weapon = Execute_GetWeapon(this);
 		if (IsValid(Weapon) && Weapon->HasAnySockets() && Weapon->GetSocketByName(SocketName))
 		{
 			return Weapon->GetSocketLocation(SocketName);
@@ -207,7 +205,10 @@ FTaggedMontage AAuraBaseCharacter::GetTagMontageByTag_Implementation(const FGame
 
 void AAuraBaseCharacter::Die()
 {
-	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	if (USkeletalMeshComponent* Weapon = Execute_GetWeapon(this); IsValid(Weapon))
+	{
+		Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	}
 	MulticastHandleDeath();
 }
 
@@ -239,15 +240,10 @@ void AAuraBaseCharacter::ChangeMinionCount_Implementation(const int32 Delta)
 void AAuraBaseCharacter::ApplyDeathImpulse(const FVector& DeathImpulse)
 {
 	GetMesh()->AddImpulse(DeathImpulse, NAME_None, true);
-	if (Weapon)
+	if (USkeletalMeshComponent* Weapon = Execute_GetWeapon(this))
 	{
 		Weapon->AddImpulse(DeathImpulse, NAME_None, true);
 	}
-}
-
-USkeletalMeshComponent* AAuraBaseCharacter::GetWeapon_Implementation() const
-{
-	return Weapon;
 }
 
 void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
@@ -257,10 +253,12 @@ void AAuraBaseCharacter::MulticastHandleDeath_Implementation()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
 	}
-	Weapon->SetSimulatePhysics(true);
-	Weapon->SetEnableGravity(true);
-	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-
+	if (USkeletalMeshComponent* Weapon = Execute_GetWeapon(this))
+	{
+		Weapon->SetSimulatePhysics(true);
+		Weapon->SetEnableGravity(true);
+		Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	}
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -277,11 +275,14 @@ void AAuraBaseCharacter::Dissolve()
 		DissolveMaterialInstance,
 		&AAuraBaseCharacter::StartDissolveTimeline
 	);
-	Dissolve(
-		Weapon,
-		WeaponDissolveMaterialInstance,
-		&AAuraBaseCharacter::StartWeaponDissolveTimeline
-	);
+	if (USkeletalMeshComponent* Weapon = Execute_GetWeapon(this))
+	{
+		Dissolve(
+			Weapon,
+			WeaponDissolveMaterialInstance,
+			&AAuraBaseCharacter::StartWeaponDissolveTimeline
+		);
+	}
 }
 
 void AAuraBaseCharacter::Dissolve(

@@ -268,9 +268,9 @@ void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, SavedAbility.AbilityLevel);
 		AssignSlotTagToAbilitySpec(AbilitySpec, SavedAbility.AbilitySlotTag);
 		AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilityStatusTag);
-		if (SavedAbility.AbilityTypeTag.MatchesTagExact(GameplayTags.Abilities_Type_Passive))
+		if (SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
 		{
-			if (SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
+			if (SavedAbility.AbilityState == GiveAbilityAndActivate)
 			{
 				GiveAbilityAndActivateOnce(AbilitySpec);
 			}
@@ -278,10 +278,6 @@ void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
 			{
 				GiveAbility(AbilitySpec);
 			}
-		}
-		else if (SavedAbility.AbilityTypeTag.MatchesTagExact(GameplayTags.Abilities_Type_Offensive))
-		{
-			GiveAbility(AbilitySpec);
 		}
 	}
 	bAbilitiesGiven = true;
@@ -311,6 +307,9 @@ void UAuraAbilitySystemComponent::ToSaveData(UAuraSaveGame* SaveData)
 				SavedAbility.AbilityTypeTag = Info.AbilityType;
 				SavedAbility.AbilitySlotTag = UAuraAbilitySystemLibrary::GetInputTagFromSpec(AbilitySpec);
 				SavedAbility.AbilityStatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(AbilitySpec);
+				SavedAbility.AbilityState = AbilitySpec.ActiveCount > 0
+					                            ? GiveAbilityAndActivate
+					                            : ESavedAbilityState::GiveAbility;
 				SaveData->AddSavedAbility(SavedAbility);
 			}
 			else

@@ -10,6 +10,8 @@
 class UAbilitySystemComponent;
 class UGameplayEffect;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerOverlapSignature, AActor*, Player);
+
 UENUM(BlueprintType)
 enum class EEffectApplicationPolicy : uint8
 {
@@ -51,6 +53,11 @@ class AURA_API AAuraEffectActor : public AActor
 public:
 	AAuraEffectActor();
 	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerOverlapSignature OnPlayerOverlapStart;
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerOverlapSignature OnPlayerOverlapEnd;
 
 protected:
 	virtual void BeginPlay() override;

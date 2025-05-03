@@ -17,6 +17,13 @@ class AURA_API UArrayUtils : public UObject
 public:
 	template <typename T>
 	static T GetRandomElement(const TArray<T>& Array);
+	/**
+	 *Returns <code>true</code> if Source contains all elements in the Elements list
+	 */
+	template <typename T>
+	static bool ContainsAll(const TArray<T>& Source, const TArray<T>& Elements);
+	template <typename T>
+	static TArray<T> RemoveAndCollapse(const TArray<T>& Source, T Element);
 };
 
 template <typename T>
@@ -28,4 +35,31 @@ T UArrayUtils::GetRandomElement(const TArray<T>& Array)
 		return T();
 	}
 	return Array[FMath::RandRange(0, Array.Num() - 1)];
+}
+
+template <typename T>
+bool UArrayUtils::ContainsAll(const TArray<T>& Source, const TArray<T>& Elements)
+{
+	for (const T& Element : Elements)
+	{
+		if (!Source.Contains(Element))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+template <typename T>
+TArray<T> UArrayUtils::RemoveAndCollapse(const TArray<T>& Source, T Element)
+{
+	TArray<T> Collapsed;
+	for (T Current : Source)
+	{
+		if (Current != Element)
+		{
+			Collapsed.Add(Current);
+		}
+	}
+	return Collapsed;
 }

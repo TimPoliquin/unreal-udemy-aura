@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
+#include "Item/AuraItemTypes.h"
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "OverlayWidgetController.generated.h"
 
@@ -18,20 +19,28 @@ struct FUIWidgetRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(Categories="Message"))
 	FGameplayTag AssetTag = FGameplayTag();
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Message = FText();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<UAuraUserWidget> MessageWidget;
+	TSubclassOf<UUserWidget> MessageWidget;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UTexture2D* Image = nullptr;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FMessageWidgetRowSignature,
+	FUIWidgetRow,
+	Row,
+	const FMessageSubstitutions&,
+	MessageSubstitutions
+);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOverlayClearSlotSignature, const FGameplayTag&, SlotTag);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOverlayVisibilityChangedSignature, const bool, bVisible);
 
 
 /**
@@ -72,6 +81,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOverlayClearSlotSignature OnClearSlot;
 
+	UPROPERTY(BlueprintAssignable, Category="HUD")
+	FOverlayVisibilityChangedSignature OnHUDVisibilityChangedDelegate;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable> MessageDataTable;
@@ -88,6 +100,12 @@ private:
 	void OnPlayerLevelChange(const int32 InLevel);
 	UFUNCTION()
 	void OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload);
+	UFUNCTION()
+	void OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count);
+	UFUNCTION()
+	void OnPlayerInventoryAddItem(const FGameplayTag& ItemType, int32 Count, bool BAddedAll);
+	UFUNCTION()
+	void OnPlayerInventoryFull(const FGameplayTag& ItemType);
 };
 
 template <typename T>

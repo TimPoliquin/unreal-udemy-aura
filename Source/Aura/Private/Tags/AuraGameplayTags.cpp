@@ -130,6 +130,18 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("InputTag.Passive2"),
 		FString("Input tag for Passive Ability 2")
 	);
+	Instance.InputTag_Interact = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Interact"),
+		FString("Input tag for player interacting with an object")
+	);
+	Instance.InputTag_Fishing_Reel = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Fishing.Reel"),
+		FString("Input tag for reeling in the fishing line during the fishing minigame")
+	);
+	Instance.InputTag_Cancel = TagManager.AddNativeGameplayTag(
+		FName("InputTag.Cancel"),
+		FString("Input tag for canceling player interaction and abilities")
+	);
 
 	// Effect Tags
 	Instance.Effect_HitReact = TagManager.AddNativeGameplayTag(
@@ -304,6 +316,22 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Abilities.Passive.ManaSiphon"),
 		FString("Passive 3 ability tag")
 	);
+	Instance.Abilities_Other_Interact = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Other.Interact"),
+		FString("Interact with objects in the world")
+	);
+	Instance.Abilities_Other_Cancel = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Other.Cancel"),
+		FString("Cancels active abilities and interactions")
+	);
+	Instance.Abilities_Fishing = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Fishing"),
+		FString("Player's fishing ability.")
+	);
+	Instance.Abilities_Fishing_Reel = TagManager.AddNativeGameplayTag(
+		FName("Abilities.Fishing.Reel"),
+		FString("Player's fishing reel ability.")
+	);
 	Instance.Abilities_Status = TagManager.AddNativeGameplayTag(
 		FName("Abilities.Status"),
 		FString("Status Ability root")
@@ -399,18 +427,113 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Player.Block.CursorTrace"),
 		FString("Block tracing under the cursor")
 	);
-	Instance.Player_Block_InputPressed = TagManager.AddNativeGameplayTag(
-		FName("Player.Block.InputPressed"),
-		FString("Block Input Pressed callback for input")
+	Instance.Player_Block_Movement = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.Movement"),
+		FString("Blocks player movement")
 	);
-	Instance.Player_Block_InputHeld = TagManager.AddNativeGameplayTag(
-		FName("Player.Block.InputHeld"),
-		FString("Block Input Held callback for input")
+	Instance.Player_Block_Interaction = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.Interaction"),
+		FString("Blocks player's ability to interact with the environment")
 	);
-	Instance.Player_Block_InputReleased = TagManager.AddNativeGameplayTag(
-		FName("Player.Block.InputReleased"),
-		FString("Block Input Released callback for input")
+	Instance.Player_Block_Ability_Offensive = TagManager.AddNativeGameplayTag(
+		FName("Player.Block.Ability.Offensive"),
+		FString("Blocks player offensive abilities")
 	);
+	Instance.Player_State_InteractionAvailable = TagManager.AddNativeGameplayTag(
+		FName("Player.State.InteractionAvailable"),
+		FString("Interaction is available for the player")
+	);
+	Instance.Player_Equipped_Tool = TagManager.AddNativeGameplayTag(
+		FName("Player.Equipped.Tool"),
+		FString("Player has a tool equipped")
+	);
+	Instance.Player_Equipped_Tool = TagManager.AddNativeGameplayTag(
+		FName("Player.Equipped.Tool.FishingRod"),
+		FString("Player has a fishing rod tool equipped")
+	);
+	Instance.Player_Equipped_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Player.Equipped.Weapon"),
+		FString("Player has a weapon equipped")
+	);
+	Instance.Player_POI_Fishing = TagManager.AddNativeGameplayTag(
+		FName("Player.POI.Fishing"),
+		FString("Player is at a fishing POI")
+	);
+	Instance.Player_POI_Fishing_CanReel = TagManager.AddNativeGameplayTag(
+		FName("Player.POI.Fishing.CanReel"),
+		FString("Player is fishing and can reel")
+	);
+	Instance.Player_HUD_Hide = TagManager.AddNativeGameplayTag(
+		FName("Player.HUD.Hide"),
+		FString("Force the player HUD to hide")
+	);
+	Instance.Item = TagManager.AddNativeGameplayTag(FName("Item"), FString("Item root tag"));
+	Instance.Item_Type = TagManager.AddNativeGameplayTag(FName("Item.Type"), FString("Item Type root tag"));
+	Instance.Item_Type_Consumable = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Consumable"),
+		FString("Consumable Item Type")
+	);
+	Instance.Item_Type_Equipment = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Equipment"),
+		FString("Equipment Item Type")
+	);
+	Instance.Item_Type_Fish = TagManager.AddNativeGameplayTag(FName("Item.Type.Fish"), FString("Fish Item Type"));
+	Instance.Item_Type_Instant = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Instant"),
+		FString("Instant Item Type")
+	);
+	Instance.Item_Type_None = TagManager.AddNativeGameplayTag(FName("Item.Type.None"), FString("None Item Type"));
+
+	Instance.Item_Type_Equipment_FishingRod = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Equipment.FishingRod"),
+		FString("Fishing rod - used for fishing!")
+	);
+	Instance.Item_Type_Equipment_Staff = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Equipment.Staff"),
+		FString("Staff - used for magic!")
+	);
+
+	Instance.Equipment = TagManager.AddNativeGameplayTag(FName("Equipment"), FString("Equipment root tag"));
+	Instance.Equipment_Type = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type"),
+		FString("Equipment Type root tag")
+	);
+	Instance.Equipment_Type_None = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type.None"),
+		FString("None Equipment Type")
+	);
+	Instance.Equipment_Type_Tool = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type.Tool"),
+		FString("Tool Equipment Type")
+	);
+	Instance.Equipment_Type_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Type.Weapon"),
+		FString("Weapon Equipment Type")
+	);
+	Instance.Equipment_Slot = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot"),
+		FString("Equipment Slot root tag")
+	);
+	Instance.Equipment_Slot_None = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot.None"),
+		FString("None Equipment Slot")
+	);
+	Instance.Equipment_Slot_Tool = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot.Tool"),
+		FString("Tool Equipment Slot")
+	);
+	Instance.Equipment_Slot_Weapon = TagManager.AddNativeGameplayTag(
+		FName("Equipment.Slot.Weapon"),
+		FString("Weapon Equipment Slot")
+	);
+
+	Instance.Item_Type_Fish_None = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Fish.None"),
+		FString("None fish type")
+	);
+	Instance.Fish = TagManager.AddNativeGameplayTag(FName("Fish"), FString("Fish root tag"));
+	Instance.Fish_Rarity = TagManager.AddNativeGameplayTag(FName("Fish.Rarity"), FString("Fish Rarity root tag"));
+	Instance.Fish_Tag = TagManager.AddNativeGameplayTag(FName("Fish.Tag"), FString("Fish Tags root tag"));
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

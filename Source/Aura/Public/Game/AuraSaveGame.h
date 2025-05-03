@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/SaveGame.h"
+#include "Item/AuraItemTypes.h"
 #include "AuraSaveGame.generated.h"
 
 class UGameplayAbility;
@@ -22,6 +23,13 @@ enum ESaveSlotAttributeSource
 {
 	FromDefault,
 	FromDisk
+};
+
+UENUM(BlueprintType)
+enum ESavedAbilityState
+{
+	GiveAbility,
+	GiveAbilityAndActivate
 };
 
 USTRUCT(BlueprintType)
@@ -75,6 +83,8 @@ struct FSavedAbility
 	FGameplayTag AbilitySlotTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int32 AbilityLevel = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TEnumAsByte<ESavedAbilityState> AbilityState = GiveAbility;
 
 	FString ToString() const
 	{
@@ -96,6 +106,21 @@ struct FSavedAbility
 	{
 		return AbilityTag.MatchesTagExact(Right.AbilityTag);
 	}
+};
+
+USTRUCT(BlueprintType)
+struct FSavedInventory
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 MaxItems = 16;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<FAuraItemInventoryEntry> Inventory;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
 };
 
 /**
@@ -146,6 +171,8 @@ public:
 
 	UPROPERTY()
 	TArray<FSavedAbility> SavedAbilities;
+	UPROPERTY()
+	FSavedInventory SavedInventory;
 	UPROPERTY()
 	TArray<FSavedMap> SavedMaps;
 

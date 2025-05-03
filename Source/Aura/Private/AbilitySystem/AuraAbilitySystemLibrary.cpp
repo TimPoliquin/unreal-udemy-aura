@@ -3,8 +3,6 @@
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
-#include <rapidjson/schema.h>
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
@@ -713,6 +711,61 @@ FDamageEffectParams UAuraAbilitySystemLibrary::MakeCustomDamageEffectParams(
 		}
 	}
 	return DamageEffectParams;
+}
+
+FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
+	AActor* TargetActor,
+	const TSubclassOf<UGameplayEffect>& GameplayEffect,
+	const int32 Level
+)
+{
+	UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	);
+	FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(TargetActor);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
+		GameplayEffect,
+		Level,
+		EffectContextHandle
+	);
+	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
+		*EffectSpecHandle.Data.Get()
+	);
+	return ActiveEffectHandle;
+}
+
+void UAuraAbilitySystemLibrary::RemoveGameplayEffect(
+	AActor* TargetActor,
+	const FActiveGameplayEffectHandle& GameplayEffectHandle,
+	bool bRemoveAll
+)
+{
+	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	))
+	{
+		AbilitySystemComponent->RemoveActiveGameplayEffect(
+			GameplayEffectHandle,
+			bRemoveAll
+				? -1
+				: 1
+		);
+	}
+}
+
+int32 UAuraAbilitySystemLibrary::GetAbilityLevelByAbilityTag(
+	AActor* Actor,
+	const FGameplayTag& AbilityTag
+)
+{
+	if (UAuraAbilitySystemComponent* AbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Actor)
+	))
+	{
+		return AbilitySystemComponent->GetSpecFromAbilityTag(AbilityTag)->Level;
+	}
+	return 0;
 }
 
 bool UAuraAbilitySystemLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)

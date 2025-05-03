@@ -53,7 +53,6 @@ void AAuraPlayerState::ToSaveData(UAuraSaveGame* SaveData) const
 	SaveData->SpellPoints = GetSpellPoints();
 }
 
-
 float AAuraPlayerState::GetXPToNextLevelPercentage() const
 {
 	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))

@@ -11,7 +11,7 @@ public class Aura : ModuleRules
 		this.PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG", "SlateCore",
-			"ModelViewViewModel"
+			"ModelViewViewModel", "CableComponent"
 		});
 
 		this.PrivateDependencyModuleNames.AddRange(new[]

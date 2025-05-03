@@ -42,6 +42,7 @@ public:
 	}
 
 	virtual int32 GetXPReward_Implementation() const override;
+	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
 
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
 
@@ -84,6 +85,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> HealthWidget;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<USkeletalMeshComponent> Weapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;

@@ -59,6 +59,9 @@ struct FAuraGameplayTags
 	FGameplayTag InputTag_Action4;
 	FGameplayTag InputTag_Passive1;
 	FGameplayTag InputTag_Passive2;
+	FGameplayTag InputTag_Interact;
+	FGameplayTag InputTag_Fishing_Reel;
+	FGameplayTag InputTag_Cancel;
 
 	/** Effect Tags **/
 	FGameplayTag Effect_HitReact;
@@ -108,6 +111,10 @@ struct FAuraGameplayTags
 	FGameplayTag Abilities_Passive_HaloOfProtection;
 	FGameplayTag Abilities_Passive_LifeSiphon;
 	FGameplayTag Abilities_Passive_ManaSiphon;
+	FGameplayTag Abilities_Other_Interact;
+	FGameplayTag Abilities_Other_Cancel;
+	FGameplayTag Abilities_Fishing;
+	FGameplayTag Abilities_Fishing_Reel;
 	FGameplayTag Abilities_Status;
 	FGameplayTag Abilities_Status_Locked;
 	FGameplayTag Abilities_Status_Eligible;
@@ -135,9 +142,47 @@ struct FAuraGameplayTags
 
 	/** Player Tags **/
 	FGameplayTag Player_Block_CursorTrace;
-	FGameplayTag Player_Block_InputPressed;
-	FGameplayTag Player_Block_InputHeld;
-	FGameplayTag Player_Block_InputReleased;
+	FGameplayTag Player_Block_Movement;
+	FGameplayTag Player_Block_Ability_Offensive;
+	FGameplayTag Player_Block_Interaction;
+	FGameplayTag Player_State_InteractionAvailable;
+	FGameplayTag Player_Equipped_Tool;
+	FGameplayTag Player_Equipped_Tool_FishingRod;
+	FGameplayTag Player_Equipped_Weapon;
+	FGameplayTag Player_POI_Fishing;
+	FGameplayTag Player_POI_Fishing_CanReel;
+	FGameplayTag Player_HUD_Hide;
+
+	/* Item Tags */
+	FGameplayTag Item;
+	FGameplayTag Item_Type;
+	FGameplayTag Item_Type_Consumable;
+	FGameplayTag Item_Type_Equipment;
+	FGameplayTag Item_Type_Fish;
+	FGameplayTag Item_Type_Instant;
+	FGameplayTag Item_Type_None;
+
+	/* Equipment Tags */
+	FGameplayTag Item_Type_Equipment_Staff;
+	FGameplayTag Item_Type_Equipment_FishingRod;
+
+	/* Equipment Tags */
+	FGameplayTag Equipment;
+	FGameplayTag Equipment_Type;
+	FGameplayTag Equipment_Type_None;
+	FGameplayTag Equipment_Type_Tool;
+	FGameplayTag Equipment_Type_Weapon;
+	FGameplayTag Equipment_Slot;
+	FGameplayTag Equipment_Slot_None;
+	FGameplayTag Equipment_Slot_Tool;
+	FGameplayTag Equipment_Slot_Weapon;
+
+	/* Fishing Tags */
+	FGameplayTag Item_Type_Fish_None;
+	FGameplayTag Fish;
+	FGameplayTag Fish_Rarity;
+	FGameplayTag Fish_Tag;
+
 
 	/**
 	 * Montage Attack Tags 

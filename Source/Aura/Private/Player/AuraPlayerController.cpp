@@ -114,7 +114,7 @@ void AAuraPlayerController::SetupInputComponent()
 void AAuraPlayerController::Move(const FInputActionValue& Value)
 {
 	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_InputPressed
+		FAuraGameplayTags::Get().Player_Block_Movement
 	))
 	{
 		return;
@@ -177,12 +177,6 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetAuraAbilitySystemComponen
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_InputPressed
-	))
-	{
-		return;
-	}
 	if (FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
 		bAutoRunning = false;
@@ -195,12 +189,6 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_InputHeld
-	))
-	{
-		return;
-	}
 	if (IsTargetingEnemy() || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
 		if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
@@ -210,6 +198,13 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	}
 	else if (!IsTargetingEnemy())
 	{
+		if (GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
+			FAuraGameplayTags::Get().Player_Block_Movement
+		))
+		{
+			// abort if player cannot move
+			return;
+		}
 		FollowTime += GetWorld()->GetDeltaSeconds();
 		if (CursorHit.bBlockingHit)
 		{
@@ -225,12 +220,6 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_InputReleased
-	))
-	{
-		return;
-	}
 	if (IsTargetingEnemy() || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
 		if (UAuraAbilitySystemComponent* LocalAbilitySystemComponent = GetAuraAbilitySystemComponent())
@@ -247,10 +236,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 void AAuraPlayerController::AutoMove_Start()
 {
 	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_InputPressed
+		FAuraGameplayTags::Get().Player_Block_Movement
 	))
 	{
-		// do not automove if input is blocked
+		// do not automove if movement is blocked
 		return;
 	}
 	if (const APawn* ControlledPawn = GetPawn<APawn>(); FollowTime <= ShortPressThreshold)
@@ -289,8 +278,12 @@ void AAuraPlayerController::AutoMove_Start()
 
 void AAuraPlayerController::AutoMove_Process()
 {
-	if (!bAutoRunning)
+	if (!bAutoRunning || GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
+		FAuraGameplayTags::Get().Player_Block_Movement
+	))
 	{
+		// stop automove if not auto running or if movement is blocked
+		bAutoRunning = false;
 		return;
 	}
 	if (APawn* ControlledPawn = GetPawn())

@@ -2,8 +2,6 @@
 
 
 #include "UI/Widget/AuraUserWidget.h"
-
-#include "Aura/AuraLogChannels.h"
 #include "Interaction/UnbindableInterface.h"
 
 void UAuraUserWidget::SetWidgetController(UObject* InWidgetController)

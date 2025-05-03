@@ -230,11 +230,11 @@ struct FAbilityTagStatus
 	GENERATED_BODY()
 
 	UPROPERTY()
-	FGameplayTag AbilityTag;
+	FGameplayTag AbilityTag = FGameplayTag::EmptyTag;
 	UPROPERTY()
-	FGameplayTag StatusTag;
+	FGameplayTag StatusTag = FGameplayTag::EmptyTag;
 	UPROPERTY()
-	int32 AbilityLevel;
+	int32 AbilityLevel = 0;
 
 	static FAbilityTagStatus Create(
 		const FGameplayTag AbilityTag,

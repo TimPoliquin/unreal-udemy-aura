@@ -10,16 +10,20 @@
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
-#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Aura/AuraLogChannels.h"
+#include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Fishing/AuraFishingComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUD.h"
+#include "Interaction/PlayerInterface.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -40,14 +44,21 @@ AAuraCharacter::AAuraCharacter()
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->SetUsingAbsoluteRotation(true);
 	SpringArmComponent->bDoCollisionTest = false;
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
+	CameraComponent = CreateDefaultSubobject<UAuraCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
+	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("Player Inventory"));
+	FishingComponent = CreateDefaultSubobject<UAuraFishingComponent>(TEXT("Fishing Component"));
+	FishingComponent->SetPlayerInventoryComponent(PlayerInventoryComponent);
+	FishingStatusEffectNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Fishing Status Effect"));
+	FishingStatusEffectNiagaraComponent->SetupAttachment(GetRootComponent());
+	FishingStatusEffectNiagaraComponent->SetAutoActivate(false);
 }
 
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	OnCameraReturnDelegate.BindUObject(this, &AAuraCharacter::OnCameraReturned);
 }
 
 
@@ -100,6 +111,10 @@ void AAuraCharacter::LoadProgress()
 			{
 				AuraAbilitySystemComponent->FromSaveData(SaveData);
 			}
+			if (PlayerInventoryComponent)
+			{
+				PlayerInventoryComponent->FromSaveData(SaveData);
+			}
 			break;
 		default:
 			UE_LOG(
@@ -134,9 +149,9 @@ void AAuraCharacter::OnRep_StatusEffectTags()
 		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 		FGameplayTagContainer BlockedTags;
 		BlockedTags.AddTag(GameplayTags.Player_Block_CursorTrace);
-		BlockedTags.AddTag(GameplayTags.Player_Block_InputHeld);
-		BlockedTags.AddTag(GameplayTags.Player_Block_InputPressed);
-		BlockedTags.AddTag(GameplayTags.Player_Block_InputReleased);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Movement);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Ability_Offensive);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Interaction);
 		if (IsShocked())
 		{
 			AuraAbilitySystemComponent->AddLooseGameplayTags(BlockedTags);
@@ -191,17 +206,23 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 void AAuraCharacter::InitializePlayerControllerHUD(
 	APlayerController* InPlayerController,
 	APlayerState* InPlayerState
-) const
+)
 {
 	if (AAuraHUD* HUD = Cast<AAuraHUD>(InPlayerController->GetHUD()))
 	{
 		HUD->InitializeWidgets(
+			this,
 			InPlayerController,
 			InPlayerState,
 			AbilitySystemComponent,
 			AttributeSet
 		);
 	}
+}
+
+void AAuraCharacter::OnCameraReturned()
+{
+	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 }
 
 int32 AAuraCharacter::GetCharacterLevel_Implementation() const
@@ -233,6 +254,11 @@ void AAuraCharacter::Die()
 	);
 	GetWorldTimerManager().SetTimer(DeathTimer, DeathTimerDelegate, DeathTime, false);
 	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+USkeletalMeshComponent* AAuraCharacter::GetWeapon_Implementation() const
+{
+	return PlayerInventoryComponent->GetWeapon();
 }
 
 int32 AAuraCharacter::GetXP_Implementation()
@@ -372,8 +398,71 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		{
 			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No AuraAbilitySystemComponent set!"))
 		}
+		if (PlayerInventoryComponent)
+		{
+			PlayerInventoryComponent->ToSaveData(SaveData);
+		}
 		SaveData->SaveSlotAttributeSource = FromDisk;
 		SaveData->PlayerStartTag = CheckpointTag;
 		GameMode->SaveInGameProgressData(SaveData);
+	}
+}
+
+void AAuraCharacter::MoveCameraToPoint_Implementation(
+	const FVector& Destination,
+	const FVector& Direction,
+	UCurveFloat* AnimationCurve
+)
+{
+	DesiredCameraForwardVector = CameraComponent->GetForwardVector();
+	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	CameraComponent->MoveToLocation(Destination, Direction, AnimationCurve);
+}
+
+void AAuraCharacter::MoveCameraToPointWithCallback(
+	const FVector& Destination,
+	const FVector& Direction,
+	UCurveFloat* AnimationCurve,
+	FOnCameraMoveFinishedSignature& OnCameraMoveFinishedSignature
+)
+{
+	DesiredCameraForwardVector = CameraComponent->GetForwardVector();
+	CameraComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	CameraComponent->MoveToLocation(Destination, Direction, AnimationCurve, &OnCameraMoveFinishedSignature);
+}
+
+void AAuraCharacter::ReturnCamera_Implementation(
+	UCurveFloat* AnimationCurve
+)
+{
+	CameraComponent->AttachToComponent(
+		SpringArmComponent,
+		FAttachmentTransformRules::KeepWorldTransform,
+		USpringArmComponent::SocketName
+	);
+	CameraComponent->MoveToLocation(
+		SpringArmComponent->GetSocketTransform(USpringArmComponent::SocketName).GetLocation(),
+		DesiredCameraForwardVector,
+		AnimationCurve,
+		&OnCameraReturnDelegate
+	);
+}
+
+TScriptInterface<IFishingComponentInterface> AAuraCharacter::GetFishingComponent_Implementation() const
+{
+	return FishingComponent;
+}
+
+void AAuraCharacter::ShowFishingStatusEffect_Implementation(UNiagaraSystem* EffectSystem)
+{
+	if (EffectSystem)
+	{
+		FishingStatusEffectNiagaraComponent->SetAsset(EffectSystem);
+		FishingStatusEffectNiagaraComponent->Activate(true);
+	}
+	else
+	{
+		FishingStatusEffectNiagaraComponent->SetAsset(nullptr);
+		FishingStatusEffectNiagaraComponent->DeactivateImmediate();
 	}
 }
