@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AuraItemTypes.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
+#include "Item/AuraItemTypes.h"
 #include "AuraItemInfo.generated.h"
 
 /**
@@ -16,8 +17,8 @@ class AURA_API UAuraItemInfo : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	FAuraItemDefinition FindItemByName(const FString& ItemName) const;
 	FAuraItemDefinition FindItemByItemType(const FGameplayTag& ItemType) const;
+	void AddToMap(TMap<FGameplayTag, FAuraItemDefinition>& ItemDefinitionMap) const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item")

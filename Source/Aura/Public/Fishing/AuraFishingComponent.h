@@ -6,7 +6,7 @@
 #include "GameplayAbilitySpecHandle.h"
 #include "Components/ActorComponent.h"
 #include "Interaction/FishingComponentInterface.h"
-#include "Item/AuraFishingBob.h"
+#include "Item/Equipment/AuraFishingBob.h"
 #include "Item/AuraItemTypes.h"
 #include "AuraFishingComponent.generated.h"
 

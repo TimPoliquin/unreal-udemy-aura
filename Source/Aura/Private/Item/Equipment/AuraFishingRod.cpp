@@ -1,9 +1,9 @@
 ﻿// Copyright Alien Shores
 
 
-#include "Item/AuraFishingRod.h"
+#include "Item/Equipment/AuraFishingRod.h"
 
-#include "AuraFishingBob.h"
+#include "Item/Equipment/AuraFishingBob.h"
 #include "CableComponent.h"
 #include "Actor/AuraActorBlueprintFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"

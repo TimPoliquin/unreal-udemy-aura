@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AuraItemBase.h"
-#include "Item/AuraFishingBob.h"
+#include "AuraEquipmentBase.h"
+#include "Item/Equipment/AuraFishingBob.h"
 #include "AuraFishingRod.generated.h"
 
 class UCableComponent;
@@ -13,7 +13,7 @@ class AAuraFishingBob;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFishingBobLandedSignature);
 
 UCLASS()
-class AURA_API AAuraFishingRod : public AAuraItemBase
+class AURA_API AAuraFishingRod : public AAuraEquipmentBase
 {
 	GENERATED_BODY()
 

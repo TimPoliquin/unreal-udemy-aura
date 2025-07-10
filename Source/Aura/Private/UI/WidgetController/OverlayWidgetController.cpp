@@ -9,7 +9,6 @@
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameModeBase.h"
-#include "Item/AuraItemInfo.h"
 #include "Player/AuraPlayerState.h"
 #include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
@@ -76,37 +75,23 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 			}
 		}
 	);
-	GetAuraAbilitySystemComponent()->OnAbilityEquippedDelegate.AddDynamic(
-		this,
-		&UOverlayWidgetController::OnAbilityEquipped
-	);
+	GetAuraAbilitySystemComponent()->OnAbilityEquippedDelegate.AddDynamic(this, &UOverlayWidgetController::OnAbilityEquipped);
 	if (GetAuraAbilitySystemComponent()->HasFiredOnAbilitiesGivenDelegate())
 	{
 		BroadcastAbilityInfo();
 	}
 	else
 	{
-		GetAuraAbilitySystemComponent()->OnAbilitiesGivenDelegate.AddUObject(
-			this,
-			&UOverlayWidgetController::BroadcastAbilityInfo
-		);
+		GetAuraAbilitySystemComponent()->OnAbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastAbilityInfo);
 	}
 	AbilitySystemComponent->RegisterGameplayTagEvent(
 		FAuraGameplayTags::Get().Player_HUD_Hide,
 		EGameplayTagEventType::NewOrRemoved
 	).AddUObject(this, &UOverlayWidgetController::OnPlayerHideHUDTagChanged);
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(
-		Player
-	))
+	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(Player))
 	{
-		PlayerInventoryComponent->OnItemAddedDelegate.AddDynamic(
-			this,
-			&UOverlayWidgetController::OnPlayerInventoryAddItem
-		);
-		PlayerInventoryComponent->OnInventoryFullDelegate.AddDynamic(
-			this,
-			&UOverlayWidgetController::OnPlayerInventoryFull
-		);
+		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryAddItem);
+		PlayerInventoryComponent->OnInventoryFullDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryFull);
 	}
 }
 
@@ -142,24 +127,15 @@ void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTa
 	OnHUDVisibilityChangedDelegate.Broadcast(Count == 0);
 }
 
-void UOverlayWidgetController::OnPlayerInventoryAddItem(
-	const FGameplayTag& ItemType,
-	const int32 Count,
-	const bool BAddedAll
+void UOverlayWidgetController::OnPlayerInventoryAddItem(const FOnInventoryItemCountChangedPayload& Payload
 )
 {
-	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(Player)->GetItemInfo()->
-		FindItemByItemType(
-			ItemType
-		);
-	if (const FUIWidgetRow* WidgetRow = GetDataTableRowByTag<FUIWidgetRow>(
-		MessageDataTable,
-		ItemDefinition.PickupMessageTag
-	))
+	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(Player)->FindItemDefinitionByItemTag(Payload.ItemType);
+	if (const FUIWidgetRow* WidgetRow = GetDataTableRowByTag<FUIWidgetRow>(MessageDataTable, ItemDefinition.PickupMessageTag))
 	{
 		FMessageSubstitutions Substitutions;
 		Substitutions.Add(FString("ItemName"), ItemDefinition.ItemName);
-		Substitutions.Add(FString("Count"), FString::FromInt(Count));
+		Substitutions.Add(FString("Count"), FString::FromInt(Payload.GetDelta()));
 		MessageWidgetRowDelegate.Broadcast(*WidgetRow, Substitutions);
 	}
 }

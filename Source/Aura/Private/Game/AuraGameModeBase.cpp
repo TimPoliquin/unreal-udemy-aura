@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/Character.h"
 #include "Interaction/SaveInterface.h"
+#include "Item/Data/AuraItemInfo.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
@@ -183,10 +184,20 @@ UAuraGameInstance* AAuraGameModeBase::GetAuraGameInstance() const
 	return Cast<UAuraGameInstance>(GetGameInstance());
 }
 
+FAuraItemDefinition AAuraGameModeBase::FindItemDefinitionByItemTag(const FGameplayTag& ItemTag) const
+{
+	if (ItemDefinitions.Contains(ItemTag))
+	{
+		return ItemDefinitions[ItemTag];
+	}
+	return FAuraItemDefinition();
+}
+
 void AAuraGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	MapsByName.Add(DefaultMapName, DefaultMap);
+	InitializeItemDefinitions();
 }
 
 int32 AAuraGameModeBase::GetDefaultPlayerLevel() const
@@ -240,4 +251,12 @@ FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetNam
 		}
 	}
 	return FString("");
+}
+
+void AAuraGameModeBase::InitializeItemDefinitions()
+{
+	for (const UAuraItemInfo* ItemDefinitionSet : ItemInfos)
+	{
+		ItemDefinitionSet->AddToMap(ItemDefinitions);
+	}
 }

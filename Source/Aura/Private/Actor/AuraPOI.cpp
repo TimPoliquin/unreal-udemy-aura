@@ -6,6 +6,7 @@
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Item/Component/AuraEffectComponent.h"
 #include "UI/Widget/InteractionWidgetInterface.h"
 
 
@@ -22,8 +23,6 @@ AAuraPOI::AAuraPOI()
 	POIWidget->SetupAttachment(GetRootComponent());
 	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	InteractionWidget->SetupAttachment(GetRootComponent());
-	ApplyToTags.AddUnique(TAG_PLAYER);
-	ApplyToTags.Remove(TAG_ENEMY);
 }
 
 void AAuraPOI::BeginPlay()
@@ -46,7 +45,7 @@ void AAuraPOI::OnSphereBeginOverlap(
 	// if player, show interaction widget
 	if (IsPlayerActor(OtherActor))
 	{
-		OnOverlap(OtherActor);
+		EffectComponent->OnOverlap(OtherActor);
 		IInteractionWidgetInterface::Show(InteractionWidget->GetWidget());
 	}
 }
@@ -61,7 +60,7 @@ void AAuraPOI::OnSphereEndOverlap(
 	// if player, hide interaction widget
 	if (IsPlayerActor(OtherActor))
 	{
-		OnEndOverlap(OtherActor);
+		EffectComponent->OnEndOverlap(OtherActor);
 		IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget());
 	}
 }

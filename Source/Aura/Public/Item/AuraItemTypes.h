@@ -5,7 +5,7 @@
 #include "AuraItemTypes.generated.h"
 
 
-class AAuraItemBase;
+class AAuraEquipmentBase;
 
 UENUM(BlueprintType)
 enum class EAuraItemCategory : uint8
@@ -16,10 +16,12 @@ enum class EAuraItemCategory : uint8
 	Consumable,
 	/** Equipment type - these items can be equipped into equipment slots */
 	Equipment,
+	/** Fish type - these items are fish **/
+	Fish,
 	/** Instant type - these items have an effect immediately on contact with the player */
 	Instant,
-	/** Fish type - these items are fish **/
-	Fish
+	/** Used to unlock doors/chests/etc */
+	Key,
 };
 
 UENUM(BlueprintType)
@@ -60,6 +62,7 @@ struct FAuraItemDefinition
 {
 	GENERATED_BODY()
 
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	FString ItemName = FString("INVALID");
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
@@ -80,7 +83,12 @@ struct FAuraItemDefinition
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Message"))
 	FGameplayTag PickupMessageTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
-	TSubclassOf<AAuraItemBase> ItemClass;
+	TSubclassOf<AAuraEquipmentBase> ItemClass;
+
+	bool IsValid() const
+	{
+		return ItemType.IsValid();
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -92,6 +100,16 @@ struct FAuraItemInventoryEntry
 	FGameplayTag ItemType = FGameplayTag::EmptyTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Item")
 	int32 ItemCount = 0;
+
+	bool operator==(const FAuraItemInventoryEntry& Other) const
+	{
+		return ItemType.MatchesTagExact(Other.ItemType);
+	}
+
+	bool IsValid() const
+	{
+		return ItemType.IsValid();
+	}
 };
 
 USTRUCT(BlueprintType)

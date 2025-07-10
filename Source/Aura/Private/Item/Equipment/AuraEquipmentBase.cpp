@@ -1,30 +1,30 @@
 ﻿// Copyright Alien Shores
 
 
-#include "Item/AuraItemBase.h"
+#include "Item/Equipment/AuraEquipmentBase.h"
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 
 
 // Sets default values
-AAuraItemBase::AAuraItemBase()
+AAuraEquipmentBase::AAuraEquipmentBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	MeshComponent->SetupAttachment(GetRootComponent());
 }
 
-USkeletalMeshComponent* AAuraItemBase::GetMesh() const
+USkeletalMeshComponent* AAuraEquipmentBase::GetMesh() const
 {
 	return MeshComponent;
 }
 
-bool AAuraItemBase::IsEquipped() const
+bool AAuraEquipmentBase::IsEquipped() const
 {
 	return bIsEquipped;
 }
 
-void AAuraItemBase::Equip(AActor* InOwner)
+void AAuraEquipmentBase::Equip(AActor* InOwner)
 {
 	if (IsEquipped())
 	{
@@ -37,7 +37,7 @@ void AAuraItemBase::Equip(AActor* InOwner)
 	}
 }
 
-void AAuraItemBase::UnEquip(AActor* InOwner)
+void AAuraEquipmentBase::UnEquip(AActor* InOwner)
 {
 	if (!IsEquipped())
 	{

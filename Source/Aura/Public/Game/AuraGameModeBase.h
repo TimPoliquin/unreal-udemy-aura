@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/GameModeBase.h"
+#include "Item/AuraItemTypes.h"
 #include "AuraGameModeBase.generated.h"
 
 class UFishInfo;
@@ -34,11 +36,6 @@ public:
 		return AbilityInfo;
 	}
 
-	FORCEINLINE UAuraItemInfo* GetItemInfo() const
-	{
-		return ItemInfo;
-	}
-
 	FORCEINLINE UFishInfo* GetFishInfo() const
 	{
 		return FishInfo;
@@ -64,11 +61,12 @@ public:
 	void PlayerDied(ACharacter* PlayerCharacter);
 	static AAuraGameModeBase* GetAuraGameMode(const UObject* WorldContextObject);
 	ULootTiers* GetLootTiers() const { return LootTiers; }
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FAuraItemDefinition FindItemDefinitionByItemTag(const FGameplayTag& ItemTag) const;
 
 protected:
 	virtual void BeginPlay() override;
 
-private:
 	UPROPERTY(EditDefaultsOnly, Category="Character Class Defaults")
 	TObjectPtr<UCharacterClassInfo> CharacterClassInfo;
 
@@ -76,7 +74,7 @@ private:
 	TObjectPtr<UAbilityInfo> AbilityInfo;
 
 	UPROPERTY(EditDefaultsOnly, Category="Items")
-	TObjectPtr<UAuraItemInfo> ItemInfo;
+	TArray<UAuraItemInfo*> ItemInfos;
 
 	UPROPERTY(EditDefaultsOnly, Category="Loot Tiers")
 	TObjectPtr<ULootTiers> LootTiers;
@@ -98,6 +96,10 @@ private:
 	FName DefaultPlayerStartTag;
 	UPROPERTY(EditDefaultsOnly, Category="Maps")
 	TMap<FString, TSoftObjectPtr<UWorld>> MapsByName;
+	UPROPERTY()
+	TMap<FGameplayTag, FAuraItemDefinition> ItemDefinitions;
 
+private:
 	FString GetMapNameFromMapAssetName(const FString& MapAssetName) const;
+	void InitializeItemDefinitions();
 };

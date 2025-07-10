@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "ActiveGameplayEffectHandle.h"
-#include "AuraItemTypes.h"
+#include "Item/AuraItemTypes.h"
 #include "GameFramework/Actor.h"
-#include "AuraItemBase.generated.h"
+#include "AuraEquipmentBase.generated.h"
 
 class UGameplayEffect;
 
 UCLASS()
-class AURA_API AAuraItemBase : public AActor
+class AURA_API AAuraEquipmentBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	AAuraItemBase();
+	AAuraEquipmentBase();
 
 	USkeletalMeshComponent* GetMesh() const;
 	bool IsEquipped() const;

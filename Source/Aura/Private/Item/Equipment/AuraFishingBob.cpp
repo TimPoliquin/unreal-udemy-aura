@@ -1,7 +1,7 @@
 ﻿// Copyright Alien Shores
 
 
-#include "AuraFishingBob.h"
+#include "Item/Equipment/AuraFishingBob.h"
 
 #include "Actor/AuraActorBlueprintFunctionLibrary.h"
 #include "Components/SphereComponent.h"
