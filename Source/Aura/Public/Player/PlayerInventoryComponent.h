@@ -76,6 +76,7 @@ public:
 	void PlayEquipAnimation(EAuraEquipmentSlot Slot) const;
 	UFUNCTION(BlueprintCallable, Category="Item")
 	int32 AddToInventory(const FGameplayTag& ItemType, int32 Count = 1);
+	bool ConsumeItem(const FGameplayTag& ItemType);
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;

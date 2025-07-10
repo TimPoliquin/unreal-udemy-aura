@@ -211,6 +211,27 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 	return CountToAdd;
 }
 
+bool UPlayerInventoryComponent::ConsumeItem(const FGameplayTag& ItemType)
+{
+	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetItemInfo()->	FindItemByItemType(ItemType);
+	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
+		[ItemType](const FAuraItemInventoryEntry& Entry)
+		{
+			return Entry.ItemType == ItemType;
+		}
+	);
+	if (ItemEntry && ItemEntry->ItemCount > 0 && ItemEntry->ItemType.MatchesTagExact(FAuraGameplayTags::Get().Item_Type_Consumable))
+	{
+		ItemEntry->ItemCount = ItemEntry->ItemCount - 1;
+		if (ItemEntry->ItemCount <= 0)
+		{
+			Inventory.Remove(*ItemEntry);
+		}
+		return true;
+	}
+	return false;
+}
+
 void UPlayerInventoryComponent::FromSaveData(const UAuraSaveGame* SaveData)
 {
 	MaxItems = SaveData->SavedInventory.MaxItems;
