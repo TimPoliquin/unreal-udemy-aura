@@ -8,6 +8,7 @@
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerState.h"
+#include "Player/InventoryActorInterface.h"
 #include "AuraCharacter.generated.h"
 
 class UFishingComponentInterface;
@@ -28,7 +29,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IFishingActorInterface
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IInventoryActorInterface, public IFishingActorInterface
 {
 	GENERATED_BODY()
 
@@ -81,6 +82,10 @@ public:
 	virtual void ReturnCamera_Implementation(
 		UCurveFloat* AnimationCurve
 	) override;
+
+	/** InventoryInterface Start */
+	virtual UPlayerInventoryComponent* GetInventoryComponent_Implementation() const override;
+	/** InventoryInterface End */
 
 	/** FishingActorInterface Start */
 	virtual TScriptInterface<IFishingComponentInterface> GetFishingComponent_Implementation() const override;

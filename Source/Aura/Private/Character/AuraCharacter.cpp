@@ -448,6 +448,11 @@ void AAuraCharacter::ReturnCamera_Implementation(
 	);
 }
 
+UPlayerInventoryComponent* AAuraCharacter::GetInventoryComponent_Implementation() const
+{
+	return PlayerInventoryComponent;
+}
+
 TScriptInterface<IFishingComponentInterface> AAuraCharacter::GetFishingComponent_Implementation() const
 {
 	return FishingComponent;
