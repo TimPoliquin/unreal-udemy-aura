@@ -715,7 +715,7 @@ FDamageEffectParams UAuraAbilitySystemLibrary::MakeCustomDamageEffectParams(
 
 FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
 	AActor* TargetActor,
-	const TSubclassOf<UGameplayEffect>& GameplayEffect,
+	TSubclassOf<UGameplayEffect> GameplayEffect,
 	const int32 Level
 )
 {

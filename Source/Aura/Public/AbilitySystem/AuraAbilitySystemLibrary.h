@@ -320,7 +320,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static FActiveGameplayEffectHandle ApplyBasicGameplayEffect(
 		AActor* TargetActor,
-		const TSubclassOf<UGameplayEffect>& GameplayEffect,
+		TSubclassOf<UGameplayEffect> GameplayEffect,
 		int32 Level = 1
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")

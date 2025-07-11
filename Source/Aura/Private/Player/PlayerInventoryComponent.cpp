@@ -183,13 +183,14 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 			return Entry.ItemType == ItemType;
 		}
 	);
+	const bool AddToInventory = !ItemEntry;
 	if (!ItemEntry)
 	{
 		if (Inventory.Num() + ItemDefinition.InventorySize <= MaxItems)
 		{
 			ItemEntry = new FAuraItemInventoryEntry();
 			ItemEntry->ItemType = ItemType;
-			Inventory.Add(*ItemEntry);
+			ItemEntry->ItemCount = 0;
 		}
 		else
 		{
@@ -207,6 +208,11 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 	const int32 OldValue = ItemEntry->ItemCount;
 	const int32 NewValue = ItemEntry->ItemCount + CountToAdd;
 	ItemEntry->ItemCount = NewValue;
+	if (AddToInventory)
+	{
+		Inventory.Add(*ItemEntry);
+	}
+	UE_LOG(LogAura, Warning, TEXT("[%s][%s] Adding item to inventory: %s [%d]->[%d]"), *GetOwner()->GetName(), *GetName(), *ItemType.ToString(), OldValue, NewValue)
 	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
 		ItemEntry->ItemType,
 		OldValue,
@@ -313,7 +319,7 @@ bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAura
 	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
 		[ItemTag](const FAuraItemInventoryEntry& Entry)
 		{
-			return Entry.ItemType == ItemTag;
+			return Entry.ItemType.MatchesTagExact(ItemTag);
 		}
 	);
 	if (!ItemEntry || !ItemEntry->IsValid())
@@ -331,7 +337,11 @@ bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAura
 	ItemEntry->ItemCount = NewValue;
 	if (ItemEntry->ItemCount <= 0)
 	{
-		Inventory.Remove(*ItemEntry);
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Used item %s"), *GetOwner()->GetName(), *GetName(), *ItemTag.ToString())
+		Inventory.RemoveAll([ItemTag](const FAuraItemInventoryEntry& Entry)
+		{
+			return Entry.ItemType.MatchesTagExact(ItemTag);
+		});
 	}
 	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
 		ItemEntry->ItemType,

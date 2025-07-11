@@ -104,7 +104,7 @@ private:
 	UFUNCTION()
 	void OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count);
 	UFUNCTION()
-	void OnPlayerInventoryAddItem(const FOnInventoryItemCountChangedPayload& Payload);
+	void OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload);
 	UFUNCTION()
 	void OnPlayerInventoryFull(const FGameplayTag& ItemType);
 };

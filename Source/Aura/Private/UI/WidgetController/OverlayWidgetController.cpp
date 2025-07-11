@@ -90,7 +90,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	).AddUObject(this, &UOverlayWidgetController::OnPlayerHideHUDTagChanged);
 	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(Player))
 	{
-		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryAddItem);
+		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryChanged);
 		PlayerInventoryComponent->OnInventoryFullDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryFull);
 	}
 }
@@ -127,9 +127,10 @@ void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTa
 	OnHUDVisibilityChangedDelegate.Broadcast(Count == 0);
 }
 
-void UOverlayWidgetController::OnPlayerInventoryAddItem(const FOnInventoryItemCountChangedPayload& Payload
+void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload
 )
 {
+	// TODO - change message based on whether item is added or removed
 	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(Player)->FindItemDefinitionByItemTag(Payload.ItemType);
 	if (const FUIWidgetRow* WidgetRow = GetDataTableRowByTag<FUIWidgetRow>(MessageDataTable, ItemDefinition.PickupMessageTag))
 	{
