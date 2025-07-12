@@ -44,7 +44,9 @@ public:
 
 	UPlayerInventoryComponent();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasItemInInventory(const FGameplayTag& ItemType) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasToolEquipped(const FGameplayTag& ItemType) const;
 
 	bool IsUsingTool() const;

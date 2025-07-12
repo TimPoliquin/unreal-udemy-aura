@@ -43,10 +43,14 @@ void AAuraPOI::OnSphereBeginOverlap(
 )
 {
 	// if player, show interaction widget
-	if (IsPlayerActor(OtherActor))
+	if (IsPlayerActor(OtherActor) && IsPreconditionMet(OtherActor))
 	{
 		EffectComponent->OnOverlap(OtherActor);
-		IInteractionWidgetInterface::Show(InteractionWidget->GetWidget());
+		ShowInteractWithPOIAvailable(OtherActor);
+	}
+	else
+	{
+		ShowInteractWithPOINotAvailable(OtherActor);
 	}
 }
 
@@ -63,6 +67,38 @@ void AAuraPOI::OnSphereEndOverlap(
 		EffectComponent->OnEndOverlap(OtherActor);
 		IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget());
 	}
+}
+
+void AAuraPOI::ShowInteractWithPOIAvailable_Implementation(AActor* Player) const
+{
+	IInteractionWidgetInterface::Show(InteractionWidget->GetWidget());
+}
+
+void AAuraPOI::ShowInteractWithPOINotAvailable_Implementation(AActor* Player) const
+{
+	if (PreconditionWidget && PreconditionWidget->GetWidget())
+	{
+		IInteractionWidgetInterface::Show(PreconditionWidget->GetWidget());
+	}
+}
+
+bool AAuraPOI::IsPreconditionMet_Implementation(AActor* Player) const
+{
+	return true;
+}
+
+bool AAuraPOI::OnInteract_Implementation(AActor* Player)
+{
+	if (IsPreconditionMet(Player))
+	{
+		return HandleInteract(Player);
+	}
+	return false;
+}
+
+void AAuraPOI::OnInteractionEnd_Implementation(AActor* Player, const bool bIsCancelled)
+{
+	// TODO ?
 }
 
 bool AAuraPOI::IsPlayerActor(const AActor* Actor) const

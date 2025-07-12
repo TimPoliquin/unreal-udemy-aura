@@ -34,7 +34,7 @@ bool UPlayerInventoryComponent::HasItemInInventory(const FGameplayTag& ItemType)
 	return Inventory.ContainsByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
 		{
-			return Entry.ItemType == ItemType;
+			return Entry.ItemType == ItemType && Entry.ItemCount > 0;
 		}
 	);
 }
