@@ -52,7 +52,7 @@ protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void ShowInteractWithPOIAvailable(AActor* Player) const;
 	UFUNCTION(BlueprintNativeEvent)
-	void ShowInteractWithPOINotAvailable(AActor* Player) const;
+	void ShowPreconditionWidget(AActor* Player) const;
 
 	/** AuraInteractionInterface Start **/
 	virtual bool OnInteract_Implementation(AActor* Player) override;
@@ -60,7 +60,6 @@ protected:
 	bool HandleInteract(AActor* Player);
 	virtual void OnInteractionEnd_Implementation(AActor* Player, const bool bIsCancelled) override;
 	/** AuraInteractionInterface End **/
-
 
 private:
 	bool IsPlayerActor(const AActor* Actor) const;

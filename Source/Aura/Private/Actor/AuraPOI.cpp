@@ -23,6 +23,8 @@ AAuraPOI::AAuraPOI()
 	POIWidget->SetupAttachment(GetRootComponent());
 	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	InteractionWidget->SetupAttachment(GetRootComponent());
+	PreconditionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PreconditionWidget"));
+	PreconditionWidget->SetupAttachment(GetRootComponent());
 }
 
 void AAuraPOI::BeginPlay()
@@ -31,6 +33,7 @@ void AAuraPOI::BeginPlay()
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPOI::OnSphereBeginOverlap);
 	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPOI::OnSphereEndOverlap);
 	IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget(), false);
+	IInteractionWidgetInterface::Hide(PreconditionWidget->GetWidget(), false);
 }
 
 void AAuraPOI::OnSphereBeginOverlap(
@@ -50,7 +53,7 @@ void AAuraPOI::OnSphereBeginOverlap(
 	}
 	else
 	{
-		ShowInteractWithPOINotAvailable(OtherActor);
+		ShowPreconditionWidget(OtherActor);
 	}
 }
 
@@ -66,6 +69,7 @@ void AAuraPOI::OnSphereEndOverlap(
 	{
 		EffectComponent->OnEndOverlap(OtherActor);
 		IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget());
+		IInteractionWidgetInterface::Hide(PreconditionWidget->GetWidget());
 	}
 }
 
@@ -74,7 +78,7 @@ void AAuraPOI::ShowInteractWithPOIAvailable_Implementation(AActor* Player) const
 	IInteractionWidgetInterface::Show(InteractionWidget->GetWidget());
 }
 
-void AAuraPOI::ShowInteractWithPOINotAvailable_Implementation(AActor* Player) const
+void AAuraPOI::ShowPreconditionWidget_Implementation(AActor* Player) const
 {
 	if (PreconditionWidget && PreconditionWidget->GetWidget())
 	{
