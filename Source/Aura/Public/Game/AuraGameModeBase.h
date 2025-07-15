@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/GameModeBase.h"
+#include "Item/AuraItemTypes.h"
 #include "AuraGameModeBase.generated.h"
 
 class UFishInfo;
@@ -12,6 +14,7 @@ class ULootTiers;
 class UAuraSaveGame;
 class USaveGame;
 class UMVVM_LoadSlot;
+class UGameplayEffect;
 class UAbilityInfo;
 class UCharacterClassInfo;
 class UAuraGameInstance;
@@ -32,11 +35,6 @@ public:
 	FORCEINLINE UAbilityInfo* GetAbilityInfo() const
 	{
 		return AbilityInfo;
-	}
-
-	FORCEINLINE UAuraItemInfo* GetItemInfo() const
-	{
-		return ItemInfo;
 	}
 
 	FORCEINLINE UFishInfo* GetFishInfo() const
@@ -64,19 +62,31 @@ public:
 	void PlayerDied(ACharacter* PlayerCharacter);
 	static AAuraGameModeBase* GetAuraGameMode(const UObject* WorldContextObject);
 	ULootTiers* GetLootTiers() const { return LootTiers; }
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FAuraItemDefinition FindItemDefinitionByItemTag(const FGameplayTag& ItemTag) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FGameplayTag GetDefaultItemPickupMessageTag() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FGameplayTag GetDefaultItemUseMessageTag() const;
 
 protected:
 	virtual void BeginPlay() override;
 
-private:
 	UPROPERTY(EditDefaultsOnly, Category="Character Class Defaults")
 	TObjectPtr<UCharacterClassInfo> CharacterClassInfo;
 
 	UPROPERTY(EditDefaultsOnly, Category="Ability Info")
 	TObjectPtr<UAbilityInfo> AbilityInfo;
+	UPROPERTY(EditDefaultsOnly, Category="Ability Info")
+	TSubclassOf<UGameplayEffect> DefaultInteractEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category="Items")
-	TObjectPtr<UAuraItemInfo> ItemInfo;
+	TArray<UAuraItemInfo*> ItemInfos;
+	UPROPERTY(EditDefaultsOnly, Category="Items", meta=(Categories="Message"))
+	FGameplayTag DefaultItemPickupMessageTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, Category="Items", meta=(Categories="Message"))
+	FGameplayTag DefaultItemUsedMessageTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, Category="Loot Tiers")
 	TObjectPtr<ULootTiers> LootTiers;
@@ -98,6 +108,10 @@ private:
 	FName DefaultPlayerStartTag;
 	UPROPERTY(EditDefaultsOnly, Category="Maps")
 	TMap<FString, TSoftObjectPtr<UWorld>> MapsByName;
+	UPROPERTY()
+	TMap<FGameplayTag, FAuraItemDefinition> ItemDefinitions;
 
+private:
 	FString GetMapNameFromMapAssetName(const FString& MapAssetName) const;
+	void InitializeItemDefinitions();
 };

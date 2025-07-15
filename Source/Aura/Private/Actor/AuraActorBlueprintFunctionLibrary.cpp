@@ -1,7 +1,7 @@
 ﻿// Copyright Alien Shores
 
 
-#include "AuraActorBlueprintFunctionLibrary.h"
+#include "Actor/AuraActorBlueprintFunctionLibrary.h"
 
 void UAuraActorBlueprintFunctionLibrary::SinusoidalMovement(
 	AActor* Actor,
