@@ -33,10 +33,6 @@ void UAuraEffectComponent::OnOverlap(AActor* TargetActor)
 			ApplyEffectToTarget(TargetActor, GameplayEffectConfig);
 		}
 	}
-	if (PickupSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
-	}
 	OnPlayerOverlapStart.Broadcast(TargetActor);
 }
 

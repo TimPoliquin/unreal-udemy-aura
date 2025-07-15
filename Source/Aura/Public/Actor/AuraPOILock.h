@@ -4,19 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "AuraPOI.h"
+#include "Interaction/HighlightInterface.h"
 #include "AuraPOILock.generated.h"
 
 class IAuraGateInterface;
 class UUserWidget;
 
 UCLASS()
-class AURA_API AAuraPOILock : public AAuraPOI
+class AURA_API AAuraPOILock : public AAuraPOI, public IHighlightInterface
 {
 	GENERATED_BODY()
 
 public:
 	AAuraPOILock();
 
+	/** IHighlightInterface Start **/
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnHighlightActor_Implementation() override;
+	/** IHighlightInterface End **/
 protected:
 	virtual void BeginPlay() override;
 	virtual bool IsPreconditionMet_Implementation(AActor* Player) const override;
@@ -44,4 +49,6 @@ protected:
 	TObjectPtr<USoundBase> UnlockSound;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
 	FString InteractText = FString("Unlock");
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lock")
+	bool bUnlocked = false;
 };

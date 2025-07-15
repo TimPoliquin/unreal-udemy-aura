@@ -38,8 +38,6 @@ protected:
 	TArray<FName> ApplyToTags;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Applied Effects")
 	float ActorLevel = 1.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pickup Sound")
-	TObjectPtr<USoundBase> PickupSound;
 
 private:
 	UPROPERTY()

@@ -17,7 +17,6 @@ void AAuraPickupItemInventory::BeginPlay()
 {
 	Super::BeginPlay();
 	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPickupItemInventory::OnBeginOverlap);
-	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPickupItemInventory::OnEndOverlap);
 }
 
 void AAuraPickupItemInventory::ActivatePickup(AActor* PickupActor)
@@ -37,14 +36,6 @@ void AAuraPickupItemInventory::OnBeginOverlap(UPrimitiveComponent* OverlappedCom
 {
 	if (IsValid(OtherActor) && OtherActor->Implements<UInventoryActorInterface>())
 	{
-		OnPickupAvailable(OtherActor);
-	}
-}
-
-void AAuraPickupItemInventory::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (IsValid(OtherActor) && OtherActor->Implements<UInventoryActorInterface>())
-	{
-		OnPickupUnavailable(OtherActor);
+		ActivatePickup(OtherActor);
 	}
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/HighlightInterface.h"
 #include "AuraPickupItemBase.generated.h"
 
 class USphereComponent;
@@ -12,7 +13,7 @@ class UAuraEffectComponent;
 class USinusoidalMovementComponent;
 
 UCLASS()
-class AURA_API AAuraPickupItemBase : public AActor
+class AURA_API AAuraPickupItemBase : public AActor, public IHighlightInterface
 {
 	GENERATED_BODY()
 
@@ -32,7 +33,15 @@ protected:
 	TObjectPtr<USinusoidalMovementComponent> SinusoidalMovementComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item")
 	FGameplayTag ItemType = FGameplayTag::EmptyTag;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item")
+	TObjectPtr<USoundBase> PickupSound;
 
-	UFUNCTION(BlueprintImplementableEvent)
+
+	/** IHighlightInterface Start **/
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnHighlightActor_Implementation() override;
+	/** IHighlightInterface End **/
+
+	UFUNCTION(BlueprintNativeEvent)
 	void PlayPickupEffect(AActor* PickupActor, const bool bAutoDestroy);
 };
