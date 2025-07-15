@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Interaction/SavableInterface.h"
 #include "Item/AuraItemTypes.h"
+#include "AuraInventoryEvents.h"
 #include "PlayerInventoryComponent.generated.h"
 
 class AAuraFishingRod;
@@ -27,17 +28,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	EquippedItem
 );
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
-	FOnItemAddedSignature,
-	const FGameplayTag&,
-	ItemType,
-	const int32,
-	Count,
-	const bool,
-	bAddedAll
-);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryFullSignature, const FGameplayTag&, ItemType);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryItemCountChangedSignature, const FOnInventoryItemCountChangedPayload&, Payload);
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -51,7 +44,9 @@ public:
 
 	UPlayerInventoryComponent();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasItemInInventory(const FGameplayTag& ItemType) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasToolEquipped(const FGameplayTag& ItemType) const;
 
 	bool IsUsingTool() const;
@@ -76,7 +71,10 @@ public:
 	void PlayEquipAnimation(EAuraEquipmentSlot Slot) const;
 	UFUNCTION(BlueprintCallable, Category="Item")
 	int32 AddToInventory(const FGameplayTag& ItemType, int32 Count = 1);
-	bool ConsumeItem(const FGameplayTag& ItemType);
+	UFUNCTION(BlueprintCallable, Category="Item")
+	bool UseConsumable(const FGameplayTag& ItemType);
+	UFUNCTION(BlueprintCallable, Category="Item")
+	bool UseKey(const FGameplayTag& ItemType);
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;
@@ -85,7 +83,7 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnEquipmentAnimationCompleteSignature OnEquipmentAnimationCompleteDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FOnItemAddedSignature OnItemAddedDelegate;
+	FOnInventoryItemCountChangedSignature OnInventoryItemCountChangedDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryFullSignature OnInventoryFullDelegate;
 
@@ -110,10 +108,11 @@ protected:
 	TMap<EAuraEquipmentSlot, FName> EquipmentSocketNames;
 
 	UPROPERTY()
-	TObjectPtr<AAuraItemBase> Weapon;
+	TObjectPtr<AAuraEquipmentBase> Weapon;
 	UPROPERTY()
-	TObjectPtr<AAuraItemBase> Tool;
+	TObjectPtr<AAuraEquipmentBase> Tool;
 
 private:
-	AAuraItemBase* SpawnEquipment(const EAuraEquipmentSlot& Slot);
+	AAuraEquipmentBase* SpawnEquipment(const EAuraEquipmentSlot& Slot);
+	bool UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory);
 };

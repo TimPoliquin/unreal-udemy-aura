@@ -9,6 +9,7 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "OverlayWidgetController.generated.h"
 
+struct FOnInventoryItemCountChangedPayload;
 struct FAuraAbilityInfo;
 class UAuraAbilitySystemComponent;
 class UAuraUserWidget;
@@ -103,7 +104,7 @@ private:
 	UFUNCTION()
 	void OnPlayerHideHUDTagChanged(FGameplayTag GameplayTag, int Count);
 	UFUNCTION()
-	void OnPlayerInventoryAddItem(const FGameplayTag& ItemType, int32 Count, bool BAddedAll);
+	void OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload);
 	UFUNCTION()
 	void OnPlayerInventoryFull(const FGameplayTag& ItemType);
 };

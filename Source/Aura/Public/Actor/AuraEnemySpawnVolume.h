@@ -21,7 +21,7 @@ public:
 	/** Save Interface **/
 	virtual void LoadActor_Implementation() override;
 
-	void SetEnabled(const bool bEnabled);
+	void SetEnabled(const bool bInEnabled);
 
 	/** Save Interface End**/
 protected:
@@ -36,6 +36,8 @@ protected:
 		const FHitResult& SweepResult
 	);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Debug")
+	bool bEnabled = true;
 	UPROPERTY(BlueprintReadOnly, SaveGame)
 	bool bTriggered = false;
 

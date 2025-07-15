@@ -8,7 +8,7 @@
 #include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
 #include "Game/AuraGameModeBase.h"
-#include "Item/AuraFishingRod.h"
+#include "Item/Equipment/AuraFishingRod.h"
 #include "Item/AuraItemTypes.h"
 #include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"

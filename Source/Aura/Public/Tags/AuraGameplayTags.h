@@ -160,6 +160,7 @@ struct FAuraGameplayTags
 	FGameplayTag Item_Type_Equipment;
 	FGameplayTag Item_Type_Fish;
 	FGameplayTag Item_Type_Instant;
+	FGameplayTag Item_Type_Key;
 	FGameplayTag Item_Type_None;
 
 	/* Equipment Tags */

@@ -5,14 +5,13 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/Character.h"
-#include "Item/AuraFishingRod.h"
-#include "Item/AuraItemBase.h"
+#include "Item/Equipment/AuraFishingRod.h"
+#include "Item/Equipment/AuraEquipmentBase.h"
 #include "Item/AuraItemBlueprintLibrary.h"
-#include "Item/AuraItemInfo.h"
 #include "Tags/AuraGameplayTags.h"
 
 
@@ -35,7 +34,7 @@ bool UPlayerInventoryComponent::HasItemInInventory(const FGameplayTag& ItemType)
 	return Inventory.ContainsByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
 		{
-			return Entry.ItemType == ItemType;
+			return Entry.ItemType == ItemType && Entry.ItemCount > 0;
 		}
 	);
 }
@@ -177,21 +176,21 @@ void UPlayerInventoryComponent::PlayEquipAnimation(const EAuraEquipmentSlot Slot
 
 int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, const int32 Count)
 {
-	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetItemInfo()->
-		FindItemByItemType(ItemType);
+	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->FindItemDefinitionByItemTag(ItemType);
 	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
 		{
 			return Entry.ItemType == ItemType;
 		}
 	);
+	const bool AddToInventory = !ItemEntry;
 	if (!ItemEntry)
 	{
 		if (Inventory.Num() + ItemDefinition.InventorySize <= MaxItems)
 		{
 			ItemEntry = new FAuraItemInventoryEntry();
 			ItemEntry->ItemType = ItemType;
-			Inventory.Add(*ItemEntry);
+			ItemEntry->ItemCount = 0;
 		}
 		else
 		{
@@ -206,30 +205,30 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 		return 0;
 	}
 	const int32 CountToAdd = FMath::Min(Count, ItemDefinition.InventoryMaxCount - ItemEntry->ItemCount);
-	ItemEntry->ItemCount += CountToAdd;
-	OnItemAddedDelegate.Broadcast(ItemType, CountToAdd, CountToAdd == Count);
+	const int32 OldValue = ItemEntry->ItemCount;
+	const int32 NewValue = ItemEntry->ItemCount + CountToAdd;
+	ItemEntry->ItemCount = NewValue;
+	if (AddToInventory)
+	{
+		Inventory.Add(*ItemEntry);
+	}
+	UE_LOG(LogAura, Warning, TEXT("[%s][%s] Adding item to inventory: %s [%d]->[%d]"), *GetOwner()->GetName(), *GetName(), *ItemType.ToString(), OldValue, NewValue)
+	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
+		ItemEntry->ItemType,
+		OldValue,
+		NewValue
+	));
 	return CountToAdd;
 }
 
-bool UPlayerInventoryComponent::ConsumeItem(const FGameplayTag& ItemType)
+bool UPlayerInventoryComponent::UseConsumable(const FGameplayTag& ItemType)
 {
-	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetItemInfo()->	FindItemByItemType(ItemType);
-	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
-		[ItemType](const FAuraItemInventoryEntry& Entry)
-		{
-			return Entry.ItemType == ItemType;
-		}
-	);
-	if (ItemEntry && ItemEntry->ItemCount > 0 && ItemEntry->ItemType.MatchesTagExact(FAuraGameplayTags::Get().Item_Type_Consumable))
-	{
-		ItemEntry->ItemCount = ItemEntry->ItemCount - 1;
-		if (ItemEntry->ItemCount <= 0)
-		{
-			Inventory.Remove(*ItemEntry);
-		}
-		return true;
-	}
-	return false;
+	return UseItem(ItemType, EAuraItemCategory::Consumable);
+}
+
+bool UPlayerInventoryComponent::UseKey(const FGameplayTag& ItemType)
+{
+	return UseItem(ItemType, EAuraItemCategory::Key);
 }
 
 void UPlayerInventoryComponent::FromSaveData(const UAuraSaveGame* SaveData)
@@ -266,7 +265,7 @@ void UPlayerInventoryComponent::BeginPlay()
 }
 
 
-AAuraItemBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipmentSlot& Slot)
+AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipmentSlot& Slot)
 {
 	if (!EquipmentSlots.Contains(Slot))
 	{
@@ -284,16 +283,70 @@ AAuraItemBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipmentSlo
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = Player;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AAuraItemBase* Equipment = GetWorld()->SpawnActor<AAuraItemBase>(
+	AAuraEquipmentBase* Equipment = GetWorld()->SpawnActor<AAuraEquipmentBase>(
 		ItemDefinition.ItemClass,
 		SocketLocation,
 		SocketRotation,
 		SpawnParameters
 	);
+	if (!Equipment)
+	{
+		UE_LOG(LogAura, Error, TEXT("[%s][%s] Failed to spawn equipment for slot [%s]. Check item configuration."), *GetOwner()->GetName(), *GetName(), *ItemDefinition.ItemType.ToString());
+		return nullptr;
+	}
 	Equipment->AttachToComponent(
 		Player->GetMesh(),
 		FAttachmentTransformRules::KeepWorldTransform,
 		SocketName
 	);
 	return Equipment;
+}
+
+bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory)
+{
+	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->FindItemDefinitionByItemTag(ItemTag);
+	if (!ItemDefinition.IsValid())
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Attempted to find item that has no definition: %s"), *GetOwner()->GetName(), *GetName(), *ItemTag.ToString());
+		return false;
+	}
+	if (ItemDefinition.ItemCategory != ItemCategory)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Attempted to use item of incorrect category: %s != %s"), *GetOwner()->GetName(), *GetName(), *UEnum::GetValueAsString(ItemCategory),
+		       *UEnum::GetValueAsString(ItemDefinition.ItemCategory));
+		return false;
+	}
+	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
+		[ItemTag](const FAuraItemInventoryEntry& Entry)
+		{
+			return Entry.ItemType.MatchesTagExact(ItemTag);
+		}
+	);
+	if (!ItemEntry || !ItemEntry->IsValid())
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Item not found in inventory: %s"), *GetOwner()->GetName(), *GetName(), *ItemTag.ToString());
+		return false;
+	}
+	if (ItemEntry->ItemCount <= 0)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Item found in inventory but with 0 count: %s"), *GetOwner()->GetName(), *GetName(), *ItemTag.ToString());
+		return false;
+	}
+	const int32 OldValue = ItemEntry->ItemCount;
+	const int32 NewValue = ItemEntry->ItemCount - 1;
+	ItemEntry->ItemCount = NewValue;
+	if (ItemEntry->ItemCount <= 0)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Used item %s"), *GetOwner()->GetName(), *GetName(), *ItemTag.ToString())
+		Inventory.RemoveAll([ItemTag](const FAuraItemInventoryEntry& Entry)
+		{
+			return Entry.ItemType.MatchesTagExact(ItemTag);
+		});
+	}
+	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
+		ItemEntry->ItemType,
+		OldValue,
+		NewValue
+	));
+	return true;
 }

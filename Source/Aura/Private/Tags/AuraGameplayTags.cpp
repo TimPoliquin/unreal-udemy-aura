@@ -482,6 +482,7 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Item.Type.Instant"),
 		FString("Instant Item Type")
 	);
+	Instance.Item_Type_Key = TagManager.AddNativeGameplayTag(FName("Item.Type.Key"), FString("Key Item Type"));
 	Instance.Item_Type_None = TagManager.AddNativeGameplayTag(FName("Item.Type.None"), FString("None Item Type"));
 
 	Instance.Item_Type_Equipment_FishingRod = TagManager.AddNativeGameplayTag(

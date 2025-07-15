@@ -27,11 +27,12 @@ void AAuraEnemySpawnVolume::LoadActor_Implementation()
 	}
 }
 
-void AAuraEnemySpawnVolume::SetEnabled(const bool bEnabled)
+void AAuraEnemySpawnVolume::SetEnabled(const bool bInEnabled)
 {
-	SetActorHiddenInGame(!bEnabled);
-	SetActorEnableCollision(bEnabled);
-	if (!bEnabled)
+	bEnabled = bInEnabled;
+	SetActorHiddenInGame(!bInEnabled);
+	SetActorEnableCollision(bInEnabled);
+	if (!bInEnabled)
 	{
 		SetActorTickEnabled(false);
 	}
@@ -40,6 +41,10 @@ void AAuraEnemySpawnVolume::SetEnabled(const bool bEnabled)
 void AAuraEnemySpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!bEnabled)
+	{
+		SetEnabled(false);
+	}
 	if (bTriggered)
 	{
 		SetEnabled(false);
@@ -57,7 +62,7 @@ void AAuraEnemySpawnVolume::OnBoxOverlap(
 	const FHitResult& SweepResult
 )
 {
-	if (!IPlayerInterface::ImplementsPlayerInterface(OtherActor))
+	if (!IPlayerInterface::ImplementsPlayerInterface(OtherActor) || !bEnabled)
 	{
 		return;
 	}
