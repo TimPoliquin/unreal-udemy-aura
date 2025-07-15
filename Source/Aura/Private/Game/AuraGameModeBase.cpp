@@ -193,6 +193,16 @@ FAuraItemDefinition AAuraGameModeBase::FindItemDefinitionByItemTag(const FGamepl
 	return FAuraItemDefinition();
 }
 
+FGameplayTag AAuraGameModeBase::GetDefaultItemPickupMessageTag() const
+{
+	return DefaultItemPickupMessageTag;
+}
+
+FGameplayTag AAuraGameModeBase::GetDefaultItemUseMessageTag() const
+{
+	return DefaultItemUsedMessageTag;
+}
+
 void AAuraGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();

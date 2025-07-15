@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "AuraPOI.generated.h"
 
+class UCapsuleComponent;
 class USphereComponent;
 class UWidgetComponent;
 
@@ -29,10 +30,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="POI")
 	TObjectPtr<UWidgetComponent> PreconditionWidget;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="POI")
-	TObjectPtr<USphereComponent> SphereComponent;
+	TObjectPtr<UCapsuleComponent> OverlapDetectionComponent;
 
 	UFUNCTION()
-	void OnSphereBeginOverlap(
+	void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -41,7 +42,7 @@ protected:
 		const FHitResult& SweepResult
 	);
 	UFUNCTION()
-	void OnSphereEndOverlap(
+	void OnEndOverlap(
 		UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -56,11 +57,13 @@ protected:
 
 	/** AuraInteractionInterface Start **/
 	virtual bool OnInteract_Implementation(AActor* Player) override;
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintNativeEvent)
 	bool HandleInteract(AActor* Player);
 	virtual void OnInteractionEnd_Implementation(AActor* Player, const bool bIsCancelled) override;
 	/** AuraInteractionInterface End **/
+	void DisablePOI();
 
 private:
 	bool IsPlayerActor(const AActor* Actor) const;
+	bool bDisabled = false;
 };

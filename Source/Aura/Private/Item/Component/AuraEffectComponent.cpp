@@ -61,6 +61,13 @@ void UAuraEffectComponent::OnEndOverlap(AActor* TargetActor)
 	OnPlayerOverlapEnd.Broadcast(TargetActor);
 }
 
+void UAuraEffectComponent::SetDefaults(const TArray<FGameplayEffectConfig>& InEffectConfig, const bool InDestroyOnEffectApplication, const TArray<FName>& InApplyToTags)
+{
+	GameplayEffectConfigs = InEffectConfig;
+	bDestroyOnEffectApplication = InDestroyOnEffectApplication;
+	ApplyToTags = InApplyToTags;
+}
+
 void UAuraEffectComponent::ApplyEffectToTarget(AActor* TargetActor, const FGameplayEffectConfig& GameplayEffectConfig)
 {
 	check(GameplayEffectConfig.GameplayEffectClass);

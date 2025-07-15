@@ -9,7 +9,6 @@
 AAuraEffectActor::AAuraEffectActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot")));
 	EffectComponent = CreateDefaultSubobject<UAuraEffectComponent>(TEXT("Effect Component"));
 }
 

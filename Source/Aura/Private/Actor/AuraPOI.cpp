@@ -4,7 +4,7 @@
 #include "Actor/AuraPOI.h"
 
 #include "Aura/Aura.h"
-#include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item/Component/AuraEffectComponent.h"
 #include "UI/Widget/InteractionWidgetInterface.h"
@@ -13,30 +13,36 @@
 AAuraPOI::AAuraPOI()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
-	SphereComponent->SetCollisionObjectType(ECC_WorldStatic);
-	SphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	SphereComponent->SetGenerateOverlapEvents(true);
-	SphereComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	SetRootComponent(SphereComponent);
+	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
+	OverlapDetectionComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Overlap Detection Component"));
+	OverlapDetectionComponent->SetCollisionObjectType(ECC_WorldStatic);
+	OverlapDetectionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	OverlapDetectionComponent->SetGenerateOverlapEvents(true);
+	OverlapDetectionComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	OverlapDetectionComponent->SetupAttachment(GetRootComponent());
 	POIWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("POIWidget"));
 	POIWidget->SetupAttachment(GetRootComponent());
 	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	InteractionWidget->SetupAttachment(GetRootComponent());
 	PreconditionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PreconditionWidget"));
 	PreconditionWidget->SetupAttachment(GetRootComponent());
+	TArray<FGameplayEffectConfig> EffectConfigs;
+	EffectConfigs.Add(FGameplayEffectConfig(nullptr, EEffectApplicationPolicy::ApplyOnOverlap, EEffectRemovalPolicy::RemoveOnEndOverlap));
+	TArray<FName> ApplyToTags;
+	ApplyToTags.Add(TAG_PLAYER);
+	EffectComponent->SetDefaults(EffectConfigs, false, ApplyToTags);
 }
 
 void AAuraPOI::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPOI::OnSphereBeginOverlap);
-	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPOI::OnSphereEndOverlap);
+	OverlapDetectionComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPOI::OnBeginOverlap);
+	OverlapDetectionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPOI::OnEndOverlap);
 	IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget(), false);
 	IInteractionWidgetInterface::Hide(PreconditionWidget->GetWidget(), false);
 }
 
-void AAuraPOI::OnSphereBeginOverlap(
+void AAuraPOI::OnBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
@@ -45,8 +51,16 @@ void AAuraPOI::OnSphereBeginOverlap(
 	const FHitResult& SweepResult
 )
 {
+	if (bDisabled)
+	{
+		return;
+	}
+	if (!IsPlayerActor(OtherActor))
+	{
+		return;
+	}
 	// if player, show interaction widget
-	if (IsPlayerActor(OtherActor) && IsPreconditionMet(OtherActor))
+	if (IsPreconditionMet(OtherActor))
 	{
 		EffectComponent->OnOverlap(OtherActor);
 		ShowInteractWithPOIAvailable(OtherActor);
@@ -57,7 +71,7 @@ void AAuraPOI::OnSphereBeginOverlap(
 	}
 }
 
-void AAuraPOI::OnSphereEndOverlap(
+void AAuraPOI::OnEndOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
@@ -100,9 +114,24 @@ bool AAuraPOI::OnInteract_Implementation(AActor* Player)
 	return false;
 }
 
+bool AAuraPOI::HandleInteract_Implementation(AActor* Player)
+{
+	return true;
+}
+
 void AAuraPOI::OnInteractionEnd_Implementation(AActor* Player, const bool bIsCancelled)
 {
 	// TODO ?
+}
+
+void AAuraPOI::DisablePOI()
+{
+	bDisabled = true;
+	OverlapDetectionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (POIWidget && POIWidget->GetWidget())
+	{
+		POIWidget->GetWidget()->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 bool AAuraPOI::IsPlayerActor(const AActor* Actor) const

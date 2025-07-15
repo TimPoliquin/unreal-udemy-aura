@@ -34,6 +34,15 @@ FString UAuraItemBlueprintLibrary::Substitute(const FString& Message, const FMes
 	return Result;
 }
 
+UTexture2D* UAuraItemBlueprintLibrary::SubstituteMessageIcon(UTexture2D* MessageIcon, const FMessageSubstitutions& MessageSubstitutions)
+{
+	if (MessageSubstitutions.Icon != nullptr)
+	{
+		return MessageSubstitutions.Icon;
+	}
+	return MessageIcon;
+}
+
 FAuraFishCatch UAuraItemBlueprintLibrary::ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType)
 {
 	const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject);

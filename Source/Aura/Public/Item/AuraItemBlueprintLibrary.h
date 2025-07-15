@@ -27,6 +27,8 @@ public:
 	static FString GetItemNameByItemType(const UObject* WorldContextObject, const FGameplayTag& ItemType);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AuraItemBlueprintLibrary|Messages")
 	static FString Substitute(const FString& Message, const FMessageSubstitutions& MessageSubstitutions);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AuraItemBlueprintLibrary|Messages")
+	static UTexture2D* SubstituteMessageIcon(UTexture2D* MessageIcon, const FMessageSubstitutions& MessageSubstitutions);
 
 	static FAuraFishCatch ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType);
 };

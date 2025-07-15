@@ -127,16 +127,35 @@ void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTa
 	OnHUDVisibilityChangedDelegate.Broadcast(Count == 0);
 }
 
-void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload
-)
+void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload)
 {
-	// TODO - change message based on whether item is added or removed
-	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(Player)->FindItemDefinitionByItemTag(Payload.ItemType);
-	if (const FUIWidgetRow* WidgetRow = GetDataTableRowByTag<FUIWidgetRow>(MessageDataTable, ItemDefinition.PickupMessageTag))
+	const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(Player);
+	const FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(Payload.ItemType);
+	FGameplayTag MessageTag;
+	if (!ItemDefinition.IsValid())
+	{
+		// do nothing - invalid item type
+		return;
+	}
+	if (Payload.IsItemAddedChange())
+	{
+		MessageTag = ItemDefinition.PickupMessageTag.IsValid() ? ItemDefinition.PickupMessageTag : GameMode->GetDefaultItemPickupMessageTag();
+	}
+	else if (Payload.IsItemUsedChange())
+	{
+		MessageTag = ItemDefinition.UseMessageTag.IsValid() ? ItemDefinition.UseMessageTag : GameMode->GetDefaultItemUseMessageTag();
+	}
+	if (!MessageTag.IsValid())
+	{
+		return;
+	}
+	if (const FUIWidgetRow* WidgetRow = GetDataTableRowByTag<FUIWidgetRow>(MessageDataTable, MessageTag))
 	{
 		FMessageSubstitutions Substitutions;
 		Substitutions.Add(FString("ItemName"), ItemDefinition.ItemName);
-		Substitutions.Add(FString("Count"), FString::FromInt(Payload.GetDelta()));
+		Substitutions.Add(FString("Count"), FString::FromInt(FMath::Abs(Payload.GetDelta())));
+		Substitutions.Icon = ItemDefinition.ItemIcon;
+		Substitutions.IconColor = ItemDefinition.ItemIconColor;
 		MessageWidgetRowDelegate.Broadcast(*WidgetRow, Substitutions);
 	}
 }

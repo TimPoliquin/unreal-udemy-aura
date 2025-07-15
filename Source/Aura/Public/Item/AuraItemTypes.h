@@ -67,6 +67,10 @@ struct FAuraItemDefinition
 	FString ItemName = FString("INVALID");
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	FString ItemDescription = FString("");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
+	UTexture2D* ItemIcon = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
+	FColor ItemIconColor = FColor::White;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Item.Type"))
 	FGameplayTag ItemType = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
@@ -82,6 +86,8 @@ struct FAuraItemDefinition
 	EAuraEquipmentCategory EquipmentCategory = EAuraEquipmentCategory::None;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Message"))
 	FGameplayTag PickupMessageTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Message"))
+	FGameplayTag UseMessageTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
 	TSubclassOf<AAuraEquipmentBase> ItemClass;
 
@@ -117,8 +123,12 @@ struct FMessageSubstitutions
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FString> Substitutions;
+	UPROPERTY(BlueprintReadOnly)
+	UTexture2D* Icon = nullptr;
+	UPROPERTY(BlueprintReadOnly)
+	FColor IconColor = FColor::White;
 
 	void Add(const FString& Key, const FString& Value)
 	{

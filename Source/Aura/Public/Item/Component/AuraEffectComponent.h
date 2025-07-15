@@ -24,6 +24,7 @@ public:
 	void OnOverlap(AActor* TargetActor);
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
+	void SetDefaults(const TArray<FGameplayEffectConfig>& InEffectConfig, const bool InDestroyOnEffectApplication, const TArray<FName>& InApplyToTags);
 
 protected:
 	UFUNCTION(BlueprintCallable)
