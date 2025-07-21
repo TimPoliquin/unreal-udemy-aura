@@ -1,9 +1,11 @@
 ﻿// Copyright Alien Shores
 
 
-#include "Actor/AuraEnemySpawnVolume.h"
+#include "Actor/Spawn/AuraEnemySpawnVolume.h"
 
-#include "Actor/AuraEnemySpawnPoint.h"
+#include "Actor/Spawn/AuraActorTrackerComponent.h"
+#include "Actor/Spawn/AuraEnemySpawnPoint.h"
+#include "Character/AuraEnemy.h"
 #include "Components/BoxComponent.h"
 #include "Interaction/PlayerInterface.h"
 
@@ -17,6 +19,7 @@ AAuraEnemySpawnVolume::AAuraEnemySpawnVolume()
 	Box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Box->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	ActorTrackerComponent = CreateDefaultSubobject<UAuraActorTrackerComponent>(TEXT("Actor Tracker Component"));
 }
 
 void AAuraEnemySpawnVolume::LoadActor_Implementation()
@@ -48,9 +51,9 @@ void AAuraEnemySpawnVolume::BeginPlay()
 	if (bTriggered)
 	{
 		SetEnabled(false);
-		return;
 	}
 	Box->OnComponentBeginOverlap.AddDynamic(this, &AAuraEnemySpawnVolume::OnBoxOverlap);
+	ActorTrackerComponent->OnCountChanged.AddDynamic(this, &AAuraEnemySpawnVolume::OnActorTrackerCountChangedHandler);
 }
 
 void AAuraEnemySpawnVolume::OnBoxOverlap(
@@ -67,12 +70,20 @@ void AAuraEnemySpawnVolume::OnBoxOverlap(
 		return;
 	}
 	bTriggered = true;
-	for (AAuraEnemySpawnPoint* SpawnPoint : SpawnPoints)
+	for (const AAuraEnemySpawnPoint* SpawnPoint : SpawnPoints)
 	{
 		if (IsValid(SpawnPoint))
 		{
-			SpawnPoint->SpawnEnemy();
+			ActorTrackerComponent->Track(SpawnPoint->SpawnEnemy());
 		}
 	}
 	SetEnabled(false);
+}
+
+void AAuraEnemySpawnVolume::OnActorTrackerCountChangedHandler(const FOnAuraActorTrackerCountChangedPayload& Payload)
+{
+	if (Payload.IsEmpty())
+	{
+		OnAllEnemiesDefeated.Broadcast();
+	}
 }

@@ -8,6 +8,7 @@
 #include "Interaction/HighlightInterface.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Actor/Spawn/TrackableInterface.h"
 #include "AuraEnemy.generated.h"
 
 class UBehaviorTree;
@@ -15,7 +16,7 @@ class AAuraAIController;
 class UWidgetComponent;
 
 UCLASS()
-class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterface, public IEnemyInterface
+class AURA_API AAuraEnemy : public AAuraBaseCharacter, public IHighlightInterface, public IEnemyInterface, public ITrackableInterface
 {
 	GENERATED_BODY()
 
@@ -57,6 +58,10 @@ public:
 	{
 		CombatTarget = InCombatTarget;
 	}
+
+	/** Start ITrackableInterface **/
+	virtual FOnTrackableStopTrackingSignature& GetStopTrackingDelegate() override;
+	/** End ITrackableInterface **/
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOnAttributeChangedSignature OnHealthChanged;
@@ -117,6 +122,8 @@ protected:
 	TObjectPtr<AActor> CombatTarget;
 
 private:
+	FOnTrackableStopTrackingSignature OnTrackableStopTracking;
+
 	UPROPERTY(EditAnywhere, Category = "Highlight")
 	uint8 HighlightCustomDepthStencilValue = 250;
 

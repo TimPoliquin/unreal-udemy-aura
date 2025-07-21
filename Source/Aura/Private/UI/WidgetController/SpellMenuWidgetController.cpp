@@ -7,6 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
+#include "Aura/AuraLogChannels.h"
 #include "Player/AuraPlayerState.h"
 #include "Tags/AuraGameplayTags.h"
 
