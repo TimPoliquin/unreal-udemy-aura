@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "AuraEnemySpawnConfig.h"
 #include "Engine/TargetPoint.h"
 #include "AuraEnemySpawnPoint.generated.h"
 
@@ -18,12 +18,8 @@ public:
 	AAuraEnemySpawnPoint();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemey Class")
-	TSubclassOf<AAuraEnemy> EnemyClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemey Class")
-	int32 EnemyLevel = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemey Class")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+	FEnemySpawnConfig SpawnConfig;
 
 	UFUNCTION(BlueprintCallable, Category = "Enemey Class")
-	void SpawnEnemy();
+	AAuraEnemy* SpawnEnemy() const;
 };

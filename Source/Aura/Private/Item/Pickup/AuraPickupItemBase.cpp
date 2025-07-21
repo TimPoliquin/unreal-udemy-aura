@@ -3,6 +3,7 @@
 
 #include "Item/Pickup/AuraPickupItemBase.h"
 
+#include "NiagaraFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
 #include "Item/Component/SinusoidalMovementComponent.h"
@@ -19,6 +20,7 @@ AAuraPickupItemBase::AAuraPickupItemBase()
 	SphereComponent->SetCollisionObjectType(ECC_WorldDynamic);
 	SphereComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 	SphereComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	SphereComponent->SetCollisionResponseToChannel(ECC_Projectile, ECR_Ignore);
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	MeshComponent->SetupAttachment(SphereComponent);
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -31,6 +33,7 @@ void AAuraPickupItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 	MeshComponent->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+	PlaySpawnEffect();
 }
 
 void AAuraPickupItemBase::HighlightActor_Implementation()
@@ -41,6 +44,18 @@ void AAuraPickupItemBase::HighlightActor_Implementation()
 void AAuraPickupItemBase::UnHighlightActor_Implementation()
 {
 	MeshComponent->SetRenderCustomDepth(false);
+}
+
+void AAuraPickupItemBase::PlaySpawnEffect_Implementation()
+{
+	if (SpawnSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SpawnSound, GetActorLocation());
+	}
+	if (SpawnEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, SpawnEffect, GetActorLocation(), GetActorRotation());
+	}
 }
 
 void AAuraPickupItemBase::PlayPickupEffect_Implementation(AActor* PickupActor, const bool bAutoDestroy)
