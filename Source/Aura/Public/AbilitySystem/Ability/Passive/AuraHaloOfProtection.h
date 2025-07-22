@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Ability/AuraPassiveAbility.h"
+#include "AbilitySystem/Ability/Passive/AuraPassiveAbility.h"
 #include "AuraHaloOfProtection.generated.h"
 
 /**

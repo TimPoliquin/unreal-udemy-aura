@@ -23,6 +23,25 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(
 )
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbilitySignature, const FGameplayTag& /*Ability Tag*/);
+USTRUCT(BlueprintType)
+struct FOnAbilitySystemOutgoingDamagePayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<AActor> Source;
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<AActor> Target;
+	UPROPERTY(BlueprintReadOnly)
+	float OutgoingDamage = 0.f;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
+	FOnAbilitySystemOutgoingDamageSignature,
+	const FOnAbilitySystemOutgoingDamagePayload&,
+	Payload
+);
+
 /**
  * 
  */
@@ -75,6 +94,8 @@ public:
 	FAbilityEquippedSignature OnAbilityEquippedDelegate;
 	FDeactivatePassiveAbilitySignature OnDeactivatePassiveAbilityDelegate;
 	FActivatePassiveEffectSignature OnActivatePassiveEffectDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnAbilitySystemOutgoingDamageSignature OnOutgoingDamageDelegate;
 
 protected:
 	virtual void BeginPlay() override;

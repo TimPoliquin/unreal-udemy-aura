@@ -1,7 +1,7 @@
 // Copyright Alien Shores
 
 
-#include "AbilitySystem/Ability/AuraHaloOfProtection.h"
+#include "AbilitySystem/Ability/Passive/AuraHaloOfProtection.h"
 
 FString UAuraHaloOfProtection::GetDescription_Implementation(const int32 AbilityLevel) const
 {

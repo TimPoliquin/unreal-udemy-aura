@@ -324,6 +324,14 @@ public:
 		int32 Level = 1
 	);
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
+	static FActiveGameplayEffectHandle ApplyBasicGameplayEffectWithMagnitude(
+		AActor* TargetActor,
+		TSubclassOf<UGameplayEffect> GameplayEffect,
+		int32 Level,
+		const FGameplayTag& MagnitudeTag,
+		const float Magnitude
+	);
+	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
 	static void RemoveGameplayEffect(
 		AActor* TargetActor,
 		const FActiveGameplayEffectHandle& GameplayEffectHandle,

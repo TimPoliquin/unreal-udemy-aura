@@ -161,6 +161,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Effect.HitReact.Shock"),
 		FString("Tag applied when character is reacting to a hit with shock")
 	);
+	Instance.Effect_Magnitude = TagManager.AddNativeGameplayTag(
+		FName("Effect.Magnitude"),
+		FString("Generic tag for specifying magnitude of effect across multiple effects")
+	);
 
 	// Damage Tags
 	Instance.Damage = TagManager.AddNativeGameplayTag(
