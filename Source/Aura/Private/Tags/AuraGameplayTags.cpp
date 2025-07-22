@@ -262,6 +262,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Debuff.Stat.Duration"),
 		FString("Debuff Duration")
 	);
+	Instance.Debuff_Block_Regen_Health = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Block.Regen.Health"),
+		FString("Block health regen")
+	);
+	Instance.Debuff_Block_Regen_Mana = TagManager.AddNativeGameplayTag(
+		FName("Debuff.Block.Regen.Mana"),
+		FString("Block mana regen")
+	);
 	/** Ability Tags */
 	Instance.Abilities = TagManager.AddNativeGameplayTag(FName("Abilities"), FString("Abilities root tag"));
 	Instance.Abilities_HitReact = TagManager.AddNativeGameplayTag(

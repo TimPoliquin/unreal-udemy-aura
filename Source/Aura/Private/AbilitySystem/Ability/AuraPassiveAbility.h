@@ -30,5 +30,11 @@ public:
 		bool bWasCancelled
 	) override;
 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGameplayEffect> ActivateEffect;
+
+private:
+	UFUNCTION()
 	void ReceiveDeactivate(const FGameplayTag& AbilityTag);
 };

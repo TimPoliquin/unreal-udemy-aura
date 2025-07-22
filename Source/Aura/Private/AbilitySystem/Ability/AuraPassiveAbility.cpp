@@ -29,6 +29,14 @@ void UAuraPassiveAbility::ActivateAbility(
 			this,
 			&UAuraPassiveAbility::ReceiveDeactivate
 		);
+		if (ActivateEffect)
+		{
+			UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
+				GetAvatarActorFromActorInfo(),
+				ActivateEffect,
+				GetAbilityLevel()
+			);
+		}
 	}
 }
 

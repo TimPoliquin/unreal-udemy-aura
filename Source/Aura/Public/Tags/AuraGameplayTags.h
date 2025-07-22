@@ -93,6 +93,8 @@ struct FAuraGameplayTags
 	FGameplayTag Debuff_Stat_Damage;
 	FGameplayTag Debuff_Stat_Frequency;
 	FGameplayTag Debuff_Stat_Duration;
+	FGameplayTag Debuff_Block_Regen_Health;
+	FGameplayTag Debuff_Block_Regen_Mana;
 
 
 	/** Abilities **/
