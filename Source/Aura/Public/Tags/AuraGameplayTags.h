@@ -77,7 +77,6 @@ struct FAuraGameplayTags
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Lightning;
 	FGameplayTag Damage_Physical;
-	FGameplayTag Damage_Outgoing;
 
 	/** Resistance Tags **/
 	FGameplayTag Attributes_Resistance_Arcane;

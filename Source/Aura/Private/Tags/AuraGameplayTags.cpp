@@ -187,10 +187,6 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Damage.Physical"),
 		FString("Physical Damage")
 	);
-	Instance.Damage_Outgoing = TagManager.AddNativeGameplayTag(
-		FName("Damage.Outgoing"),
-		FString("Outgoing Damage - Damage caused by the Source")
-	);
 	Instance.DamageTypes.Add(Instance.Damage_Arcane);
 	Instance.DamageTypes.Add(Instance.Damage_Fire);
 	Instance.DamageTypes.Add(Instance.Damage_Lightning);
