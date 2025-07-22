@@ -53,6 +53,8 @@ AAuraCharacter::AAuraCharacter()
 	FishingStatusEffectNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Fishing Status Effect"));
 	FishingStatusEffectNiagaraComponent->SetupAttachment(GetRootComponent());
 	FishingStatusEffectNiagaraComponent->SetAutoActivate(false);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
 }
 
 void AAuraCharacter::BeginPlay()

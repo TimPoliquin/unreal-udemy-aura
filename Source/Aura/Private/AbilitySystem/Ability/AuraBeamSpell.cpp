@@ -39,7 +39,9 @@ void UAuraBeamSpell::ActivateAbility(
 		WaitInputRelease->OnRelease.AddDynamic(this, &UAuraBeamSpell::OnInputRelease);
 		ExecuteTask(WaitInputRelease);
 	}
-	if (UTargetDataUnderMouse* TargetDataUnderMouseTask = UTargetDataUnderMouse::CreateTargetDataUnderMouse(this))
+	if (UTargetDataUnderMouse* TargetDataUnderMouseTask = UTargetDataUnderMouse::CreateTargetDataUnderMouse(
+		this
+	))
 	{
 		TargetDataUnderMouseTask->HasMouseTarget.AddDynamic(this, &UAuraBeamSpell::OnReceiveMouseData);
 		ExecuteTask(TargetDataUnderMouseTask);

@@ -298,6 +298,19 @@ public:
 		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Resistance_Physical, OldValue);
 	}
 
+	/**	 Passive Attributes  */
+	/**
+	 * Protection afforded by passive abilities.
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_PassiveProtection, Category="Passive Attributes")
+	FGameplayAttributeData Passive_Protection;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Passive_Protection);
+	UFUNCTION()
+	FORCEINLINE void OnRep_PassiveProtection(const FGameplayAttributeData& OldValue) const
+	{
+		GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Passive_Protection, OldValue);
+	}
+
 	/**
 	 *Meta Attributes
 	 */

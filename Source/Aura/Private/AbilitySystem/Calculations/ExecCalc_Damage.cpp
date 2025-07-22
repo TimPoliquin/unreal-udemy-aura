@@ -23,6 +23,7 @@ struct AuraDamageStatics
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Resistance_Fire);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Resistance_Lightning);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Resistance_Physical);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(Passive_Protection);
 
 	TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition> TagsToCaptureDefs;
 
@@ -38,6 +39,7 @@ struct AuraDamageStatics
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, Resistance_Fire, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, Resistance_Lightning, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, Resistance_Physical, Target, false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, Passive_Protection, Target, false);
 
 		const FAuraGameplayTags& Tags = FAuraGameplayTags::Get();
 
@@ -52,6 +54,7 @@ struct AuraDamageStatics
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Fire, Resistance_FireDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Lightning, Resistance_LightningDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Physical, Resistance_PhysicalDef);
+		TagsToCaptureDefs.Add(Tags.Attributes_Passive_Protection, Passive_ProtectionDef);
 	}
 };
 
@@ -74,6 +77,7 @@ UExecCalc_Damage::UExecCalc_Damage()
 	RelevantAttributesToCapture.Add(DamageStatics().Resistance_FireDef);
 	RelevantAttributesToCapture.Add(DamageStatics().Resistance_LightningDef);
 	RelevantAttributesToCapture.Add(DamageStatics().Resistance_PhysicalDef);
+	RelevantAttributesToCapture.Add(DamageStatics().Passive_ProtectionDef);
 }
 
 float UExecCalc_Damage::CalculateBaseDamage(
@@ -116,14 +120,13 @@ void UExecCalc_Damage::Execute_Implementation(
 	{
 		ApplyRadialDamage(ExecutionParams, Damage);
 	}
-
 	// If the attack was blocked (based on BlockChance), cut the damage in half.
 	if (IsAttackBlockedByTarget(ExecutionParams, EvaluateParameters))
 	{
 		Damage *= .5f;
 		UAuraAbilitySystemLibrary::SetIsBlockedHit(EffectContextHandle, true);
 	}
-	// Reduce damage by a percentage based on target's effective armor
+	// Reduce damage by a percentage based on target's effective armor and level of protection
 	Damage *= (100 - GetTargetEffectiveArmor(ExecutionParams, EvaluateParameters)) / 100.f;
 	// if the attack is a critical hit, increase the damage by the critical hit damage
 	if (IsCriticalHitOnTarget(ExecutionParams, EvaluateParameters))
@@ -190,6 +193,10 @@ float UExecCalc_Damage::GetTargetEffectiveArmor(
 	const FAggregatorEvaluateParameters& EvaluateParameters
 )
 {
+	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(
+		ExecutionParams.GetSourceAbilitySystemComponent()->GetAvatarActor()
+	);
+	// target protection
 	float TargetArmor = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
 		DamageStatics().ArmorDef,
@@ -197,23 +204,31 @@ float UExecCalc_Damage::GetTargetEffectiveArmor(
 		TargetArmor
 	);
 	TargetArmor = FMath::Max<float>(TargetArmor, 0.f);
+	float PassiveProtectionPercentage = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
+		DamageStatics().Passive_ProtectionDef,
+		EvaluateParameters,
+		PassiveProtectionPercentage
+	);
+	PassiveProtectionPercentage = FMath::Max(PassiveProtectionPercentage, 1.f, PassiveProtectionPercentage);
+	TargetArmor *= PassiveProtectionPercentage;
+	const float EffectiveArmorCoefficient =
+		CharacterClassInfo->GetEffectiveArmorCoefficient(
+			ICombatInterface::GetCharacterLevel(ExecutionParams.GetTargetAbilitySystemComponent())
+		);
+	// source armor penetration
 	float SourceArmorPenetration = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
 		DamageStatics().ArmorPenetrationDef,
 		EvaluateParameters,
 		SourceArmorPenetration
 	);
-	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(
-		ExecutionParams.GetSourceAbilitySystemComponent()->GetAvatarActor()
-	);
-	const float EffectiveArmorCoefficient =
-		CharacterClassInfo->GetEffectiveArmorCoefficient(
-			ICombatInterface::GetCharacterLevel(ExecutionParams.GetTargetAbilitySystemComponent())
-		);
+
 	const float ArmorPenetrationCoefficient =
 		CharacterClassInfo->GetArmorPenetrationCoefficient(
 			ICombatInterface::GetCharacterLevel(ExecutionParams.GetSourceAbilitySystemComponent())
 		);
+
 	const float EffectiveArmor = EffectiveArmorCoefficient * FMath::Max<float>(
 		TargetArmor * (100 - SourceArmorPenetration * ArmorPenetrationCoefficient) / 100.f,
 		0.f

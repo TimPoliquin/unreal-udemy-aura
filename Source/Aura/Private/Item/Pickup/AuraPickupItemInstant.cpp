@@ -22,14 +22,29 @@ void AAuraPickupItemInstant::BeginPlay()
 	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnEndOverlap);
 }
 
-void AAuraPickupItemInstant::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-                                            const FHitResult& SweepResult)
+void AAuraPickupItemInstant::OnBeginOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult
+)
 {
+	if (!EffectComponent->CheckPreRequisites(OtherActor))
+	{
+		return;
+	}
 	PlayPickupEffect(OtherActor, true);
 	EffectComponent->OnOverlap(OtherActor);
 }
 
-void AAuraPickupItemInstant::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AAuraPickupItemInstant::OnEndOverlap(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex
+)
 {
 	EffectComponent->OnEndOverlap(OtherActor);
 }

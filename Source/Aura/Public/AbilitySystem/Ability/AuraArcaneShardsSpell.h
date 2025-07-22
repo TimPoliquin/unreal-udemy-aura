@@ -15,7 +15,7 @@ class AURA_API UAuraArcaneShardsSpell : public UAuraDamageGameplayAbility
 	GENERATED_BODY()
 
 public:
-	virtual FString GetDescription(const int32 AbilityLevel) const override;
+	virtual FString GetDescription_Implementation(const int32 AbilityLevel) const override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetNumShards(const int32 AbilityLevel) const
 	{

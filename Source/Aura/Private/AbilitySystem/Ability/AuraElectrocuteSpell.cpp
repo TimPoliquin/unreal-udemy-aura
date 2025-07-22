@@ -3,7 +3,7 @@
 
 #include "AbilitySystem/Ability/AuraElectrocuteSpell.h"
 
-FString UAuraElectrocuteSpell::GetDescription(const int32 AbilityLevel) const
+FString UAuraElectrocuteSpell::GetDescription_Implementation(const int32 AbilityLevel) const
 {
 	const float ManaCost = GetManaCost(AbilityLevel);
 	const float Cooldown = GetCooldown(AbilityLevel);

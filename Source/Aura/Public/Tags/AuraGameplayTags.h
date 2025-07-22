@@ -47,6 +47,8 @@ struct FAuraGameplayTags
 	/** Meta Attributes **/
 	FGameplayTag Attributes_Meta_IncomingDamage;
 	FGameplayTag Attributes_Meta_IncomingXP;
+	/** Passive Attributes **/
+	FGameplayTag Attributes_Passive_Protection;
 
 	/** Input Tags **/
 	FGameplayTag InputTag;
