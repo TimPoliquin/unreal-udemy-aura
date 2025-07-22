@@ -735,6 +735,31 @@ FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
 	return ActiveEffectHandle;
 }
 
+FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffectWithMagnitude(
+	AActor* TargetActor,
+	const TSubclassOf<UGameplayEffect> GameplayEffect,
+	const int32 Level,
+	const FGameplayTag& MagnitudeTag,
+	const float Magnitude
+)
+{
+	UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		TargetActor
+	);
+	FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(TargetActor);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
+		GameplayEffect,
+		Level,
+		EffectContextHandle
+	);
+	EffectSpecHandle.Data->SetSetByCallerMagnitude(MagnitudeTag, Magnitude);
+	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
+		*EffectSpecHandle.Data.Get()
+	);
+	return ActiveEffectHandle;
+}
+
 void UAuraAbilitySystemLibrary::RemoveGameplayEffect(
 	AActor* TargetActor,
 	const FActiveGameplayEffectHandle& GameplayEffectHandle,

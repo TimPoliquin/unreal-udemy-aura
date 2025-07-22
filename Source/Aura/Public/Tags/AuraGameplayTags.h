@@ -69,6 +69,7 @@ struct FAuraGameplayTags
 	FGameplayTag Effect_HitReact;
 	FGameplayTag Effect_HitReact_Default;
 	FGameplayTag Effect_HitReact_Shock;
+	FGameplayTag Effect_Magnitude;
 
 	/** Damage Tags **/
 	FGameplayTag Damage;
@@ -76,6 +77,7 @@ struct FAuraGameplayTags
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Lightning;
 	FGameplayTag Damage_Physical;
+	FGameplayTag Damage_Outgoing;
 
 	/** Resistance Tags **/
 	FGameplayTag Attributes_Resistance_Arcane;
@@ -97,6 +99,8 @@ struct FAuraGameplayTags
 	FGameplayTag Debuff_Stat_Duration;
 	FGameplayTag Debuff_Block_Regen_Health;
 	FGameplayTag Debuff_Block_Regen_Mana;
+
+	FGameplayTag Effect_Passive_HaloOfProtection;
 
 
 	/** Abilities **/

@@ -1,7 +1,7 @@
 ﻿// Copyright Alien Shores
 
 
-#include "AuraPassiveAbility.h"
+#include "AbilitySystem/Ability/Passive/AuraPassiveAbility.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"

@@ -186,6 +186,7 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	SetMeta_IncomingDamage(0.f);
 	if (IncomingDamage > 0.f)
 	{
+		HandleOutgoingDamage(Props, IncomingDamage);
 		const float NewHealth = GetHealth() - IncomingDamage;
 		const bool bFatal = NewHealth <= 0.f;
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
@@ -316,6 +317,19 @@ void UAuraAttributeSet::HandleDebuff(const FEffectProperties& Props)
 		AuraContext->SetDamageTypeTag(DebuffDamageType);
 
 		Props.Target.AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*MutableSpec);
+	}
+}
+
+void UAuraAttributeSet::HandleOutgoingDamage(const FEffectProperties& Props, const float IncomingDamage)
+{
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(
+		Props.Source.AbilitySystemComponent
+	))
+	{
+		AuraAbilitySystemComponent->OnOutgoingDamageDelegate.Broadcast(
+			FOnAbilitySystemOutgoingDamagePayload(Props.Source.AvatarActor, Props.Target.AvatarActor, IncomingDamage)
+		);
 	}
 }
 

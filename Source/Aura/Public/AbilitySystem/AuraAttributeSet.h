@@ -327,6 +327,7 @@ private:
 	void HandleIncomingDamage(const FEffectProperties& Props);
 	void HandleIncomingXP(const FEffectProperties& Props);
 	void HandleDebuff(const FEffectProperties& Props);
+	void HandleOutgoingDamage(const FEffectProperties& Props, float IncomingDamage);
 	void ShowDamageText(
 		const FEffectProperties& Props,
 		const float& IncomingDamage
