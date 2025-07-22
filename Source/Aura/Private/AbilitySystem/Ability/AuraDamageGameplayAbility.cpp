@@ -102,35 +102,6 @@ int32 UAuraDamageGameplayAbility::GetDamageAtLevel(
 	return DamageConfig.GetDamageAtLevel(AbilityLevel);
 }
 
-float UAuraDamageGameplayAbility::GetManaCost(const float InLevel) const
-{
-	if (GetCostGameplayEffect())
-	{
-		for (const FGameplayModifierInfo Mod : GetCostGameplayEffect()->Modifiers)
-		{
-			if (Mod.Attribute == UAuraAttributeSet::GetManaAttribute())
-			{
-				float ManaCost = 0.f;
-				// TODO this assumes a static value.
-				Mod.ModifierMagnitude.GetStaticMagnitudeIfPossible(InLevel, ManaCost);
-				return ManaCost;
-			}
-		}
-	}
-	return 0.f;
-}
-
-float UAuraDamageGameplayAbility::GetCooldown(const float InLevel) const
-{
-	if (const UGameplayEffect* CooldownEffect = GetCooldownGameplayEffect())
-	{
-		float Cooldown = 0.f;
-		CooldownEffect->DurationMagnitude.GetStaticMagnitudeIfPossible(InLevel, Cooldown);
-		return Cooldown;
-	}
-	return 0.f;
-}
-
 FGameplayTag UAuraDamageGameplayAbility::GetDefaultAbilityTag() const
 {
 	return GetAssetTags().First();

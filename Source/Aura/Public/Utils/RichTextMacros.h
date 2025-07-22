@@ -9,3 +9,4 @@
 #define RICH_MANA_COST(text) "<ManaCost>" text "</>"
 #define RICH_COOLDOWN(text) "<Cooldown>" text "</>"
 #define RICH_SMALL(text) "<Small>" text "</>"
+#define RICH_BUFF(text) "<Buff>" text "</>"

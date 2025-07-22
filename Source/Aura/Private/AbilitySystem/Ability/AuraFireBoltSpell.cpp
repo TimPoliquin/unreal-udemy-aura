@@ -7,10 +7,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/HighlightInterface.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Tags/AuraGameplayTags.h"
 
-FString UAuraFireBoltSpell::GetDescription(const int32 AbilityLevel) const
+FString UAuraFireBoltSpell::GetDescription_Implementation(const int32 AbilityLevel) const
 {
 	const float ManaCost = GetManaCost(AbilityLevel);
 	const float Cooldown = GetCooldown(AbilityLevel);
@@ -67,7 +65,7 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 	OnSpawnFinish.BindLambda(
 		[this, ProjectileTargetLocation, Target](AAuraProjectile* SpawnedProjectile)
 		{
-			if (IsValid(Target) && Target->Implements<UHighlightInterface>())
+			if (IsValid(Target) && Target->Implements<UHighlightInterface>() && Target != GetAvatarActorFromActorInfo())
 			{
 				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = Target->GetRootComponent();
 				if (ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(Target))

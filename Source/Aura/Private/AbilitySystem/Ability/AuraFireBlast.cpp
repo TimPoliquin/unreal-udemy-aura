@@ -7,7 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Actor/AuraFireball.h"
 
-FString UAuraFireBlast::GetDescription(const int32 AbilityLevel) const
+FString UAuraFireBlast::GetDescription_Implementation(const int32 AbilityLevel) const
 {
 	const float ManaCost = GetManaCost(AbilityLevel);
 	const float Cooldown = GetCooldown(AbilityLevel);

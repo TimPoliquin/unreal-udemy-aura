@@ -20,11 +20,17 @@ public:
 	FOnPlayerOverlapSignature OnPlayerOverlapStart;
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerOverlapSignature OnPlayerOverlapEnd;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CheckPreRequisites(AActor* PickupActor) const;
 	UFUNCTION(BlueprintCallable)
 	void OnOverlap(AActor* TargetActor);
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
-	void SetDefaults(const TArray<FGameplayEffectConfig>& InEffectConfig, const bool InDestroyOnEffectApplication, const TArray<FName>& InApplyToTags);
+	void SetDefaults(
+		const TArray<FGameplayEffectConfig>& InEffectConfig,
+		const bool InDestroyOnEffectApplication,
+		const TArray<FName>& InApplyToTags
+	);
 
 protected:
 	UFUNCTION(BlueprintCallable)

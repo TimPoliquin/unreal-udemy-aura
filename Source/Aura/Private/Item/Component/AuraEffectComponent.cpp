@@ -19,11 +19,15 @@ UAuraEffectComponent::UAuraEffectComponent()
 }
 
 
+bool UAuraEffectComponent::CheckPreRequisites(AActor* PickupActor) const
+{
+	return TagUtils::HasAnyTag(PickupActor, ApplyToTags);
+}
+
 void UAuraEffectComponent::OnOverlap(AActor* TargetActor)
 {
-	if (!TagUtils::HasAnyTag(TargetActor, ApplyToTags))
+	if (!CheckPreRequisites(TargetActor))
 	{
-		// effect does not apply to target.
 		return;
 	}
 	for (auto GameplayEffectConfig : GameplayEffectConfigs)
@@ -57,7 +61,11 @@ void UAuraEffectComponent::OnEndOverlap(AActor* TargetActor)
 	OnPlayerOverlapEnd.Broadcast(TargetActor);
 }
 
-void UAuraEffectComponent::SetDefaults(const TArray<FGameplayEffectConfig>& InEffectConfig, const bool InDestroyOnEffectApplication, const TArray<FName>& InApplyToTags)
+void UAuraEffectComponent::SetDefaults(
+	const TArray<FGameplayEffectConfig>& InEffectConfig,
+	const bool InDestroyOnEffectApplication,
+	const TArray<FName>& InApplyToTags
+)
 {
 	GameplayEffectConfigs = InEffectConfig;
 	bDestroyOnEffectApplication = InDestroyOnEffectApplication;

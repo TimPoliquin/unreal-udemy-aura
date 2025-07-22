@@ -3,7 +3,7 @@
 
 #include "AbilitySystem/Ability/AuraArcaneShardsSpell.h"
 
-FString UAuraArcaneShardsSpell::GetDescription(const int32 AbilityLevel) const
+FString UAuraArcaneShardsSpell::GetDescription_Implementation(const int32 AbilityLevel) const
 {
 	const float ManaCost = GetManaCost(AbilityLevel);
 	const float Cooldown = GetCooldown(AbilityLevel);

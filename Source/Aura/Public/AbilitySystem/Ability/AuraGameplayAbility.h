@@ -26,10 +26,8 @@ public:
 		return AbilityName.ToString();
 	}
 
-	virtual FString GetDescription(const int32 AbilityLevel) const
-	{
-		return FString(TEXT(RICH_DEFAULT("Unimplemented")));
-	};
+	UFUNCTION(BlueprintNativeEvent)
+	FString GetDescription(const int32 AbilityLevel) const;
 
 	static FString GetLockedDescription(const int32 LevelRequirement)
 	{
@@ -40,6 +38,9 @@ public:
 			LevelRequirement
 		);
 	}
+
+	float GetManaCost(const float InLevel = 1.f) const;
+	float GetCooldown(const float InLevel = 1.f) const;
 
 protected:
 	void ExecuteTask(UAbilityTask* Task) const;

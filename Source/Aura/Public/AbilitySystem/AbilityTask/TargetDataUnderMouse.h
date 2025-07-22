@@ -31,8 +31,12 @@ public:
 			DisplayName="TargetDataUnderMouse"
 		)
 	)
-	static UTargetDataUnderMouse* CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility);
+	static UTargetDataUnderMouse* CreateTargetDataUnderMouse(
+		UGameplayAbility* OwningAbility
+	);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ExposeOnSpawn=true))
+	TArray<AActor*> IgnoreActors;
 	UPROPERTY(BlueprintAssignable)
 	FMouseTargetDataSignature HasMouseTarget;
 

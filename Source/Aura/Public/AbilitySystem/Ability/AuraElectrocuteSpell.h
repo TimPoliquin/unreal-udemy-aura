@@ -15,5 +15,5 @@ class AURA_API UAuraElectrocuteSpell : public UAuraBeamSpell
 	GENERATED_BODY()
 
 public:
-	virtual FString GetDescription(const int32 AbilityLevel) const override;
+	virtual FString GetDescription_Implementation(const int32 AbilityLevel) const override;
 };

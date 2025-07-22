@@ -88,6 +88,11 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Meta.IncomingXP"),
 		FString("Incoming XP")
 	);
+	// Passive Attributes
+	Instance.Attributes_Passive_Protection = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Passive.Protection"),
+		FString("Protection afforded by passive abilities")
+	);
 
 	// Input Tags
 	Instance.InputTag = TagManager.AddNativeGameplayTag(
