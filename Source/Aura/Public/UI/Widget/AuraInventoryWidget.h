@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "AuraInventoryWidget.generated.h"
 
+class UMVVM_Inventory;
 class UAuraInventoryItemWidget;
 class UUniformGridPanel;
 /**
@@ -19,6 +20,8 @@ class AURA_API UAuraInventoryWidget : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable)
 	TArray<UAuraInventoryItemWidget*> CreateInventoryItems(UUniformGridPanel* GridPanel, int32 Columns, int32 Rows);
+	UFUNCTION(BlueprintCallable)
+	UMVVM_Inventory* FindInventoryViewModel() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

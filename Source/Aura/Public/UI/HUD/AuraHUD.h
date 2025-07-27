@@ -7,6 +7,9 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraHUD.generated.h"
 
+class UAuraMenuWidget;
+class UAuraInventoryWidget;
+class UMVVM_Inventory;
 class USpellMenuWidgetController;
 class UAuraWidgetController;
 class UAttributeMenuWidgetController;
@@ -41,12 +44,20 @@ public:
 	USpellMenuWidgetController* GetSpellMenuWidgetController(
 		const FWidgetControllerParams& WidgetControllerParams
 	);
+	UFUNCTION(BlueprintCallable)
+	UMVVM_Inventory* GetInventoryViewModel();
 
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UAuraUserWidget> OverlayWidget;
+
+	/** Menu Widget **/
+	UPROPERTY(EditDefaultsOnly, Category = "Menu")
+	TSubclassOf<UAuraMenuWidget> MenuWidgetClass;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Menu")
+	TObjectPtr<UAuraMenuWidget> MenuWidget;
 
 private:
 	/** Overlay Widget Controller **/
@@ -84,6 +95,13 @@ private:
 		const TSubclassOf<T>& WidgetControllerClass,
 		const FWidgetControllerParams& WidgetControllerParams
 	);
+
+	/** Inventory View Model */
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UMVVM_Inventory> InventoryViewModelClass;
+	UPROPERTY()
+	TObjectPtr<UMVVM_Inventory> InventoryViewModel;
+	void InitializeInventoryViewModel();
 };
 
 template <typename T>

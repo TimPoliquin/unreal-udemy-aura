@@ -4,6 +4,8 @@
 #include "UI/HUD/AuraHUD.h"
 
 #include "Blueprint/UserWidget.h"
+#include "UI/ViewModel/MVVM_Inventory.h"
+#include "UI/Widget/AuraMenuWidget.h"
 #include "UI/Widget/AuraUserWidget.h"
 #include "UI/WidgetController/AttributeMenuWidgetController.h"
 #include "UI/WidgetController/SpellMenuWidgetController.h"
@@ -12,6 +14,7 @@
 void AAuraHUD::BeginPlay()
 {
 	Super::BeginPlay();
+	InitializeInventoryViewModel();
 }
 
 
@@ -43,6 +46,15 @@ void AAuraHUD::InitializeWidgets(
 		InAbilitySystemComponent,
 		InAttributeSet
 	);
+	MenuWidget = CreateWidget<UAuraMenuWidget>(GetWorld(), MenuWidgetClass, FName("MenuWidget"));
+	MenuWidget->InitializeDependencies(
+		InPlayer,
+		InPlayerController,
+		InPlayerState,
+		InAbilitySystemComponent,
+		InAttributeSet
+	);
+	MenuWidget->AddToViewport();
 }
 
 UAttributeMenuWidgetController* AAuraHUD::GetAttributeMenuWidgetController(
@@ -71,6 +83,11 @@ USpellMenuWidgetController* AAuraHUD::GetSpellMenuWidgetController(
 		);
 	}
 	return SpellMenuWidgetController;
+}
+
+UMVVM_Inventory* AAuraHUD::GetInventoryViewModel()
+{
+	return InventoryViewModel;
 }
 
 UAuraUserWidget* AAuraHUD::CreateAuraWidget(
@@ -103,4 +120,11 @@ UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 	WidgetController->BroadcastInitialValues();
 	Widget->AddToViewport();
 	return Widget;
+}
+
+void AAuraHUD::InitializeInventoryViewModel()
+{
+	InventoryViewModel = NewObject<UMVVM_Inventory>(this, InventoryViewModelClass);
+	InventoryViewModel->InitializeInventoryItems();
+	InventoryViewModel->InitializeDependencies(GetOwner());
 }

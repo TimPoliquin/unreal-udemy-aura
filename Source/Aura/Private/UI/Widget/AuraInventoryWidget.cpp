@@ -5,6 +5,7 @@
 
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
+#include "UI/HUD/AuraHUD.h"
 #include "UI/Widget/AuraInventoryItemWidget.h"
 
 TArray<UAuraInventoryItemWidget*> UAuraInventoryWidget::CreateInventoryItems(
@@ -35,4 +36,13 @@ TArray<UAuraInventoryItemWidget*> UAuraInventoryWidget::CreateInventoryItems(
 		}
 	}
 	return InventoryItems;
+}
+
+UMVVM_Inventory* UAuraInventoryWidget::FindInventoryViewModel() const
+{
+	if (AAuraHUD* HUD = Cast<AAuraHUD>(GetOwningPlayer()->GetHUD()))
+	{
+		return HUD->GetInventoryViewModel();
+	}
+	return nullptr;
 }
