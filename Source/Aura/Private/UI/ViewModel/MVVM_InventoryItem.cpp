@@ -3,8 +3,14 @@
 
 #include "UI/ViewModel/MVVM_InventoryItem.h"
 
-void UMVVM_InventoryItem::InitializeDependencies(AAuraCharacter* PlayerActor)
+#include "Game/AuraGameModeBase.h"
+#include "Item/AuraItemBlueprintLibrary.h"
+#include "Character/AuraCharacter.h"
+
+void UMVVM_InventoryItem::InitializeDependencies(AAuraCharacter* InPlayerActor)
 {
+	PlayerActor = InPlayerActor;
+	SetIcon(DefaultEmptyIcon);
 }
 
 FGameplayTag UMVVM_InventoryItem::GetInventoryItemTag() const
@@ -15,6 +21,7 @@ FGameplayTag UMVVM_InventoryItem::GetInventoryItemTag() const
 void UMVVM_InventoryItem::SetInventoryItemTag(const FGameplayTag& InInventoryItemTag)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(InventoryItemTag, InInventoryItemTag);
+	UpdateFromInventoryItemTag();
 }
 
 int32 UMVVM_InventoryItem::GetQuantity() const
@@ -25,6 +32,46 @@ int32 UMVVM_InventoryItem::GetQuantity() const
 void UMVVM_InventoryItem::SetQuantity(const int32 InQuantity)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(Quantity, InQuantity);
+}
+
+bool UMVVM_InventoryItem::GetIsEquipped() const
+{
+	return IsEquipped;
+}
+
+void UMVVM_InventoryItem::SetIsEquipped(const bool InIsEquipped)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(IsEquipped, InIsEquipped);
+}
+
+UTexture2D* UMVVM_InventoryItem::GetIcon() const
+{
+	return Icon;
+}
+
+void UMVVM_InventoryItem::SetIcon(UTexture2D* const InIcon)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(Icon, InIcon);
+}
+
+FString UMVVM_InventoryItem::GetInventoryItemName() const
+{
+	return InventoryItemName;
+}
+
+void UMVVM_InventoryItem::SetInventoryItemName(const FString& InInventoryItemName)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(InventoryItemName, InInventoryItemName);
+}
+
+int32 UMVVM_InventoryItem::GetItemIndex() const
+{
+	return ItemIndex;
+}
+
+void UMVVM_InventoryItem::SetItemIndex(const int32 InItemIndex)
+{
+	ItemIndex = InItemIndex;
 }
 
 int32 UMVVM_InventoryItem::GetRow() const
@@ -45,4 +92,33 @@ int32 UMVVM_InventoryItem::GetColumn() const
 void UMVVM_InventoryItem::SetColumn(const int32 InColumn)
 {
 	this->Column = InColumn;
+}
+
+bool UMVVM_InventoryItem::IsEmpty() const
+{
+	return !InventoryItemTag.IsValid() || Quantity <= 0;
+}
+
+void UMVVM_InventoryItem::Clear()
+{
+	SetInventoryItemTag(FGameplayTag::EmptyTag);
+	SetQuantity(0);
+	SetIsEquipped(false);
+}
+
+
+void UMVVM_InventoryItem::UpdateFromInventoryItemTag()
+{
+	if (InventoryItemTag.IsValid() && PlayerActor.IsValid())
+	{
+		const AActor* LocalPlayerActor = PlayerActor.Get();
+		const FAuraItemDefinition& ItemDef = UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(LocalPlayerActor, InventoryItemTag);
+		SetInventoryItemName(ItemDef.ItemName);
+		SetIcon(ItemDef.ItemIcon);
+	}
+	else
+	{
+		SetInventoryItemName(FString(""));
+		SetIcon(DefaultEmptyIcon);
+	}
 }

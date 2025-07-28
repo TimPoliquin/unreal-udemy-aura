@@ -14,7 +14,6 @@
 void AAuraHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	InitializeInventoryViewModel();
 }
 
 
@@ -46,13 +45,10 @@ void AAuraHUD::InitializeWidgets(
 		InAbilitySystemComponent,
 		InAttributeSet
 	);
+	InitializeInventoryViewModel(InPlayer);
 	MenuWidget = CreateWidget<UAuraMenuWidget>(GetWorld(), MenuWidgetClass, FName("MenuWidget"));
 	MenuWidget->InitializeDependencies(
-		InPlayer,
-		InPlayerController,
-		InPlayerState,
-		InAbilitySystemComponent,
-		InAttributeSet
+		GetOwningPawn()
 	);
 	MenuWidget->AddToViewport();
 }
@@ -122,9 +118,9 @@ UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 	return Widget;
 }
 
-void AAuraHUD::InitializeInventoryViewModel()
+void AAuraHUD::InitializeInventoryViewModel(AActor* InPlayer)
 {
 	InventoryViewModel = NewObject<UMVVM_Inventory>(this, InventoryViewModelClass);
 	InventoryViewModel->InitializeInventoryItems();
-	InventoryViewModel->InitializeDependencies(GetOwner());
+	InventoryViewModel->InitializeDependencies(InPlayer);
 }

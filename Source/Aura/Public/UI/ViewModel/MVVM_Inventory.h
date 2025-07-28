@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
+#include "Player/AuraInventoryEvents.h"
 #include "MVVM_Inventory.generated.h"
 
 class UMVVM_InventoryItem;
@@ -18,12 +19,15 @@ class AURA_API UMVVM_Inventory : public UMVVMViewModelBase
 public:
 	FString GetInventoryName() const;
 	void SetInventoryName(const FString& InInventoryName);
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UMVVM_InventoryItem* GetInventoryItemByRowCol(const int32& Row, const int32& Column) const;
 	UFUNCTION(BlueprintCallable)
 	void InitializeInventoryItems();
 	UFUNCTION(BlueprintCallable)
 	void InitializeDependencies(AActor* PlayerActor);
+	TArray<UMVVM_InventoryItem*> GetInventoryItems();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int32 GetRows() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int32 GetColumns() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))
@@ -34,8 +38,12 @@ protected:
 	TArray<UMVVM_InventoryItem*> InventoryItems;
 
 private:
+	UFUNCTION()
+	void OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload);
+
 	const int32 Rows = 5;
 	const int32 Columns = 5;
+
 	UMVVM_InventoryItem* CreateInventoryItemViewModel(const int32 Row, const int32 Column);
 	UPROPERTY()
 	TObjectPtr<UMVVM_InventoryItem> InventoryItem_0_0;

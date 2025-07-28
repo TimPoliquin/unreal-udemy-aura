@@ -49,6 +49,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasToolEquipped(const FGameplayTag& ItemType) const;
 
+
 	bool IsUsingTool() const;
 	bool IsUsingWeapon() const;
 	UFUNCTION(BlueprintCallable, Category="Item|Equipment")
@@ -96,9 +97,14 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
-	int32 MaxItems = 16;
+	int32 MaxItems = 25;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
 	TArray<FAuraItemInventoryEntry> Inventory;
+
+public:
+	TArray<FAuraItemInventoryEntry> GetInventory() const;
+
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Equipment")
 	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
 

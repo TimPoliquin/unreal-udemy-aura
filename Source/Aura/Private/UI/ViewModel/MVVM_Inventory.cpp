@@ -16,11 +16,6 @@ void UMVVM_Inventory::SetInventoryName(const FString& InInventoryName)
 	UE_MVVM_SET_PROPERTY_VALUE(InventoryName, InInventoryName);
 }
 
-UMVVM_InventoryItem* UMVVM_Inventory::GetInventoryItemByRowCol(const int32& Row, const int32& Column) const
-{
-	return InventoryItems[(Row * Columns) + Column];
-}
-
 void UMVVM_Inventory::InitializeInventoryItems()
 {
 	InventoryItems.SetNum(5 * 5); // 5 rows, 5 columns
@@ -53,10 +48,12 @@ void UMVVM_Inventory::InitializeInventoryItems()
 
 UMVVM_InventoryItem* UMVVM_Inventory::CreateInventoryItemViewModel(const int32 Row, const int32 Column)
 {
+	const int32 ItemIdx = Row * Columns + Column;
 	UMVVM_InventoryItem* InventoryItem = NewObject<UMVVM_InventoryItem>(this, InventoryItemViewModelClass);
+	InventoryItem->SetItemIndex(ItemIdx);
 	InventoryItem->SetRow(Row);
 	InventoryItem->SetColumn(Column);
-	InventoryItems[Row * Columns + Column] = InventoryItem;
+	InventoryItems[ItemIdx] = InventoryItem;
 	return InventoryItem;
 }
 
@@ -69,4 +66,62 @@ void UMVVM_Inventory::InitializeDependencies(AActor* PlayerActor)
 			InventoryItems[Idx]->InitializeDependencies(AuraCharacter);
 		}
 	}
+	if (UPlayerInventoryComponent* PlayerInventoryComponent = IInventoryActorInterface::GetInventoryComponent(PlayerActor))
+	{
+		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UMVVM_Inventory::OnPlayerInventoryChanged);
+		for (auto InventoryItem : PlayerInventoryComponent->GetInventory())
+		{
+			if (InventoryItem.IsValid())
+			{
+				OnPlayerInventoryChanged(FOnInventoryItemCountChangedPayload(InventoryItem.ItemType, 0, InventoryItem.ItemCount));
+			}
+		}
+	}
+}
+
+TArray<UMVVM_InventoryItem*> UMVVM_Inventory::GetInventoryItems()
+{
+	return InventoryItems;
+}
+
+void UMVVM_Inventory::OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload)
+{
+	if (!Payload.IsValid())
+	{
+		return;
+	}
+	if (Payload.IsItemAddedChange())
+	{
+		UMVVM_InventoryItem* ItemModel = *InventoryItems.FindByPredicate([](const UMVVM_InventoryItem* InventoryItem)
+		{
+			return InventoryItem->IsEmpty();
+		});
+		ItemModel->SetInventoryItemTag(Payload.ItemType);
+		ItemModel->SetQuantity(Payload.NewValue);
+	}
+	else
+	{
+		UMVVM_InventoryItem* ItemModel = *InventoryItems.FindByPredicate([Payload](const UMVVM_InventoryItem* InventoryItem)
+		{
+			return InventoryItem->GetInventoryItemTag().MatchesTagExact(Payload.ItemType);
+		});
+		if (Payload.NewValue <= 0)
+		{
+			ItemModel->Clear();
+		}
+		else if (Payload.NewValue > 0)
+		{
+			ItemModel->SetQuantity(Payload.NewValue);
+		}
+	}
+}
+
+int32 UMVVM_Inventory::GetRows() const
+{
+	return Rows;
+}
+
+int32 UMVVM_Inventory::GetColumns() const
+{
+	return Columns;
 }

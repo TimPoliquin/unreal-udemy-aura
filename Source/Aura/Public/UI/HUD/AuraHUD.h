@@ -101,7 +101,7 @@ private:
 	TSubclassOf<UMVVM_Inventory> InventoryViewModelClass;
 	UPROPERTY()
 	TObjectPtr<UMVVM_Inventory> InventoryViewModel;
-	void InitializeInventoryViewModel();
+	void InitializeInventoryViewModel(AActor* InPlayer);
 };
 
 template <typename T>

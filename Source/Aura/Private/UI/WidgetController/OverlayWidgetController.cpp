@@ -129,7 +129,7 @@ void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTa
 
 void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload)
 {
-	const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(Player);
+	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(Player);
 	const FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(Payload.ItemType);
 	FGameplayTag MessageTag;
 	if (!ItemDefinition.IsValid())

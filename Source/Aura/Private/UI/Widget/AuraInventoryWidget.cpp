@@ -3,9 +3,12 @@
 
 #include "UI/Widget/AuraInventoryWidget.h"
 
+#include "Aura/AuraLogChannels.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "UI/HUD/AuraHUD.h"
+#include "UI/ViewModel/MVVM_Inventory.h"
+#include "UI/ViewModel/MVVM_InventoryItem.h"
 #include "UI/Widget/AuraInventoryItemWidget.h"
 
 TArray<UAuraInventoryItemWidget*> UAuraInventoryWidget::CreateInventoryItems(
@@ -14,7 +17,7 @@ TArray<UAuraInventoryItemWidget*> UAuraInventoryWidget::CreateInventoryItems(
 	int32 Rows
 )
 {
-	TArray<UAuraInventoryItemWidget*> InventoryItems;
+	GridPanel->ClearChildren();
 	for (int32 Row = 0; Row < Rows; Row++)
 	{
 		for (int32 Column = 0; Column < Columns; Column++)
@@ -25,17 +28,17 @@ TArray<UAuraInventoryItemWidget*> UAuraInventoryWidget::CreateInventoryItems(
 					InventoryItemWidgetClass,
 					FName(*FString::Printf(TEXT("Inventory Item %d - %d"), Row, Column))
 				);
-			InventoryItems.Add(InventoryItem);
-			if (UUniformGridSlot* Slot = GridPanel->AddChildToUniformGrid(InventoryItem))
+			InventoryItemWidgets.Add(InventoryItem);
+			if (UUniformGridSlot* InventoryItemSlot = GridPanel->AddChildToUniformGrid(InventoryItem))
 			{
-				Slot->SetRow(Row);
-				Slot->SetColumn(Column);
-				Slot->SetHorizontalAlignment(HAlign_Center);
-				Slot->SetVerticalAlignment(VAlign_Center);
+				InventoryItemSlot->SetRow(Row);
+				InventoryItemSlot->SetColumn(Column);
+				InventoryItemSlot->SetHorizontalAlignment(HAlign_Center);
+				InventoryItemSlot->SetVerticalAlignment(VAlign_Center);
 			}
 		}
 	}
-	return InventoryItems;
+	return InventoryItemWidgets;
 }
 
 UMVVM_Inventory* UAuraInventoryWidget::FindInventoryViewModel() const
@@ -45,4 +48,22 @@ UMVVM_Inventory* UAuraInventoryWidget::FindInventoryViewModel() const
 		return HUD->GetInventoryViewModel();
 	}
 	return nullptr;
+}
+
+void UAuraInventoryWidget::BindViewModel_Implementation(UMVVM_Inventory* InventoryViewModel)
+{
+	if (!InventoryViewModel)
+	{
+		UE_LOG(LogAura, Error, TEXT("InventoryViewModel is null"));
+		return;
+	}
+	if (InventoryViewModel->GetInventoryItems().Num() != InventoryItemWidgets.Num())
+	{
+		UE_LOG(LogAura, Error, TEXT("Mismatch between InventoryItem view model and Widgets!"));
+		return;
+	}
+	for (UMVVM_InventoryItem* InventoryItemModel : InventoryViewModel->GetInventoryItems())
+	{
+		InventoryItemWidgets[InventoryItemModel->GetItemIndex()]->BindViewModel(InventoryItemModel);
+	}
 }
