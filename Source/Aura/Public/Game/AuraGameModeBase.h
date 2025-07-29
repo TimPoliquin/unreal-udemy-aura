@@ -63,7 +63,7 @@ public:
 	static AAuraGameModeBase* GetAuraGameMode(const UObject* WorldContextObject);
 	ULootTiers* GetLootTiers() const { return LootTiers; }
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FAuraItemDefinition FindItemDefinitionByItemTag(const FGameplayTag& ItemTag) const;
+	FAuraItemDefinition FindItemDefinitionByItemTag(const FGameplayTag& ItemTag);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FGameplayTag GetDefaultItemPickupMessageTag() const;

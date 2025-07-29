@@ -45,7 +45,7 @@ UTexture2D* UAuraItemBlueprintLibrary::SubstituteMessageIcon(UTexture2D* Message
 
 FAuraFishCatch UAuraItemBlueprintLibrary::ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType)
 {
-	const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject);
+	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject);
 	FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(FishType);
 	FAuraFishDefinition FishDefinition = GameMode->GetFishInfo()->GetFishDefinitionByFishType(FishType);
 	FAuraFishCatch Catch;

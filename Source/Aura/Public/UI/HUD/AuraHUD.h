@@ -7,6 +7,11 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraHUD.generated.h"
 
+class UAuraOverlayWidget;
+enum class EAuraMenuTab : uint8;
+class UAuraMenuWidget;
+class UAuraInventoryWidget;
+class UMVVM_Inventory;
 class USpellMenuWidgetController;
 class UAuraWidgetController;
 class UAttributeMenuWidgetController;
@@ -41,17 +46,30 @@ public:
 	USpellMenuWidgetController* GetSpellMenuWidgetController(
 		const FWidgetControllerParams& WidgetControllerParams
 	);
+	UFUNCTION(BlueprintCallable)
+	UMVVM_Inventory* GetInventoryViewModel();
+
+	UFUNCTION(BlueprintCallable)
+	void OpenMenu(const EAuraMenuTab& OpenTab);
+	UFUNCTION(BlueprintCallable)
+	void OnMenuClosed();
 
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UAuraUserWidget> OverlayWidget;
+	TObjectPtr<UAuraOverlayWidget> OverlayWidget;
+
+	/** Menu Widget **/
+	UPROPERTY(EditDefaultsOnly, Category = "Menu")
+	TSubclassOf<UAuraMenuWidget> MenuWidgetClass;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Menu")
+	TObjectPtr<UAuraMenuWidget> MenuWidget;
 
 private:
 	/** Overlay Widget Controller **/
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAuraUserWidget> OverlayWidgetClass;
+	TSubclassOf<UAuraOverlayWidget> OverlayWidgetClass;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
 	UPROPERTY()
@@ -63,9 +81,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
 
-	UAuraUserWidget* CreateAuraWidget(
-		TSubclassOf<UAuraUserWidget> WidgetClass,
-		TSubclassOf<UAuraWidgetController> WidgetControllerClass,
+	UAuraOverlayWidget* CreateAuraWidget(
+		const TSubclassOf<UAuraOverlayWidget>& WidgetClass,
+		const TSubclassOf<UAuraWidgetController>& WidgetControllerClass,
 		AActor* InOwner,
 		APlayerController* InPlayerController,
 		APlayerState* InPlayerState,
@@ -84,6 +102,13 @@ private:
 		const TSubclassOf<T>& WidgetControllerClass,
 		const FWidgetControllerParams& WidgetControllerParams
 	);
+
+	/** Inventory View Model */
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UMVVM_Inventory> InventoryViewModelClass;
+	UPROPERTY()
+	TObjectPtr<UMVVM_Inventory> InventoryViewModel;
+	void InitializeInventoryViewModel(AActor* InPlayer);
 };
 
 template <typename T>

@@ -264,6 +264,11 @@ void UPlayerInventoryComponent::BeginPlay()
 	}
 }
 
+TArray<FAuraItemInventoryEntry> UPlayerInventoryComponent::GetInventory() const
+{
+	return Inventory;
+}
+
 
 AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipmentSlot& Slot)
 {

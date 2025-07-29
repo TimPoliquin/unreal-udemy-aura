@@ -184,8 +184,12 @@ UAuraGameInstance* AAuraGameModeBase::GetAuraGameInstance() const
 	return Cast<UAuraGameInstance>(GetGameInstance());
 }
 
-FAuraItemDefinition AAuraGameModeBase::FindItemDefinitionByItemTag(const FGameplayTag& ItemTag) const
+FAuraItemDefinition AAuraGameModeBase::FindItemDefinitionByItemTag(const FGameplayTag& ItemTag)
 {
+	if (ItemDefinitions.IsEmpty())
+	{
+		InitializeItemDefinitions();
+	}
 	if (ItemDefinitions.Contains(ItemTag))
 	{
 		return ItemDefinitions[ItemTag];
@@ -265,6 +269,10 @@ FString AAuraGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetNam
 
 void AAuraGameModeBase::InitializeItemDefinitions()
 {
+	if (!ItemDefinitions.IsEmpty())
+	{
+		return;
+	}
 	for (const UAuraItemInfo* ItemDefinitionSet : ItemInfos)
 	{
 		ItemDefinitionSet->AddToMap(ItemDefinitions);
