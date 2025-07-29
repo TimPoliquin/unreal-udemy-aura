@@ -3,6 +3,7 @@
 
 #include "UI/HUD/AuraHUD.h"
 
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/ViewModel/MVVM_Inventory.h"
 #include "UI/Widget/AuraMenuWidget.h"
@@ -10,6 +11,7 @@
 #include "UI/WidgetController/AttributeMenuWidgetController.h"
 #include "UI/WidgetController/SpellMenuWidgetController.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
+#include "UI/Widget/AuraOverlayWidget.h"
 
 void AAuraHUD::BeginPlay()
 {
@@ -45,12 +47,34 @@ void AAuraHUD::InitializeWidgets(
 		InAbilitySystemComponent,
 		InAttributeSet
 	);
+	OverlayWidget->OnOpenMenuDelegate.AddDynamic(this, &AAuraHUD::OpenMenu);
 	InitializeInventoryViewModel(InPlayer);
 	MenuWidget = CreateWidget<UAuraMenuWidget>(GetWorld(), MenuWidgetClass, FName("MenuWidget"));
 	MenuWidget->InitializeDependencies(
 		GetOwningPawn()
 	);
+	MenuWidget->OnAuraMenuClosed.AddDynamic(this, &AAuraHUD::OnMenuClosed);
+	MenuWidget->SetVisibility(ESlateVisibility::Hidden);
 	MenuWidget->AddToViewport();
+	if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(InAbilitySystemComponent))
+	{
+		const FWidgetControllerParams Params = FWidgetControllerParams(InPlayer, InPlayerController, InPlayerState, InAbilitySystemComponent, InAttributeSet);
+		if (AuraAbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
+		{
+			GetOverlayWidgetController(Params)->BroadcastInitialValues();
+			GetAttributeMenuWidgetController(Params)->BroadcastInitialValues();
+			GetSpellMenuWidgetController(Params)->BroadcastInitialValues();
+		}
+		else
+		{
+			AuraAbilitySystemComponent->OnAbilitiesGivenDelegate.AddLambda([this, Params]()
+			{
+				GetOverlayWidgetController(Params)->BroadcastInitialValues();
+				GetAttributeMenuWidgetController(Params)->BroadcastInitialValues();
+				GetSpellMenuWidgetController(Params)->BroadcastInitialValues();
+			});
+		}
+	}
 }
 
 UAttributeMenuWidgetController* AAuraHUD::GetAttributeMenuWidgetController(
@@ -86,9 +110,22 @@ UMVVM_Inventory* AAuraHUD::GetInventoryViewModel()
 	return InventoryViewModel;
 }
 
-UAuraUserWidget* AAuraHUD::CreateAuraWidget(
-	TSubclassOf<UAuraUserWidget> WidgetClass,
-	TSubclassOf<UAuraWidgetController> WidgetControllerClass,
+void AAuraHUD::OpenMenu(const EAuraMenuTab& OpenTab)
+{
+	GetOwningPlayerController()->SetInputMode(FInputModeUIOnly());
+	OverlayWidget->Hide();
+	MenuWidget->OpenMenu(OpenTab);
+}
+
+void AAuraHUD::OnMenuClosed()
+{
+	OverlayWidget->Show();
+	GetOwningPlayerController()->SetInputMode(FInputModeGameAndUI());
+}
+
+UAuraOverlayWidget* AAuraHUD::CreateAuraWidget(
+	const TSubclassOf<UAuraOverlayWidget>& WidgetClass,
+	const TSubclassOf<UAuraWidgetController>& WidgetControllerClass,
 	AActor* InOwner,
 	APlayerController* InPlayerController,
 	APlayerState* InPlayerState,
@@ -102,7 +139,7 @@ UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 		TEXT("Widget controller class uninitialized; please fill out BP_AuraHUD")
 	);
 
-	UAuraUserWidget* Widget = CreateWidget<UAuraUserWidget>(GetWorld(), WidgetClass);
+	UAuraOverlayWidget* Widget = CreateWidget<UAuraOverlayWidget>(GetWorld(), WidgetClass);
 
 	const FWidgetControllerParams WidgetControllerParams(
 		InOwner,
@@ -113,7 +150,6 @@ UAuraUserWidget* AAuraHUD::CreateAuraWidget(
 	);
 	UOverlayWidgetController* WidgetController = GetOverlayWidgetController(WidgetControllerParams);
 	Widget->SetWidgetController(WidgetController);
-	WidgetController->BroadcastInitialValues();
 	Widget->AddToViewport();
 	return Widget;
 }

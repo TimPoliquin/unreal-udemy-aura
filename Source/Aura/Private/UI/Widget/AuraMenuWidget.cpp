@@ -43,6 +43,11 @@ void UAuraMenuWidget::InitializeTabButton(const EAuraMenuTab Tab, UButton* Butto
 	}
 }
 
+void UAuraMenuWidget::CloseMenu_Implementation()
+{
+	OnAuraMenuClosed.Broadcast();
+}
+
 void UAuraMenuWidget::ChangeActiveTab(const EAuraMenuTab& Tab)
 {
 	if (ActiveMenuTab != Tab)

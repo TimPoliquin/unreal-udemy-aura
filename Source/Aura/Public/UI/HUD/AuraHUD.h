@@ -7,6 +7,8 @@
 #include "UI/WidgetController/AuraWidgetController.h"
 #include "AuraHUD.generated.h"
 
+class UAuraOverlayWidget;
+enum class EAuraMenuTab : uint8;
 class UAuraMenuWidget;
 class UAuraInventoryWidget;
 class UMVVM_Inventory;
@@ -47,11 +49,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UMVVM_Inventory* GetInventoryViewModel();
 
+	UFUNCTION(BlueprintCallable)
+	void OpenMenu(const EAuraMenuTab& OpenTab);
+	UFUNCTION(BlueprintCallable)
+	void OnMenuClosed();
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UAuraUserWidget> OverlayWidget;
+	TObjectPtr<UAuraOverlayWidget> OverlayWidget;
 
 	/** Menu Widget **/
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
@@ -62,7 +69,7 @@ protected:
 private:
 	/** Overlay Widget Controller **/
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAuraUserWidget> OverlayWidgetClass;
+	TSubclassOf<UAuraOverlayWidget> OverlayWidgetClass;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
 	UPROPERTY()
@@ -74,9 +81,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
 
-	UAuraUserWidget* CreateAuraWidget(
-		TSubclassOf<UAuraUserWidget> WidgetClass,
-		TSubclassOf<UAuraWidgetController> WidgetControllerClass,
+	UAuraOverlayWidget* CreateAuraWidget(
+		const TSubclassOf<UAuraOverlayWidget>& WidgetClass,
+		const TSubclassOf<UAuraWidgetController>& WidgetControllerClass,
 		AActor* InOwner,
 		APlayerController* InPlayerController,
 		APlayerState* InPlayerState,

@@ -12,6 +12,8 @@ class UAttributeSet;
 class UAuraInventoryWidget;
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuraMenuWidgetClosedSignature);
+
 UENUM(BlueprintType)
 enum class EAuraMenuTab : uint8
 {
@@ -37,6 +39,11 @@ public:
 	);
 	UFUNCTION(BlueprintCallable)
 	void InitializeTabButton(EAuraMenuTab Tab, UButton* Button);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void OpenMenu(const EAuraMenuTab& OpenTab);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void CloseMenu();
+	FOnAuraMenuWidgetClosedSignature OnAuraMenuClosed;
 
 protected:
 	/** Config **/
