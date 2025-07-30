@@ -88,6 +88,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Meta.IncomingXP"),
 		FString("Incoming XP")
 	);
+	Instance.Attributes_Meta_IncomingRefresh = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Meta.IncomingRefresh"),
+		FString("Incoming Refresh after a Level Up")
+	);
 	// Passive Attributes
 	Instance.Attributes_Passive_Protection = TagManager.AddNativeGameplayTag(
 		FName("Attributes.Passive.Protection"),

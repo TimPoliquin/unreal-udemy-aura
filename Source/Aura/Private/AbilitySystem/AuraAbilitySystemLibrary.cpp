@@ -89,10 +89,11 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
 	const UObject* WorldContextObject,
 	UAbilitySystemComponent* AbilitySystemComponent,
-	const UAuraSaveGame* SaveData
+	const UAuraSaveGame* SaveData,
+	const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
 )
 {
-	UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	const UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
 	if (!CharacterClassInfo)
 	{
 		UE_LOG(
@@ -131,16 +132,16 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
 		GameplayTags.Attributes_Primary_Vigor,
 		SaveData->Vigor
 	);
-	// secondary attributes
-	ApplyGameplayEffectSpec(
-		AbilitySystemComponent,
-		AbilitySystemComponent,
-		CharacterClassInfo->SecondaryAttributes_Infinite,
-		1.f
-	);
-	// vital attributes
-	ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, CharacterClassInfo->VitalAttributes, 1.f);
 	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	for (auto Effect : InitializeEffects)
+	{
+		ApplyGameplayEffectSpec(
+			AbilitySystemComponent,
+			AbilitySystemComponent,
+			Effect,
+			1.f
+		);
+	}
 }
 
 void UAuraAbilitySystemLibrary::GrantStartupAbilities(

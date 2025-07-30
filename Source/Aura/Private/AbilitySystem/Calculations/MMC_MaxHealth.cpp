@@ -28,5 +28,5 @@ float UMMC_MaxHealth::CalculateBaseMagnitude_Implementation(const FGameplayEffec
 
 	// Max health is a function of vigor and character level.
 	const int32 PlayerLevel = ICombatInterface::GetCharacterLevel(Spec.GetContext().GetSourceObject());
-	return 80.f + (2.5f * Vigor) + (10.f * PlayerLevel);
+	return 77.5f + (2.5f * Vigor) + (10.f * (PlayerLevel - 1));
 }

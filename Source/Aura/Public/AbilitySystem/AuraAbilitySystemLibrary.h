@@ -69,7 +69,8 @@ public:
 	static void InitializeDefaultAttributesFromSaveData(
 		const UObject* WorldContextObject,
 		UAbilitySystemComponent* AbilitySystemComponent,
-		const UAuraSaveGame* SaveData
+		const UAuraSaveGame* SaveData,
+		const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")

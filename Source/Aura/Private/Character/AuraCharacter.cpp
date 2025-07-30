@@ -10,6 +10,7 @@
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/AuraLogChannels.h"
@@ -111,6 +112,15 @@ void AAuraCharacter::LoadProgress()
 			}
 			if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
 			{
+				TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
+				InitializeEffects.Add(DefaultSecondaryAttributes);
+				InitializeEffects.Add(InitializeVitalAttributes);
+				UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
+					this,
+					AuraAbilitySystemComponent,
+					SaveData,
+					InitializeEffects
+				);
 				AuraAbilitySystemComponent->FromSaveData(SaveData);
 			}
 			if (PlayerInventoryComponent)

@@ -7,6 +7,7 @@
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/AuraLogChannels.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
@@ -116,6 +117,10 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		HandleIncomingXP(Props);
 	}
+	else if (Data.EvaluatedData.Attribute == GetMeta_IncomingRefreshAttribute())
+	{
+		HandleIncomingRefresh(Props);
+	}
 	if (UAuraAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
 	{
 		HandleDebuff(Props);
@@ -125,16 +130,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
-	if (Attribute == GetMaxHealthAttribute() && bTopOffHealth)
-	{
-		SetHealth(GetMaxHealth());
-		bTopOffHealth = false;
-	}
-	if (Attribute == GetMaxManaAttribute() && bTopOffMana)
-	{
-		SetMana(GetMaxMana());
-		bTopOffMana = false;
-	}
 }
 
 void UAuraAttributeSet::FromSaveData(const UAuraSaveGame* SaveData)
@@ -255,14 +250,21 @@ void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 			{
 				AuraAbilitySystemComponent->ServerUpdateAbilityStatuses(NewLevel);
 			}
-			// TODO - there are complications here that will be addressed later.
-			bTopOffHealth = true;
-			bTopOffHealth = true;
-			SetHealth(GetMaxHealth());
-			SetMana(GetMaxMana());
+			SendReplenishVitalsEvent(Props.Source.AvatarActor);
 			IPlayerInterface::Execute_LevelUp(Props.Source.Character);
 		}
 		IPlayerInterface::Execute_AddToXP(Props.Source.Character, IncomingXP);
+	}
+}
+
+void UAuraAttributeSet::HandleIncomingRefresh(const FEffectProperties& Props)
+{
+	const float IncomingRefresh = GetMeta_IncomingRefresh();
+	SetMeta_IncomingRefresh(0.f);
+	if (IncomingRefresh > 0.f)
+	{
+		SetHealth(GetMaxHealth());
+		SetMana(GetMaxMana());
 	}
 }
 
@@ -300,6 +302,7 @@ void UAuraAttributeSet::HandleDebuff(const FEffectProperties& Props)
 		UTargetTagsGameplayEffectComponent>();
 	FInheritedTagContainer InheritedTagContainer = FInheritedTagContainer();
 	InheritedTagContainer.Added.AddTag(DebuffTypeTag);
+	InheritedTagContainer.Added.AddTag(GameplayTags.Debuff_Block_Regen_Health);
 	if (DebuffTypeTag.MatchesTagExact(GameplayTags.Debuff_Type_Shock))
 	{
 		InheritedTagContainer.Added.AddTag(FAuraGameplayTags::Get().Player_Block_CursorTrace);
@@ -312,7 +315,7 @@ void UAuraAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	if (const FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContext, 1.f))
 	{
 		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(MutableSpec->GetContext().
-			Get());
+		                                                                                                Get());
 		const TSharedPtr<FGameplayTag> DebuffDamageType = MakeShareable(new FGameplayTag(DamageTypeTag));
 		AuraContext->SetDamageTypeTag(DebuffDamageType);
 
@@ -377,6 +380,18 @@ void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props) const
 	Payload.EventMagnitude = XPReward;
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
 		Props.Source.AvatarActor,
+		Payload.EventTag,
+		Payload
+	);
+}
+
+void UAuraAttributeSet::SendReplenishVitalsEvent(AActor* AvatarActor)
+{
+	FGameplayEventData Payload;
+	Payload.EventTag = FAuraGameplayTags::Get().Attributes_Meta_IncomingRefresh;
+	Payload.EventMagnitude = 1;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+		AvatarActor,
 		Payload.EventTag,
 		Payload
 	);

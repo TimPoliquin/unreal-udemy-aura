@@ -114,7 +114,7 @@ struct FSavedInventory
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 MaxItems = 16;
+	int32 MaxItems = 25;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
