@@ -256,11 +256,6 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(
 
 void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
 {
-	UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
-		GetAvatarActor(),
-		this,
-		SaveData
-	);
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	for (const FSavedAbility& SavedAbility : SaveData->SavedAbilities)
 	{

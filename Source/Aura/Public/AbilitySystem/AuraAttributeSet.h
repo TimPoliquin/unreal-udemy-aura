@@ -320,12 +320,16 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Meta Attributes")
 	FGameplayAttributeData Meta_IncomingXP;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Meta_IncomingXP);
+	UPROPERTY(BlueprintReadOnly, Category="Meta Attributes")
+	FGameplayAttributeData Meta_IncomingRefresh;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Meta_IncomingRefresh);
 
 private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
 	void HandleIncomingDamage(const FEffectProperties& Props);
 	void HandleIncomingXP(const FEffectProperties& Props);
+	void HandleIncomingRefresh(const FEffectProperties& Props);
 	void HandleDebuff(const FEffectProperties& Props);
 	void HandleOutgoingDamage(const FEffectProperties& Props, float IncomingDamage);
 	void ShowDamageText(
@@ -333,7 +337,5 @@ private:
 		const float& IncomingDamage
 	) const;
 	void SendXPEvent(const FEffectProperties& Props) const;
-
-	bool bTopOffHealth = false;
-	bool bTopOffMana = false;
+	void SendReplenishVitalsEvent(AActor* AvatarActor);
 };

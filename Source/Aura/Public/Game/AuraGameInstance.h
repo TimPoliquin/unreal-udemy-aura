@@ -19,8 +19,16 @@ public:
 	FName PlayerStartTag = FName();
 
 	UPROPERTY()
-	FString LoadSlotName = FString();
+	FString LoadSlotName = FString("Transient");
 
 	UPROPERTY()
-	int32 LoadSlotIndex = 0;
+	int32 LoadSlotIndex = 9;
+
+	UPROPERTY()
+	bool bTransient = true;
+
+	UPROPERTY()
+	bool bAutoCleanup = false;
+
+	virtual void Shutdown() override;
 };

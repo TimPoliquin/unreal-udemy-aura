@@ -212,6 +212,10 @@ void AAuraGameModeBase::BeginPlay()
 	Super::BeginPlay();
 	MapsByName.Add(DefaultMapName, DefaultMap);
 	InitializeItemDefinitions();
+	if (bAutoSaveOnStart)
+	{
+		AutoSaveTransient();
+	}
 }
 
 int32 AAuraGameModeBase::GetDefaultPlayerLevel() const
@@ -277,4 +281,28 @@ void AAuraGameModeBase::InitializeItemDefinitions()
 	{
 		ItemDefinitionSet->AddToMap(ItemDefinitions);
 	}
+}
+
+void AAuraGameModeBase::AutoSaveTransient() const
+{
+	UAuraGameInstance* GameInstance = GetAuraGameInstance();
+	if (!GameInstance->bTransient)
+	{
+		return;
+	}
+	if (UGameplayStatics::DoesSaveGameExist(GameInstance->LoadSlotName, GameInstance->LoadSlotIndex))
+	{
+		DeleteSlot(GameInstance->LoadSlotName, GameInstance->LoadSlotIndex);
+	}
+	GameInstance->bAutoCleanup = true;
+	UAuraSaveGame* SaveGame = Cast<UAuraSaveGame>(UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass));
+	SaveGame->SlotIndex = GameInstance->LoadSlotIndex;
+	SaveGame->SlotName = GameInstance->LoadSlotName;
+	SaveGame->PlayerName = GameInstance->LoadSlotName;
+	SaveGame->MapAssetName = GetDefaultMapAssetName();
+	SaveGame->MapName = GetDefaultMapName();
+	SaveGame->SaveSlotStatus = Taken;
+	SaveGame->PlayerStartTag = GetDefaultPlayerStartTag();
+	SaveGame->PlayerLevel = GetDefaultPlayerLevel();
+	UGameplayStatics::SaveGameToSlot(SaveGame, GameInstance->LoadSlotName, GameInstance->LoadSlotIndex);
 }

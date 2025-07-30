@@ -113,6 +113,7 @@ protected:
 	TSubclassOf<UGameplayEffect> InitializeVitalAttributes;
 
 	virtual void InitializeDefaultAttributes();
+	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 
 	void AddCharacterAbilities();
 	UFUNCTION()
@@ -207,7 +208,6 @@ private:
 	FOnAbilitySystemComponentRegisteredSignature OnAbilitySystemComponentRegisteredDelegate;
 	FOnDeathSignature OnDeathDelegate;
 	FOnDamageSignature OnDamageDelegate;
-	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 	void Dissolve(
 		UMeshComponent* InMesh,
 		UMaterialInstance* MaterialInstance,

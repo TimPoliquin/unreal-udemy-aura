@@ -96,6 +96,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Save Game")
 	int32 DefaultPlayerLevel = 1;
+	UPROPERTY(EditDefaultsOnly, Category="Save Game")
+	bool bAutoSaveOnStart = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Save Game")
 	TSubclassOf<USaveGame> LoadScreenSaveGameClass;
@@ -114,4 +116,5 @@ protected:
 private:
 	FString GetMapNameFromMapAssetName(const FString& MapAssetName) const;
 	void InitializeItemDefinitions();
+	void AutoSaveTransient() const;
 };
