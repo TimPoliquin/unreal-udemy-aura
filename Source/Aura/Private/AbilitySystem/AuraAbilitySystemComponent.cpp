@@ -274,6 +274,11 @@ void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
 				GiveAbility(AbilitySpec);
 			}
 		}
+		else if (!SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Locked))
+		{
+			GiveAbility(AbilitySpec);
+		}
+		MarkAbilitySpecDirty(AbilitySpec);
 	}
 	bAbilitiesGiven = true;
 	OnAbilitiesGivenDelegate.Broadcast();
@@ -286,14 +291,14 @@ void UAuraAbilitySystemComponent::ToSaveData(UAuraSaveGame* SaveData)
 		return;
 	}
 	const AActor* Actor = GetAvatarActor();
+	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(Actor);
 	FForEachAbility SaveAbilityDelegate;
 	SaveAbilityDelegate.BindLambda(
-		[Actor, SaveData](FGameplayAbilitySpec& AbilitySpec)
+		[AbilityInfo, SaveData](FGameplayAbilitySpec& AbilitySpec)
 		{
 			const FGameplayTag AbilityTag = UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(AbilitySpec);
 			if (AbilityTag.IsValid())
 			{
-				const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(Actor);
 				const FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
 				FSavedAbility SavedAbility;
 				SavedAbility.GameplayAbilityClass = Info.Ability;

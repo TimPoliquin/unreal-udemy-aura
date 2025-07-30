@@ -81,6 +81,10 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	// Init ability actor info for the server
 	InitializeAbilityActorInfo();
 	LoadProgress();
+	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
+	}
 	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
 	GameMode->LoadWorldState(GetWorld());
 }
@@ -144,6 +148,10 @@ void AAuraCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 	// Init ability actor info for the client
 	InitializeAbilityActorInfo();
+	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
+	}
 }
 
 void AAuraCharacter::OnRep_ActiveAbilityTag()
@@ -207,10 +215,6 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
-	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
-	{
-		InitializePlayerControllerHUD(PlayerController, AuraPlayerState);
-	}
 	// Broadcast Ability System Setup
 	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
 }

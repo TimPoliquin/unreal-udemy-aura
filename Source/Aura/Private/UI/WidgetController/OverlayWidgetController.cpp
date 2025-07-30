@@ -19,6 +19,14 @@ void UOverlayWidgetController::BroadcastInitialValues()
 	OnMaxMaxHealthChanged.Broadcast(GetAuraAttributeSet()->GetMaxHealth());
 	OnManaChanged.Broadcast(GetAuraAttributeSet()->GetMana());
 	OnMaxManaChanged.Broadcast(GetAuraAttributeSet()->GetMaxMana());
+	if (GetAuraAbilitySystemComponent()->HasFiredOnAbilitiesGivenDelegate())
+	{
+		BroadcastAbilityInfo();
+	}
+	else
+	{
+		GetAuraAbilitySystemComponent()->OnAbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastAbilityInfo);
+	}
 }
 
 void UOverlayWidgetController::BindCallbacksToDependencies()
@@ -76,14 +84,6 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		}
 	);
 	GetAuraAbilitySystemComponent()->OnAbilityEquippedDelegate.AddDynamic(this, &UOverlayWidgetController::OnAbilityEquipped);
-	if (GetAuraAbilitySystemComponent()->HasFiredOnAbilitiesGivenDelegate())
-	{
-		BroadcastAbilityInfo();
-	}
-	else
-	{
-		GetAuraAbilitySystemComponent()->OnAbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastAbilityInfo);
-	}
 	AbilitySystemComponent->RegisterGameplayTagEvent(
 		FAuraGameplayTags::Get().Player_HUD_Hide,
 		EGameplayTagEventType::NewOrRemoved

@@ -125,6 +125,10 @@ void AAuraGameModeBase::LoadWorldState(UWorld* World) const
 			// TODO - PERF - this should be a map or something to prevent N^2 operations
 			for (FSavedActor SavedActor : SaveData->GetSavedMapByMapName(WorldName).SavedActors)
 			{
+				if (SavedActor.ActorName != Actor->GetFName())
+				{
+					return;
+				}
 				if (ISaveInterface::Execute_ShouldLoadTransform(Actor))
 				{
 					Actor->SetActorTransform(SavedActor.Transform);
