@@ -109,6 +109,8 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMVVM_Inventory> InventoryViewModel;
 	void InitializeInventoryViewModel(AActor* InPlayer);
+
+	bool bInitialized = false;
 };
 
 template <typename T>

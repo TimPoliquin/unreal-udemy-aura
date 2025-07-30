@@ -38,6 +38,10 @@ void AAuraHUD::InitializeWidgets(
 	UAttributeSet* InAttributeSet
 )
 {
+	if (bInitialized)
+	{
+		return;
+	}
 	OverlayWidget = CreateAuraWidget(
 		OverlayWidgetClass,
 		OverlayWidgetControllerClass,
@@ -75,6 +79,7 @@ void AAuraHUD::InitializeWidgets(
 			});
 		}
 	}
+	bInitialized = true;
 }
 
 UAttributeMenuWidgetController* AAuraHUD::GetAttributeMenuWidgetController(
