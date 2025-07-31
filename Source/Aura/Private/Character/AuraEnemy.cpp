@@ -16,7 +16,6 @@
 #include "Actor/Spawn/TrackableInterface.h"
 
 
-
 AAuraEnemy::AAuraEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -122,7 +121,7 @@ void AAuraEnemy::SetCharacterClass(const ECharacterClass InCharacterClass)
 	this->CharacterClass = InCharacterClass;
 }
 
-void AAuraEnemy::InitializeStartupAbilities() const
+void AAuraEnemy::InitializeStartupAbilities()
 {
 	if (HasAuthority())
 	{
@@ -132,6 +131,7 @@ void AAuraEnemy::InitializeStartupAbilities() const
 			CharacterClass,
 			GetCharacterLevel(this)
 		);
+		AddCharacterAbilities();
 	}
 }
 
