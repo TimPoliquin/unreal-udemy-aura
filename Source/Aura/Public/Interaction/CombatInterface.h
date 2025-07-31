@@ -95,6 +95,8 @@ public:
 	USkeletalMeshComponent* GetWeapon() const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	FGameplayTag GetHitReactAbilityTagByDamageType(const FGameplayTag& DamageTypeTag) const;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool IsHitReacting() const;
 	/**
 	 * 
 	 * @param Actor 
@@ -126,4 +128,5 @@ public:
 	static FVector GetCombatSocketLocation(const UObject* Actor, const FGameplayTag& SocketTag);
 	static USkeletalMeshComponent* GetWeapon(const UObject* Actor);
 	static FGameplayTag GetHitReactAbilityTagByDamageType(const UObject* Actor, const FGameplayTag& DamageTypeTag);
+	static bool IsHitReacting(const UObject* Actor);
 };

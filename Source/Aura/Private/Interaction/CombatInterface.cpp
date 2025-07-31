@@ -116,3 +116,12 @@ FGameplayTag ICombatInterface::GetHitReactAbilityTagByDamageType(
 	}
 	return FAuraGameplayTags::Get().Effect_HitReact_Default;
 }
+
+bool ICombatInterface::IsHitReacting(const UObject* Actor)
+{
+	if (Actor && Actor->Implements<UCombatInterface>())
+	{
+		return Execute_IsHitReacting(Actor);
+	}
+	return false;
+}

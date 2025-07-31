@@ -118,6 +118,7 @@ protected:
 	void AddCharacterAbilities();
 	UFUNCTION()
 	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	virtual bool IsHitReacting_Implementation() const override;
 	UFUNCTION(BlueprintCallable)
 	bool IsShocked() const;
 	UFUNCTION(BlueprintCallable)

@@ -161,6 +161,11 @@ void AAuraBaseCharacter::OnHitReactTagChanged(const FGameplayTag CallbackTag, in
 	}
 }
 
+bool AAuraBaseCharacter::IsHitReacting_Implementation() const
+{
+	return bHitReacting;
+}
+
 bool AAuraBaseCharacter::IsShocked() const
 {
 	return StatusEffectTags.Contains(FAuraGameplayTags::Get().Debuff_Type_Shock);
