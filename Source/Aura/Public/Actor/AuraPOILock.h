@@ -28,7 +28,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void InitializeInteractionWidgetSettings(UUserWidget* InInteractionWidget, const FString& InInteractionText);
 	UFUNCTION(BlueprintImplementableEvent)
-	void InitializePreconditionWidgetSettings(UUserWidget* InPreconditionWidget, const FSlateColor InRuneColor, const UTexture2D* InRuneIcon);
+	void InitializePreconditionWidgetSettings(UUserWidget* InPreconditionWidget, const UTexture2D* InRuneIcon);
 	virtual bool HandleInteract_Implementation(AActor* Player) override;
 	UFUNCTION(BlueprintCallable)
 	bool Unlock(AActor* Player);
@@ -41,8 +41,6 @@ protected:
 	FGameplayTag KeyTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Lock", meta=(AllowedClasses="/Script/Aura.AuraGateInterface"))
 	TObjectPtr<AActor> Gate;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
-	FSlateColor RuneColor;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
 	TObjectPtr<UTexture2D> RuneIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")

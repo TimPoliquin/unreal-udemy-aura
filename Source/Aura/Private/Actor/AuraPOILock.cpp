@@ -41,7 +41,7 @@ void AAuraPOILock::BeginPlay()
 	}
 	if (PreconditionWidget && PreconditionWidget->GetWidget())
 	{
-		InitializePreconditionWidgetSettings(PreconditionWidget->GetWidget(), RuneColor, RuneIcon);
+		InitializePreconditionWidgetSettings(PreconditionWidget->GetWidget(), RuneIcon);
 	}
 	LockMeshComponent->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 }
