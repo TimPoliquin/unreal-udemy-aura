@@ -155,7 +155,6 @@ void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCo
 		Substitutions.Add(FString("ItemName"), ItemDefinition.ItemName);
 		Substitutions.Add(FString("Count"), FString::FromInt(FMath::Abs(Payload.GetDelta())));
 		Substitutions.Icon = ItemDefinition.ItemIcon;
-		Substitutions.IconColor = ItemDefinition.ItemIconColor;
 		MessageWidgetRowDelegate.Broadcast(*WidgetRow, Substitutions);
 	}
 }
