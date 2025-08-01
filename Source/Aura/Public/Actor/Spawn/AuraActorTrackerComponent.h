@@ -23,7 +23,7 @@ public:
 	FOnAuraActorTrackerCountChangedDelegate OnCountChanged;
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleInstanceOnly)
 	TArray<AActor*> Actors;
 
 private:

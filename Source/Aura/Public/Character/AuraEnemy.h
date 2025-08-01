@@ -111,7 +111,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	float AttackRangeTolerance = 20.f;
 	/** Targeting range for enemy. If the enemy detects a player within this range, it will move to attack. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float TargetingRange = 4000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	float AttackWaitTime = 1.f;
