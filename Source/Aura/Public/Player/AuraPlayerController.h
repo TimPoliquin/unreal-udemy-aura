@@ -128,6 +128,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	void ClearAutoMove();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Input")

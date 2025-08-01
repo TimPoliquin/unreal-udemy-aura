@@ -6,7 +6,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "MovieSceneTracksComponentTypes.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "NiagaraFunctionLibrary.h"
@@ -121,6 +120,7 @@ void AAuraPlayerController::Move(const FInputActionValue& Value)
 	}
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{
+		ClearAutoMove();
 		const FVector2D InputAxisVector = Value.Get<FVector2D>();
 		// const FRotator Rotation = GetControlRotation();
 		const FRotator Rotation = ControlledPawn->FindComponentByClass<UCameraComponent>()->
@@ -179,7 +179,7 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (FAuraGameplayTags::IsLeftMouseButton(InputTag))
 	{
-		bAutoRunning = false;
+		ClearAutoMove();
 	}
 	if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
 	{
@@ -283,7 +283,7 @@ void AAuraPlayerController::AutoMove_Process()
 	))
 	{
 		// stop automove if not auto running or if movement is blocked
-		bAutoRunning = false;
+		ClearAutoMove();
 		return;
 	}
 	if (APawn* ControlledPawn = GetPawn())
@@ -307,7 +307,17 @@ void AAuraPlayerController::AutoMove_Process()
 
 void AAuraPlayerController::AutoMove_End()
 {
-	bAutoRunning = false;
+	ClearAutoMove();
+}
+
+void AAuraPlayerController::ClearAutoMove()
+{
+	if (bAutoRunning)
+	{
+		bAutoRunning = false;
+		Spline->ClearSplinePoints();
+		CachedDestination = FVector::ZeroVector;
+	}
 }
 
 void AAuraPlayerController::UpdateMagicCircleLocation()
