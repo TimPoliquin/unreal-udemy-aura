@@ -31,20 +31,24 @@ void AAuraSpawnTunnel::BeginPlay()
 	EnemyTrackerComponent->OnCountChanged.AddDynamic(this, &AAuraSpawnTunnel::OnEnemyCountChanged);
 }
 
-
-float AAuraSpawnTunnel::GetRandomSpawnDelay() const
+FOnAuraActorTrackerCountChangedDelegate& AAuraSpawnTunnel::GetOnCountChangedDelegate()
 {
-	return FMath::RandRange(MinSpawnDelay, MaxSpawnDelay);
+	return EnemyTrackerComponent->OnCountChanged;
 }
 
-TArray<AAuraEnemy*> AAuraSpawnTunnel::InitializeEnemies(const float NumToSpawn)
+void AAuraSpawnTunnel::BeginSpawning_Implementation(const int32 NumEnemies, const FRandRange& SpawnDelay, const TArray<FEnemySpawnConfig>& SpawnClasses)
+{
+	// Nothing here in native land...yet
+}
+
+TArray<AAuraEnemy*> AAuraSpawnTunnel::InitializeEnemies(const int32 NumToSpawn, const TArray<FEnemySpawnConfig>& SpawnClasses)
 {
 	TArray<AAuraEnemy*> Enemies;
 	for (int32 Idx = 0; Idx < NumToSpawn; Idx++)
 	{
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		const FEnemySpawnConfig& SpawnConfig = UArrayUtils::GetRandomElement(EnemyConfig);
+		const FEnemySpawnConfig& SpawnConfig = UArrayUtils::GetRandomElement(SpawnClasses);
 		AAuraEnemy* Enemy = SpawnPointComponent->GetWorld()->SpawnActorDeferred<AAuraEnemy>(SpawnConfig.EnemyClass, SpawnPointComponent->GetChildActor()->GetActorTransform());
 		Enemy->SetLevel(SpawnConfig.EnemyLevel);
 		Enemies.Add(Enemy);

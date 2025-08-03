@@ -25,6 +25,8 @@ public:
 	static bool ContainsAll(const TArray<T>& Source, const TArray<T>& Elements);
 	template <typename T>
 	static TArray<T> RemoveAndCollapse(const TArray<T>& Source, T Element);
+	template <typename T>
+	static void ShuffleArray(TArray<T>& Array);
 };
 
 template <typename T>
@@ -63,4 +65,15 @@ TArray<T> UArrayUtils::RemoveAndCollapse(const TArray<T>& Source, T Element)
 		}
 	}
 	return Collapsed;
+}
+
+template <typename T>
+void UArrayUtils::ShuffleArray(TArray<T>& Array)
+{
+	const int32 LastIndex = Array.Num() - 1;
+	for (int32 i = LastIndex; i > 0; --i)
+	{
+		const int32 RandomIndex = FMath::RandRange(0, i);
+		Array.Swap(i, RandomIndex);
+	}
 }

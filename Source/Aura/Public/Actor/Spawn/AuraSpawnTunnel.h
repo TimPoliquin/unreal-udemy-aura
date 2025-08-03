@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraSpawnEventPayloadDefinitions.h"
+#include "AuraSpawnInterface.h"
 #include "GameFramework/Actor.h"
 #include "AuraSpawnTunnel.generated.h"
 
@@ -23,7 +24,7 @@ struct FOnAuraSpawnTunnelDefeatedPayload
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuraSpawnTunnelDefeatedSignature, const FOnAuraSpawnTunnelDefeatedPayload&, Payload);
 
 UCLASS()
-class AURA_API AAuraSpawnTunnel : public AActor
+class AURA_API AAuraSpawnTunnel : public AActor, public IAuraSpawnInterface
 {
 	GENERATED_BODY()
 
@@ -35,6 +36,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/** Start AuraSpawnInterface **/
+	virtual FOnAuraActorTrackerCountChangedDelegate& GetOnCountChangedDelegate() override;
+	virtual void BeginSpawning_Implementation(const int32 NumEnemies, const FRandRange& SpawnDelay, const TArray<FEnemySpawnConfig>& SpawnClasses) override;
+
+	/** End AuraSpawnInterface **/
+
 	UPROPERTY(BlueprintAssignable)
 	FOnAuraSpawnTunnelDefeatedSignature OnAuraSpawnTunnelDefeated;
 
@@ -44,19 +51,9 @@ protected:
 	TObjectPtr<UAuraActorTrackerComponent> EnemyTrackerComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UChildActorComponent> SpawnPointComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn")
-	TArray<FEnemySpawnConfig> EnemyConfig;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn")
-	float MinSpawnDelay = 1.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn")
-	float MaxSpawnDelay = 1.f;
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Spawn")
-	void ActivateSpawnTunnel(const float NumEnemies);
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetRandomSpawnDelay() const;
 	UFUNCTION(BlueprintCallable)
-	TArray<AAuraEnemy*> InitializeEnemies(const float NumToSpawn);
+	TArray<AAuraEnemy*> InitializeEnemies(int32 NumToSpawn, const TArray<FEnemySpawnConfig>& SpawnClasses);
 	UFUNCTION(BlueprintCallable)
 	void FinishSpawningEnemy(AAuraEnemy* Enemy);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)

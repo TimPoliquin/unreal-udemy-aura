@@ -23,6 +23,5 @@ AAuraEnemy* FEnemySpawnConfig::SpawnDeferred(const AActor* SpawnPoint) const
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	AAuraEnemy* Enemy = SpawnPoint->GetWorld()->SpawnActorDeferred<AAuraEnemy>(EnemyClass, SpawnPoint->GetActorTransform());
 	Enemy->SetLevel(EnemyLevel);
-	Enemy->SetCharacterClass(CharacterClass);
 	return Enemy;
 }
