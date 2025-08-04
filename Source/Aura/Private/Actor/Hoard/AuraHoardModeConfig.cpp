@@ -21,3 +21,13 @@ TArray<FHoardRoundRewards> UAuraHoardModeConfig::GetRewards(const int32 RoundNum
 {
 	return GetRoundConfig(RoundNum).Rewards;
 }
+
+int32 UAuraHoardModeConfig::GetNumberOfRewardsToSpawn(TArray<FHoardRoundRewards> Rewards)
+{
+	int32 NumberOfRewardsToSpawn = 0;
+	for (const auto& [Reward, Count] : Rewards)
+	{
+		NumberOfRewardsToSpawn += Count;
+	}
+	return NumberOfRewardsToSpawn;
+}

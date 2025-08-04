@@ -44,6 +44,8 @@ public:
 	bool HasNextRound() const;
 	UPROPERTY(BlueprintAssignable)
 	FOnHoardModeRoundCompleteSignature OnHoardModeRoundComplete;
+	UFUNCTION(BlueprintCallable)
+	TArray<FAuraSpawnParams> ConvertRewardsToSpawnParams(const FVector& Center, float Radius, const TArray<FHoardRoundRewards>& Rewards);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

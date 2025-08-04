@@ -4,6 +4,7 @@
 #include "Actor/Hoard/AuraHoardModeComponent.h"
 
 #include "Actor/Hoard/AuraHoardModeConfig.h"
+#include "Actor/Spawn/AuraSpawnBlueprintLibrary.h"
 #include "Actor/Spawn/AuraSpawnInterface.h"
 #include "Actor/Spawn/AuraSpawnEventPayloadDefinitions.h"
 #include "Aura/AuraLogChannels.h"
@@ -21,6 +22,17 @@ bool UAuraHoardModeComponent::HasNextRound() const
 	return HoardModeConfig->HasConfigurationForRound(CurrentRound + 1);
 }
 
+TArray<FAuraSpawnParams> UAuraHoardModeComponent::ConvertRewardsToSpawnParams(const FVector& Center, const float Radius, const TArray<FHoardRoundRewards>& Rewards)
+{
+	TArray<FAuraSpawnParams> SpawnParams;
+	const int32 NumSpawnPoints = UAuraHoardModeConfig::GetNumberOfRewardsToSpawn(Rewards);
+	TArray<FTransform> SpawnTransforms = UAuraSpawnBlueprintLibrary::GenerateSpawnLocations(Center, Radius, NumSpawnPoints);
+	for (auto [RewardClass, Count] : Rewards)
+	{
+		SpawnParams.Add(FAuraSpawnParams(RewardClass, SpawnTransforms.Pop()));
+	}
+	return SpawnParams;
+}
 
 void UAuraHoardModeComponent::PrepareNextRound()
 {

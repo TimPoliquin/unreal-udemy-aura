@@ -36,9 +36,9 @@ private:
 	TArray<UMaterialInterface*> OriginalMaterials;
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
-	UPROPERTY(EditDefaultsOnly, Category = "Fade")
+	UPROPERTY(EditAnywhere, Category = "Fade")
 	TArray<UMaterialInstance*> FadeMaterialInstances;
-	UPROPERTY(EditDefaultsOnly, Category = "Fade")
+	UPROPERTY(EditAnywhere, Category = "Fade")
 	TObjectPtr<UCurveFloat> FadeCurve;
 	ECollisionResponse OriginalVisibilityResponse;
 	FOnTimelineFloat OnTimelineTickDelegate;

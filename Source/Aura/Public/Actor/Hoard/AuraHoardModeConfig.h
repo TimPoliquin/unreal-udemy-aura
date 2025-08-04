@@ -9,6 +9,7 @@
 #include "Utils/RandUtils.h"
 #include "AuraHoardModeConfig.generated.h"
 
+struct FAuraSpawnParams;
 class AAuraSpawnTunnel;
 class AAuraEnemy;
 
@@ -54,6 +55,8 @@ public:
 	bool HasConfigurationForRound(const int32 RoundNum) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TArray<FHoardRoundRewards> GetRewards(const int32 RoundNum) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static int32 GetNumberOfRewardsToSpawn(TArray<FHoardRoundRewards> Rewards);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
