@@ -40,13 +40,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock", meta=(Categories="Item.Type.Key"))
 	FGameplayTag KeyTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Lock", meta=(AllowedClasses="/Script/Aura.AuraGateInterface"))
-	TObjectPtr<AActor> Gate;
+	TArray<AActor*> Gates;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
 	TObjectPtr<UTexture2D> RuneIcon;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
 	TObjectPtr<USoundBase> UnlockSound;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
 	FString InteractText = FString("Unlock");
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lock")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, SaveGame, Category="Lock")
 	bool bUnlocked = false;
 };

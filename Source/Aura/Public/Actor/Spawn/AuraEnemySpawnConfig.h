@@ -15,8 +15,6 @@ struct FEnemySpawnConfig
 	TSubclassOf<AAuraEnemy> EnemyClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Config")
 	int32 EnemyLevel = 1;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Config")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
 
 	/** Spawn and fully initialize an enemy. **/
 	AAuraEnemy* Spawn(const AActor* SpawnPoint) const;

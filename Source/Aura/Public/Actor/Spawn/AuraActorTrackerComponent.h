@@ -7,7 +7,6 @@
 #include "AuraSpawnEventPayloadDefinitions.h"
 #include "AuraActorTrackerComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuraActorTrackerCountChangedDelegate, const FOnAuraActorTrackerCountChangedPayload&, Payload);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AURA_API UAuraActorTrackerComponent : public UActorComponent
@@ -23,7 +22,7 @@ public:
 	FOnAuraActorTrackerCountChangedDelegate OnCountChanged;
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleInstanceOnly)
 	TArray<AActor*> Actors;
 
 private:

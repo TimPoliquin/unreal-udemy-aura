@@ -8,7 +8,6 @@
 USinusoidalMovementComponent::USinusoidalMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	InitialLocation = FVector::ZeroVector;
 }
 
 
@@ -16,10 +15,6 @@ USinusoidalMovementComponent::USinusoidalMovementComponent()
 void USinusoidalMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (bSinusoidalMovement)
-	{
-		InitialLocation = GetOwner()->GetActorLocation();
-	}
 }
 
 void USinusoidalMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -40,7 +35,6 @@ void USinusoidalMovementComponent::TickComponent(float DeltaTime, ELevelTick Tic
 void USinusoidalMovementComponent::StartSinusoidalMovement()
 {
 	bSinusoidalMovement = true;
-	InitialLocation = GetOwner()->GetActorLocation();
 }
 
 void USinusoidalMovementComponent::StartRotation()
@@ -48,7 +42,7 @@ void USinusoidalMovementComponent::StartRotation()
 	bRotates = true;
 }
 
-void USinusoidalMovementComponent::Bob(const float DeltaTime) const
+void USinusoidalMovementComponent::Bob(const float DeltaTime)
 {
 	if (bRotates)
 	{
@@ -58,6 +52,7 @@ void USinusoidalMovementComponent::Bob(const float DeltaTime) const
 	if (bSinusoidalMovement)
 	{
 		const float Sine = SineAmplitude * FMath::Sin(RunningTime * SinePeriodMultiplier);
-		GetOwner()->SetActorLocation(InitialLocation + FVector(0.f, 0.f, Sine));
+		GetOwner()->SetActorLocation(GetOwner()->GetActorLocation() - FVector(0.f, 0.f, PreviousSine) + FVector(0.f, 0.f, Sine));
+		PreviousSine = Sine;
 	}
 }

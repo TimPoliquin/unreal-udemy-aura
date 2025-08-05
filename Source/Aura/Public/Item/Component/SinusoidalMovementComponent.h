@@ -37,8 +37,7 @@ protected:
 	void StartRotation();
 
 private:
-	void Bob(const float DeltaTime) const;
-	UPROPERTY()
-	FVector InitialLocation;
+	void Bob(const float DeltaTime);
 	float RunningTime = 0.f;
+	float PreviousSine = 0.f;
 };

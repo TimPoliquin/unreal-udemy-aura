@@ -35,6 +35,11 @@ void AAuraPOILock::UnHighlightActor_Implementation()
 void AAuraPOILock::BeginPlay()
 {
 	Super::BeginPlay();
+	if (bUnlocked)
+	{
+		DisablePOI();
+		return;
+	}
 	if (InteractionWidget && InteractionWidget->GetWidget())
 	{
 		InitializeInteractionWidgetSettings(InteractionWidget->GetWidget(), InteractText);
@@ -79,7 +84,10 @@ bool AAuraPOILock::Unlock(AActor* Player)
 			{
 				UGameplayStatics::PlaySoundAtLocation(this, UnlockSound, GetActorLocation());
 			}
-			IAuraGateInterface::Unlock(Gate);
+			for (AActor* Gate : Gates)
+			{
+				IAuraGateInterface::Unlock(Gate);
+			}
 			PlayUnlockEffect(Player);
 			DisablePOI();
 			UnHighlightActor(this);

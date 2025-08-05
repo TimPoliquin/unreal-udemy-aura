@@ -74,7 +74,7 @@ FGameplayTag AAuraBaseCharacter::GetHitReactAbilityTagByDamageType_Implementatio
 void AAuraBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	BaseWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	if (!AbilitySystemComponent)
 	{
 		GetOnAbilitySystemRegisteredDelegate().AddUObject(this, &AAuraBaseCharacter::RegisterStatusEffectTags);
