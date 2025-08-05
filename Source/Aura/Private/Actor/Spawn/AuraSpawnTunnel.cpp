@@ -8,6 +8,7 @@
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraEnemy.h"
 #include "Engine/TargetPoint.h"
+#include "Kismet/GameplayStatics.h"
 #include "Utils/ArrayUtils.h"
 
 
@@ -49,7 +50,13 @@ TArray<AAuraEnemy*> AAuraSpawnTunnel::InitializeEnemies(const int32 NumToSpawn, 
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		const FEnemySpawnConfig& SpawnConfig = UArrayUtils::GetRandomElement(SpawnClasses);
-		AAuraEnemy* Enemy = SpawnPointComponent->GetWorld()->SpawnActorDeferred<AAuraEnemy>(SpawnConfig.EnemyClass, SpawnPointComponent->GetChildActor()->GetActorTransform());
+		AAuraEnemy* Enemy = SpawnPointComponent->GetWorld()->SpawnActorDeferred<AAuraEnemy>(
+			SpawnConfig.EnemyClass,
+			SpawnPointComponent->GetChildActor()->GetActorTransform(),
+			nullptr,
+			nullptr,
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+		);
 		Enemy->SetLevel(SpawnConfig.EnemyLevel);
 		Enemies.Add(Enemy);
 	}
