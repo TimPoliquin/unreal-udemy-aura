@@ -9,6 +9,16 @@
 
 class USphereComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBeaconActivatedSignature, const ABeacon*, Beacon);
+
+UENUM(BlueprintType)
+enum class EBeaconValidationState : uint8
+{
+	Incomplete,
+	OutOfOrder,
+	Complete
+};
+
 UCLASS()
 class AURA_API ABeacon : public AActor, public ISaveInterface
 {
@@ -24,6 +34,11 @@ public:
 	/**
 	 *Save Interface End
 	 */
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnBeaconActivatedSignature OnBeaconActivated;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static EBeaconValidationState ValidateBeaconActivation(const ABeacon* CurrentBeacon, const TArray<ABeacon*>& Beacons, bool IsOrdered);
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,7 +47,11 @@ protected:
 	void CheckpointReached(UMaterialInstanceDynamic* DynamicInstance);
 
 	UFUNCTION(BlueprintCallable)
-	void HandleGlowEffects();
+	void ActivateBeacon();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ResetBeacon();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsBeaconActivated() const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> BeaconMesh;
@@ -40,6 +59,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> Sphere;
 
-	UPROPERTY(BlueprintReadWrite, SaveGame)
+	UPROPERTY(BlueprintReadOnly, SaveGame)
 	bool bHasBeenActivated = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UMaterialInterface> OriginalMaterial;
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
 };

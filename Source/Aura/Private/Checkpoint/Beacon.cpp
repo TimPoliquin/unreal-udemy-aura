@@ -28,26 +28,71 @@ void ABeacon::LoadActor_Implementation()
 {
 	if (bHasBeenActivated && HasActorBegunPlay())
 	{
-		HandleGlowEffects();
+		ActivateBeacon();
 	}
+}
+
+
+EBeaconValidationState ABeacon::ValidateBeaconActivation(const ABeacon* CurrentBeacon, const TArray<ABeacon*>& Beacons, const bool IsOrdered)
+{
+	EBeaconValidationState ValidationState = EBeaconValidationState::Complete;
+	bool CurrentBeaconFound = false;
+	for (const ABeacon* Beacon : Beacons)
+	{
+		if (Beacon == CurrentBeacon)
+		{
+			CurrentBeaconFound = true;
+		}
+		if (!Beacon->IsBeaconActivated())
+		{
+			if (IsOrdered && !CurrentBeaconFound)
+			{
+				ValidationState = EBeaconValidationState::OutOfOrder;
+			}
+			else
+			{
+				ValidationState = EBeaconValidationState::Incomplete;
+			}
+			break;
+		}
+	}
+	return ValidationState;
 }
 
 void ABeacon::BeginPlay()
 {
 	Super::BeginPlay();
+	OriginalMaterial = BeaconMesh->GetMaterial(0);
+	DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
+		OriginalMaterial,
+		this
+	);
 	if (bHasBeenActivated)
 	{
-		HandleGlowEffects();
+		ActivateBeacon();
 	}
 }
 
-void ABeacon::HandleGlowEffects()
+void ABeacon::ActivateBeacon()
 {
+	if (bHasBeenActivated)
+	{
+		return;
+	}
+	bHasBeenActivated = true;
 	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
-		BeaconMesh->GetMaterial(0),
-		this
-	);
 	BeaconMesh->SetMaterial(0, DynamicMaterialInstance);
 	CheckpointReached(DynamicMaterialInstance);
+}
+
+bool ABeacon::IsBeaconActivated() const
+{
+	return bHasBeenActivated;
+}
+
+void ABeacon::ResetBeacon_Implementation()
+{
+	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BeaconMesh->SetMaterial(0, OriginalMaterial);
+	bHasBeenActivated = false;
 }
