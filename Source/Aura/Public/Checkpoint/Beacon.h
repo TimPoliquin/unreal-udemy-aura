@@ -9,7 +9,7 @@
 
 class USphereComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBeaconActivatedSignature, const ABeacon*, Beacon);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBeaconStatusChangedSignature, const ABeacon*, Beacon);
 
 UENUM(BlueprintType)
 enum class EBeaconValidationState : uint8
@@ -35,7 +35,9 @@ public:
 	 *Save Interface End
 	 */
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FOnBeaconActivatedSignature OnBeaconActivated;
+	FOnBeaconStatusChangedSignature OnBeaconActivated;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnBeaconStatusChangedSignature OnBeaconReset;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static EBeaconValidationState ValidateBeaconActivation(const ABeacon* CurrentBeacon, const TArray<ABeacon*>& Beacons, bool IsOrdered);
