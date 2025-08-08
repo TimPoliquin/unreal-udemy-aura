@@ -7,7 +7,6 @@
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
-#include "Aura/AuraLogChannels.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
@@ -187,16 +186,19 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 		if (!bFatal)
 		{
-			FGameplayTagContainer TagContainer;
-			TagContainer.AddTag(
-				ICombatInterface::GetHitReactAbilityTagByDamageType(
-					Props.Target.AvatarActor,
-					UAuraAbilitySystemLibrary::GetDamageTypeTag(Props.EffectContextHandle)
-				)
-			);
-			Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
-				TagContainer
-			);
+			if (UAuraAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle))
+			{
+				FGameplayTagContainer TagContainer;
+				TagContainer.AddTag(
+					ICombatInterface::GetHitReactAbilityTagByDamageType(
+						Props.Target.AvatarActor,
+						UAuraAbilitySystemLibrary::GetDamageTypeTag(Props.EffectContextHandle)
+					)
+				);
+				Props.Target.AbilitySystemComponent->TryActivateAbilitiesByTag(
+					TagContainer
+				);
+			}
 			if (const FVector KnockbackForce = UAuraAbilitySystemLibrary::GetKnockbackVector(Props.EffectContextHandle);
 				!
 				KnockbackForce.IsNearlyZero(1.f))
