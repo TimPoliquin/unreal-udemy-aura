@@ -11,7 +11,7 @@ AAuraEquipmentBase::AAuraEquipmentBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
-	MeshComponent->SetupAttachment(GetRootComponent());
+	SetRootComponent(MeshComponent);
 }
 
 USkeletalMeshComponent* AAuraEquipmentBase::GetMesh() const
