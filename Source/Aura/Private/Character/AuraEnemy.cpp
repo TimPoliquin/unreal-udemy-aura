@@ -216,6 +216,10 @@ void AAuraEnemy::Die()
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsDead"), true);
 	}
+	if (HealthWidget)
+	{
+		HealthWidget->SetVisibility(false);
+	}
 	OnTrackableStopTracking.Broadcast(this);
 	SetLifeSpan(LifeSpan);
 	SpawnLoot();
