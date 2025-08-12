@@ -34,4 +34,9 @@ struct FOnInventoryItemCountChangedPayload
 	{
 		return NewValue > OldValue;
 	}
+
+	bool IsNewItemAddedChange() const
+	{
+		return OldValue == 0 && NewValue > OldValue;
+	}
 };

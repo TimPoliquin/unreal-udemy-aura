@@ -165,6 +165,7 @@ struct FAuraGameplayTags
 	FGameplayTag Item;
 	FGameplayTag Item_Type;
 	FGameplayTag Item_Type_Consumable;
+	FGameplayTag Item_Type_Treasure;
 	FGameplayTag Item_Type_Equipment;
 	FGameplayTag Item_Type_Fish;
 	FGameplayTag Item_Type_Instant;

@@ -180,7 +180,7 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
 		{
-			return Entry.ItemType == ItemType;
+			return Entry.ItemType.MatchesTagExact(ItemType);
 		}
 	);
 	const bool AddToInventory = !ItemEntry;

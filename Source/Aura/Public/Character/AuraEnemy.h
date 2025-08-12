@@ -9,8 +9,11 @@
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Actor/Spawn/TrackableInterface.h"
+#include "Utils/RandUtils.h"
 #include "AuraEnemy.generated.h"
 
+struct FAuraSpawnParams;
+class ULootTiers;
 class UBehaviorTree;
 class AAuraAIController;
 class UWidgetComponent;
@@ -71,8 +74,6 @@ public:
 	void SetLevel(const int32 InLevel) { Level = InLevel; }
 	ECharacterClass GetCharacterClass() const;
 	void SetCharacterClass(const ECharacterClass InCharacterClass);
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void SpawnLoot();
 
 protected:
 	virtual void BeginPlay() override;
@@ -80,6 +81,11 @@ protected:
 	virtual void InitializeDefaultAttributes() override;
 	virtual void OnStatusShockAdded() override;
 	virtual void OnStatusShockRemoved() override;
+	virtual void SpawnLoot();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SpawnLootItems(const TArray<FAuraSpawnParams>& LootItems);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	AActor* SpawnLootItem(const FAuraSpawnParams& LootItemParams, const bool bUseActorTransform);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Highlight")
 	bool bHighlighted;
 
@@ -97,6 +103,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float LifeSpan = 5.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	FScalableFloat Treasure;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	TObjectPtr<ULootTiers> Loot;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	float LootSpawnRadius = 100;
+
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;

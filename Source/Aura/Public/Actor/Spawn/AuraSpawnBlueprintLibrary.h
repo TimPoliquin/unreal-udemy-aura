@@ -14,6 +14,11 @@ struct FAuraSpawnParams
 	TSubclassOf<AActor> SpawnClass;
 	UPROPERTY(BlueprintReadOnly)
 	FTransform SpawnTransform;
+
+	bool IsValid() const
+	{
+		return SpawnClass != nullptr && SpawnTransform.IsValid();
+	}
 };
 
 /**
@@ -30,4 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static FAuraSpawnParams Pop(UPARAM(ref)
 		TArray<FAuraSpawnParams>& SpawnParams);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static bool IsValid(UPARAM(ref)
+		const FAuraSpawnParams& SpawnParams);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static FVector GetGroundLocation(const AActor* Actor);
 };

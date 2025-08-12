@@ -6,6 +6,8 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AbilitySystem/Data/LootTiers.h"
+#include "Actor/Spawn/AuraSpawnBlueprintLibrary.h"
 #include "AI/AuraAIController.h"
 #include "Aura/Aura.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -14,6 +16,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/Widget/AuraUserWidget.h"
 #include "Actor/Spawn/TrackableInterface.h"
+#include "Game/AuraGameModeBase.h"
+#include "Item/Pickup/AuraTreasurePickup.h"
+#include "Item/Pickup/TieredItemInterface.h"
 
 
 AAuraEnemy::AAuraEnemy()
@@ -109,6 +114,46 @@ void AAuraEnemy::OnStatusShockRemoved()
 	{
 		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsStunned"), false);
 	}
+}
+
+void AAuraEnemy::SpawnLoot()
+{
+	TArray<FAuraSpawnParams> SpawnParams;
+	const FVector GroundLocation = UAuraSpawnBlueprintLibrary::GetGroundLocation(this);
+	if (Loot)
+	{
+		const TArray<FLootItem> LootItems = Loot->GetLootItems();
+		const TArray<FTransform> Transforms = UAuraSpawnBlueprintLibrary::GenerateSpawnLocations(GetActorLocation(), LootSpawnRadius, LootItems.Num());
+		for (int32 Idx = 0; Idx < LootItems.Num() && Idx < Transforms.Num(); Idx++)
+		{
+			SpawnParams.Add(FAuraSpawnParams(LootItems[Idx].LootClass, Transforms[Idx]));
+		}
+	}
+	if (!SpawnParams.IsEmpty())
+	{
+		SpawnLootItems(SpawnParams);
+	}
+	AAuraTreasurePickup::SpawnTreasure(this, GroundLocation, Treasure.IsValid() ? Treasure.GetValueAtLevel(Level) : 0.f);
+}
+
+AActor* AAuraEnemy::SpawnLootItem_Implementation(const FAuraSpawnParams& LootItemParams, bool bUseActorTransform)
+{
+	if (!LootItemParams.IsValid())
+	{
+		return nullptr;
+	}
+	const FTransform Transform = bUseActorTransform ? GetActorTransform() : LootItemParams.SpawnTransform;
+	AActor* LootItem = GetWorld()->SpawnActorDeferred<AActor>(LootItemParams.SpawnClass, Transform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	if (!LootItem)
+	{
+		return nullptr;
+	}
+	if (LootItem->Implements<UTieredItemInterface>())
+	{
+		ITieredItemInterface::SetItemLevel(LootItem, Level);
+	}
+	LootItem->FinishSpawning(Transform);
+	return LootItem;
 }
 
 ECharacterClass AAuraEnemy::GetCharacterClass() const

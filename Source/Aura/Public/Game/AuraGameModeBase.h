@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "GameFramework/GameModeBase.h"
 #include "Item/AuraItemTypes.h"
+#include "Item/Data/AuraTreasureConfig.h"
 #include "AuraGameModeBase.generated.h"
 
 class UFishInfo;
@@ -61,7 +62,7 @@ public:
 	void SetDefaultPlayerLevel(const int32 InDefaultPlayerLevel);
 	void PlayerDied(ACharacter* PlayerCharacter);
 	static AAuraGameModeBase* GetAuraGameMode(const UObject* WorldContextObject);
-	ULootTiers* GetLootTiers() const { return LootTiers; }
+	UAuraTreasureConfig* GetTreasureConfig() const { return TreasureConfig; }
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FAuraItemDefinition FindItemDefinitionByItemTag(const FGameplayTag& ItemTag);
 
@@ -88,8 +89,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Items", meta=(Categories="Message"))
 	FGameplayTag DefaultItemUsedMessageTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, Category="Loot Tiers")
-	TObjectPtr<ULootTiers> LootTiers;
+	UPROPERTY(EditDefaultsOnly, Category="Loot")
+	TObjectPtr<UAuraTreasureConfig> TreasureConfig;
 
 	UPROPERTY(EditDefaultsOnly, Category="Fishing")
 	TObjectPtr<UFishInfo> FishInfo;

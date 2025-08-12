@@ -197,11 +197,6 @@ UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldCont
 	return nullptr;
 }
 
-ULootTiers* UAuraAbilitySystemLibrary::GetLootTiers(const UObject* WorldContextObject)
-{
-	return AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->GetLootTiers();
-}
-
 bool UAuraAbilitySystemLibrary::IsFullHealth(AActor* Actor)
 {
 	if (const AAuraBaseCharacter* Character = Cast<AAuraBaseCharacter>(Actor))

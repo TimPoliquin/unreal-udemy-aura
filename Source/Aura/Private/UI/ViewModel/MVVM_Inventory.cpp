@@ -90,7 +90,7 @@ void UMVVM_Inventory::OnPlayerInventoryChanged(const FOnInventoryItemCountChange
 	{
 		return;
 	}
-	if (Payload.IsItemAddedChange())
+	if (Payload.IsNewItemAddedChange())
 	{
 		UMVVM_InventoryItem* ItemModel = *InventoryItems.FindByPredicate([](const UMVVM_InventoryItem* InventoryItem)
 		{
