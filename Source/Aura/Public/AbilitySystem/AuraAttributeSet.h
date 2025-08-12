@@ -83,6 +83,10 @@ public:
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 	void FromSaveData(const UAuraSaveGame* SaveData);
 	void ToSaveData(UAuraSaveGame* SaveData) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsFullHealth() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsFullMana() const;
 
 	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
 

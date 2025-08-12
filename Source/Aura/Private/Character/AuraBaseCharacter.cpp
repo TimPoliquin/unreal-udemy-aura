@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "Aura/Aura.h"
@@ -376,6 +377,11 @@ UAbilitySystemComponent* AAuraBaseCharacter::GetAbilitySystemComponent() const
 UAttributeSet* AAuraBaseCharacter::GetAttributeSet() const
 {
 	return AttributeSet;
+}
+
+UAuraAttributeSet* AAuraBaseCharacter::GetAuraAttributeSet() const
+{
+	return Cast<UAuraAttributeSet>(AttributeSet);
 }
 
 float AAuraBaseCharacter::TakeDamage(

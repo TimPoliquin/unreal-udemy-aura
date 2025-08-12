@@ -72,6 +72,21 @@ void UAuraEffectComponent::SetDefaults(
 	ApplyToTags = InApplyToTags;
 }
 
+bool UAuraEffectComponent::IsAffectingActor(AActor* Actor) const
+{
+	if (const UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Actor))
+	{
+		for (const TPair HandlePair : ActiveEffectHandles)
+		{
+			if (HandlePair.Value == AbilitySystemComponent)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void UAuraEffectComponent::ApplyEffectToTarget(AActor* TargetActor, const FGameplayEffectConfig& GameplayEffectConfig)
 {
 	check(GameplayEffectConfig.GameplayEffectClass);

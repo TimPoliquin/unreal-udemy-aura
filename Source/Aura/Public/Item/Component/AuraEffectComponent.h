@@ -31,6 +31,8 @@ public:
 		const bool InDestroyOnEffectApplication,
 		const TArray<FName>& InApplyToTags
 	);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsAffectingActor(AActor* Actor) const;
 
 protected:
 	UFUNCTION(BlueprintCallable)

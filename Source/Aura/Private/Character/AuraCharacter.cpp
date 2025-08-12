@@ -198,11 +198,6 @@ AAuraPlayerState* AAuraCharacter::GetAuraPlayerState() const
 	return Cast<AAuraPlayerState>(GetPlayerState());
 }
 
-UAuraAttributeSet* AAuraCharacter::GetAuraAttributeSet() const
-{
-	return Cast<UAuraAttributeSet>(GetAttributeSet());
-}
-
 UAuraAbilitySystemComponent* AAuraCharacter::GetAuraAbilitySystemComponent() const
 {
 	return Cast<UAuraAbilitySystemComponent>(GetAbilitySystemComponent());

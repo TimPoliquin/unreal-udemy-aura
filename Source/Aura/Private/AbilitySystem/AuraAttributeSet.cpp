@@ -143,6 +143,16 @@ void UAuraAttributeSet::ToSaveData(UAuraSaveGame* SaveData) const
 	SaveData->Vigor = GetVigor();
 }
 
+bool UAuraAttributeSet::IsFullHealth() const
+{
+	return GetHealth() >= GetMaxHealth();
+}
+
+bool UAuraAttributeSet::IsFullMana() const
+{
+	return GetMana() >= GetMaxMana();
+}
+
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
 {
 	Props.EffectContextHandle = Data.EffectSpec.GetContext();
