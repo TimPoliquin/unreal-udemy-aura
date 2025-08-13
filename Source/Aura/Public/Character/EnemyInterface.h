@@ -27,5 +27,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetCombatTarget(AActor* InCombatTarget);
 
+	virtual float GetMaxAIProcessingRange() const = 0;
 	static bool IsEnemyActor(const UObject* Actor);
 };

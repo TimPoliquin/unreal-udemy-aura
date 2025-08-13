@@ -30,5 +30,20 @@ public:
 	UPROPERTY()
 	bool bAutoCleanup = false;
 
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> ActivePlayerActors;
+
 	virtual void Shutdown() override;
+
+	void RegisterActivePlayer(AActor* Actor)
+	{
+		ActivePlayerActors.Add(Actor);
+	}
+
+	void UnregisterActivePlayer(AActor* Actor)
+	{
+		ActivePlayerActors.Remove(Actor);
+	}
+
+	TArray<AActor*> GetActivePlayerActors();
 };

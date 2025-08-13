@@ -17,6 +17,7 @@
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Fishing/AuraFishingComponent.h"
+#include "Game/AuraGameInstance.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -61,9 +62,21 @@ AAuraCharacter::AAuraCharacter()
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	AAuraGameModeBase::GetAuraGameMode(this)->GetAuraGameInstance()->RegisterActivePlayer(this);
 	OnCameraReturnDelegate.BindUObject(this, &AAuraCharacter::OnCameraReturned);
 }
 
+void AAuraCharacter::BeginDestroy()
+{
+	Super::BeginDestroy();
+	if (const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+	{
+		if (UAuraGameInstance* GameInstance = GameMode->GetAuraGameInstance())
+		{
+			GameInstance->UnregisterActivePlayer(this);
+		}
+	}
+}
 
 void AAuraCharacter::Tick(float DeltaTime)
 {

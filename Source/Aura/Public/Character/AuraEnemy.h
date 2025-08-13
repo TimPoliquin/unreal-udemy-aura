@@ -62,6 +62,11 @@ public:
 		CombatTarget = InCombatTarget;
 	}
 
+	virtual float GetMaxAIProcessingRange() const override
+	{
+		return MaxAIProcessingRange;
+	}
+
 	/** Start ITrackableInterface **/
 	virtual FOnTrackableStopTrackingSignature& GetStopTrackingDelegate() override;
 	/** End ITrackableInterface **/
@@ -116,6 +121,8 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;
 	/** Attack range for the enemy. Note: This should probably be in the ability instead of the enemy. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	float MaxAIProcessingRange = 2000;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	float AttackRange = 500.f;
 	/**

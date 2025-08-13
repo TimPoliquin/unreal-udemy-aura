@@ -95,6 +95,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 	void LoadProgress();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
