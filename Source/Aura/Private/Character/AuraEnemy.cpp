@@ -133,7 +133,10 @@ void AAuraEnemy::SpawnLoot()
 	{
 		SpawnLootItems(SpawnParams);
 	}
-	AAuraTreasurePickup::SpawnTreasure(this, GroundLocation, Treasure.IsValid() ? Treasure.GetValueAtLevel(Level) : 0.f);
+	if (Treasure.IsValid() && UAuraRandRangeBlueprintLibrary::ShouldAct(TreasureSpawnRate))
+	{
+		AAuraTreasurePickup::SpawnTreasure(this, GroundLocation, Treasure.IsValid() ? Treasure.GetValueAtLevel(Level) : 0.f);
+	}
 }
 
 AActor* AAuraEnemy::SpawnLootItem_Implementation(const FAuraSpawnParams& LootItemParams, bool bUseActorTransform)

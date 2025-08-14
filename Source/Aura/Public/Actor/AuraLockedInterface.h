@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "AuraGateInterface.generated.h"
+#include "AuraLockedInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(BlueprintType)
-class UAuraGateInterface : public UInterface
+class UAuraLockedInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,7 +16,7 @@ class UAuraGateInterface : public UInterface
 /**
  * 
  */
-class AURA_API IAuraGateInterface
+class AURA_API IAuraLockedInterface
 {
 	GENERATED_BODY()
 

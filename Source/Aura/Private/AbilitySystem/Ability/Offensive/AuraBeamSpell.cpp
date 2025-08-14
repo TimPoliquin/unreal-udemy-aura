@@ -16,6 +16,7 @@
 #include "GameplayCueFunctionLibrary.h"
 #include "ToolMenusEditor.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Aura.h"
 #include "Aura/AuraLogChannels.h"
 #include "Components/TimelineComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -325,7 +326,7 @@ AActor* UAuraBeamSpell::TraceFirstTarget(const FVector& BeamTargetLocation)
 		SocketLocation,
 		BeamTargetLocation,
 		BeamTraceSize,
-		TraceTypeQuery1,
+		UEngineTypes::ConvertToTraceType(ECC_Projectile),
 		false,
 		ActorsToIgnore,
 		EDrawDebugTrace::None,
@@ -421,11 +422,14 @@ void UAuraBeamSpell::EndAbilityOnTargets()
 	}
 	for (TArray<AActor*> Targets(CueActors); AActor* CueActor : Targets)
 	{
-		UGameplayCueFunctionLibrary::RemoveGameplayCueOnActor(
-			CueActor,
-			LoopCueTag,
-			ActorGameplayCueParameters[CueActor]
-		);
+		if (CueActor && ActorGameplayCueParameters.Contains(CueActor))
+		{
+			UGameplayCueFunctionLibrary::RemoveGameplayCueOnActor(
+				CueActor,
+				LoopCueTag,
+				ActorGameplayCueParameters[CueActor]
+			);
+		}
 		if (IsTargetALivingEnemy(CueActor) && HasAuthority(&CurrentActivationInfo))
 		{
 			FDamageEffectParams LastHit = MakeDamageEffectParamsFromClassDefaults(CueActor);

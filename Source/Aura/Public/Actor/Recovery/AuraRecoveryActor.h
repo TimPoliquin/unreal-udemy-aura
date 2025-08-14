@@ -47,6 +47,8 @@ protected:
 	bool HasRecoveryTime() const;
 	UFUNCTION(BlueprintNativeEvent)
 	void ExpireRecovery();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PlayEnvironmentalSound();
 
 private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Recovery")

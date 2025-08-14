@@ -7,7 +7,7 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPOILock.generated.h"
 
-class IAuraGateInterface;
+class IAuraLockedInterface;
 class UUserWidget;
 
 UCLASS()

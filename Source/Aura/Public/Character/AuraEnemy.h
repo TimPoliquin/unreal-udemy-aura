@@ -9,6 +9,7 @@
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Actor/Spawn/TrackableInterface.h"
+#include "AI/AuraAIController.h"
 #include "Utils/RandUtils.h"
 #include "AuraEnemy.generated.h"
 
@@ -110,6 +111,8 @@ protected:
 	float LifeSpan = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	FScalableFloat Treasure;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Loot")
+	float TreasureSpawnRate = .5f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	TObjectPtr<ULootTiers> Loot;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
@@ -121,7 +124,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;
 	/** Attack range for the enemy. Note: This should probably be in the ability instead of the enemy. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	float MaxAIProcessingRange = 2000;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AI")
 	float AttackRange = 500.f;

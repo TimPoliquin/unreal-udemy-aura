@@ -26,6 +26,7 @@ void AAuraRecoveryActor::BeginPlay()
 	Super::BeginPlay();
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraRecoveryActor::OnBeginOverlap);
 	CollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraRecoveryActor::OnEndOverlap);
+	PlayEnvironmentalSound();
 }
 
 // Called every frame
@@ -49,6 +50,13 @@ void AAuraRecoveryActor::Tick(float DeltaTime)
 bool AAuraRecoveryActor::HasRecoveryTime() const
 {
 	return ConsumedRecoveryTime < TotalRecoveryTime;
+}
+
+void AAuraRecoveryActor::PlayEnvironmentalSound_Implementation()
+{
+	AudioComponent->Stop();
+	AudioComponent->SetSound(EnvironmentalSound);
+	AudioComponent->Play();
 }
 
 bool AAuraRecoveryActor::CheckPreRequisites_Implementation(AActor* PickupActor) const
@@ -116,9 +124,7 @@ void AAuraRecoveryActor::EndRecovery(AActor* OtherActor)
 		RecoveryEffectComponent->OnEndOverlap(OtherActor);
 		if (AudioComponent && HasRecoveryTime() && OverlappingActors.IsEmpty())
 		{
-			AudioComponent->Stop();
-			AudioComponent->SetSound(EnvironmentalSound);
-			AudioComponent->Play();
+			PlayEnvironmentalSound();
 		}
 	}
 }
