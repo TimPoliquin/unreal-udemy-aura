@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class AURA_API UArrayUtils : public UObject
+class AURA_API UArrayUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -27,6 +27,12 @@ public:
 	static TArray<T> RemoveAndCollapse(const TArray<T>& Source, T Element);
 	template <typename T>
 	static void ShuffleArray(TArray<T>& Array);
+	template <typename T>
+	UFUNCTION(BlueprintCallable)
+	static T Pop(
+		UPARAM(ref)
+		TArray<T>& Array
+	);
 };
 
 template <typename T>
@@ -76,4 +82,10 @@ void UArrayUtils::ShuffleArray(TArray<T>& Array)
 		const int32 RandomIndex = FMath::RandRange(0, i);
 		Array.Swap(i, RandomIndex);
 	}
+}
+
+template <typename T>
+T UArrayUtils::Pop(TArray<T>& Array)
+{
+	return Array.Pop();
 }

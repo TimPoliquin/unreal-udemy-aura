@@ -15,13 +15,13 @@ AAuraTreasurePickup::AAuraTreasurePickup()
 	ItemType = FAuraGameplayTags::Get().Item_Type_Treasure;
 }
 
-AAuraTreasurePickup* AAuraTreasurePickup::SpawnTreasure(const AActor* WorldContextObject, const FVector& Location, const float Value)
+AAuraTreasurePickup* AAuraTreasurePickup::SpawnTreasure(const AActor* WorldContextObject, const FVector& Location, const float Value, const bool bRandomize)
 {
 	if (Value >= 1.f)
 	{
 		if (const UAuraTreasureConfig* TreasureConfig = AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->GetTreasureConfig())
 		{
-			if (const FTreasureConfig TreasureConfigVal = TreasureConfig->GetTreasureConfig(Value, true); TreasureConfigVal.IsValid())
+			if (const FTreasureConfig TreasureConfigVal = TreasureConfig->GetTreasureConfig(Value, bRandomize); TreasureConfigVal.IsValid())
 			{
 				FTransform TreasureTransform;
 				TreasureTransform.SetLocation(Location);

@@ -7,10 +7,17 @@
 #include "Aura/AuraLogChannels.h"
 #include "Kismet/KismetMathLibrary.h"
 
-TArray<FTransform> UAuraSpawnBlueprintLibrary::GenerateSpawnLocations(const FVector& Center, const float Radius, const int32 NumSpawns)
+TArray<FTransform> UAuraSpawnBlueprintLibrary::GenerateSpawnLocations(
+	const FVector& Center,
+	const float Radius,
+	const int32 NumSpawns,
+	const float Spread,
+	const FVector ForwardVector,
+	const FVector UpVector
+)
 {
 	TArray<FTransform> SpawnTransforms;
-	TArray<FRotator> Rotators = UAuraAbilitySystemLibrary::EvenlySpacedRotators(FVector::ForwardVector, FVector::UpVector, 360, NumSpawns);
+	TArray<FRotator> Rotators = UAuraAbilitySystemLibrary::EvenlySpacedRotators(ForwardVector, UpVector, Spread, NumSpawns);
 	for (FRotator Rotator : Rotators)
 	{
 		FTransform SpawnTransform;
@@ -21,13 +28,13 @@ TArray<FTransform> UAuraSpawnBlueprintLibrary::GenerateSpawnLocations(const FVec
 	return SpawnTransforms;
 }
 
-FAuraSpawnParams UAuraSpawnBlueprintLibrary::Pop(TArray<FAuraSpawnParams>& SpawnParams)
+FAuraSpawnParams UAuraSpawnBlueprintLibrary::SafePop(TArray<FAuraSpawnParams>& SpawnParams)
 {
 	if (SpawnParams.Num() > 0)
 	{
 		return SpawnParams.Pop();
 	}
-	UE_LOG(LogAura, Error, TEXT("[UAuraSpawnBlueprintLibrary.Pop] Attempted to Pop off an empty array!"))
+	UE_LOG(LogAura, Error, TEXT("[UAuraSpawnBlueprintLibrary.SafePop] Attempted to pop off an empty array!"))
 	return FAuraSpawnParams();
 }
 
