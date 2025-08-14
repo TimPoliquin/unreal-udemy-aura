@@ -3,6 +3,8 @@
 
 #include "Actor/Spawn/AuraEnemySpawnPoint.h"
 
+#include "Aura/AuraLogChannels.h"
+
 AAuraEnemySpawnPoint::AAuraEnemySpawnPoint()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -10,5 +12,10 @@ AAuraEnemySpawnPoint::AAuraEnemySpawnPoint()
 
 AAuraEnemy* AAuraEnemySpawnPoint::SpawnEnemy() const
 {
-	return SpawnConfig.Spawn(this);
+	AAuraEnemy* Enemy = SpawnConfig.Spawn(this);
+	if (!Enemy)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] Failed to spawn enemy - check configuration!"), *GetName());
+	}
+	return Enemy;
 }

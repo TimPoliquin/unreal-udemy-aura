@@ -2,6 +2,11 @@
 
 #include "Character/AuraEnemy.h"
 
+bool FEnemySpawnConfig::IsValid() const
+{
+	return EnemyClass != nullptr;
+}
+
 AAuraEnemy* FEnemySpawnConfig::Spawn(const AActor* SpawnPoint) const
 {
 	if (AAuraEnemy* Enemy = SpawnDeferred(SpawnPoint))
@@ -15,13 +20,16 @@ AAuraEnemy* FEnemySpawnConfig::Spawn(const AActor* SpawnPoint) const
 
 AAuraEnemy* FEnemySpawnConfig::SpawnDeferred(const AActor* SpawnPoint) const
 {
-	if (!IsValid(SpawnPoint))
+	if (!IsValid() || !SpawnPoint)
 	{
 		return nullptr;
 	}
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	AAuraEnemy* Enemy = SpawnPoint->GetWorld()->SpawnActorDeferred<AAuraEnemy>(EnemyClass, SpawnPoint->GetActorTransform());
-	Enemy->SetLevel(EnemyLevel);
+	if (Enemy)
+	{
+		Enemy->SetLevel(EnemyLevel);
+	}
 	return Enemy;
 }

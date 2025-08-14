@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "AuraEnemySpawnConfig.generated.h"
 
 class AAuraEnemy;
@@ -15,6 +14,8 @@ struct FEnemySpawnConfig
 	TSubclassOf<AAuraEnemy> EnemyClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Config")
 	int32 EnemyLevel = 1;
+
+	bool IsValid() const;
 
 	/** Spawn and fully initialize an enemy. **/
 	AAuraEnemy* Spawn(const AActor* SpawnPoint) const;
