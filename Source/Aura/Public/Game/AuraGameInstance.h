@@ -15,7 +15,7 @@ class AURA_API UAuraGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	FName PlayerStartTag = FName();
 
 	UPROPERTY()
@@ -30,5 +30,20 @@ public:
 	UPROPERTY()
 	bool bAutoCleanup = false;
 
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> ActivePlayerActors;
+
 	virtual void Shutdown() override;
+
+	void RegisterActivePlayer(AActor* Actor)
+	{
+		ActivePlayerActors.Add(Actor);
+	}
+
+	void UnregisterActivePlayer(AActor* Actor)
+	{
+		ActivePlayerActors.Remove(Actor);
+	}
+
+	TArray<AActor*> GetActivePlayerActors();
 };

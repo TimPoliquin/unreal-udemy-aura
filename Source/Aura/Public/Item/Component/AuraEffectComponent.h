@@ -31,6 +31,10 @@ public:
 		const bool InDestroyOnEffectApplication,
 		const TArray<FName>& InApplyToTags
 	);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsAffectingActor(AActor* Actor) const;
+	int32 GetActorLevel() const { return ActorLevel; }
+	void SetActorLevel(const int32 Level) { ActorLevel = Level; }
 
 protected:
 	UFUNCTION(BlueprintCallable)
@@ -43,7 +47,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
 	TArray<FName> ApplyToTags;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Applied Effects")
-	float ActorLevel = 1.f;
+	int32 ActorLevel = 1.f;
 
 private:
 	UPROPERTY()

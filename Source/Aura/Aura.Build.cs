@@ -6,15 +6,15 @@ public class Aura : ModuleRules
 {
 	public Aura(ReadOnlyTargetRules Target) : base(Target)
 	{
-		this.PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		this.PublicDependencyModuleNames.AddRange(new[]
+		PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG", "SlateCore",
-			"ModelViewViewModel", "CableComponent"
+			"ModelViewViewModel", "CableComponent", "AIModule"
 		});
 
-		this.PrivateDependencyModuleNames.AddRange(new[]
+		PrivateDependencyModuleNames.AddRange(new[]
 			{ "GameplayTags", "GameplayTasks", "NavigationSystem", "Niagara", "AIModule" });
 
 		// Uncomment if you are using Slate UI

@@ -105,5 +105,5 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 
 int32 UAuraFireBoltSpell::GetNumProjectiles(const int32 AbilityLevel) const
 {
-	return FMath::Min(AbilityLevel, MaxNumProjectiles);
+	return FMath::RoundToInt32(ProjectileCount.GetValueAtLevel(AbilityLevel));
 }

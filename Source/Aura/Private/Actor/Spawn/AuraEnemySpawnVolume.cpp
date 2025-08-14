@@ -70,6 +70,7 @@ void AAuraEnemySpawnVolume::OnBoxOverlap(
 		return;
 	}
 	bTriggered = true;
+	AddChildSpawnPoints();
 	for (const AAuraEnemySpawnPoint* SpawnPoint : SpawnPoints)
 	{
 		if (IsValid(SpawnPoint))
@@ -85,5 +86,18 @@ void AAuraEnemySpawnVolume::OnActorTrackerCountChangedHandler(const FOnAuraActor
 	if (Payload.IsEmpty())
 	{
 		OnAllEnemiesDefeated.Broadcast();
+	}
+}
+
+void AAuraEnemySpawnVolume::AddChildSpawnPoints()
+{
+	TArray<AActor*> ChildActors;
+	GetAttachedActors(ChildActors, true, true);
+	for (AActor* Child : ChildActors)
+	{
+		if (IsValid(Child) && Child->IsA(AAuraEnemySpawnPoint::StaticClass()))
+		{
+			SpawnPoints.AddUnique(Cast<AAuraEnemySpawnPoint>(Child));
+		}
 	}
 }

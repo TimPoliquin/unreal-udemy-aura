@@ -494,6 +494,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Item.Type.Consumable"),
 		FString("Consumable Item Type")
 	);
+	Instance.Item_Type_Treasure = TagManager.AddNativeGameplayTag(
+		FName("Item.Type.Treasure"),
+		FString("Treasure Item Type")
+	);
 	Instance.Item_Type_Equipment = TagManager.AddNativeGameplayTag(
 		FName("Item.Type.Equipment"),
 		FString("Equipment Item Type")

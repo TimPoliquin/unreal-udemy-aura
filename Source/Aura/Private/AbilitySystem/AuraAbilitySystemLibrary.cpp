@@ -7,9 +7,11 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemTypes.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
+#include "Character/AuraBaseCharacter.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "Interaction/CombatInterface.h"
@@ -195,9 +197,28 @@ UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldCont
 	return nullptr;
 }
 
-ULootTiers* UAuraAbilitySystemLibrary::GetLootTiers(const UObject* WorldContextObject)
+bool UAuraAbilitySystemLibrary::IsFullHealth(AActor* Actor)
 {
-	return AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->GetLootTiers();
+	if (const AAuraBaseCharacter* Character = Cast<AAuraBaseCharacter>(Actor))
+	{
+		if (Character->GetAuraAttributeSet())
+		{
+			return Character->GetAuraAttributeSet()->IsFullHealth();
+		}
+	}
+	return false;
+}
+
+bool UAuraAbilitySystemLibrary::IsFullMana(AActor* Actor)
+{
+	if (const AAuraBaseCharacter* Character = Cast<AAuraBaseCharacter>(Actor))
+	{
+		if (Character->GetAuraAttributeSet())
+		{
+			return Character->GetAuraAttributeSet()->IsFullMana();
+		}
+	}
+	return false;
 }
 
 bool UAuraAbilitySystemLibrary::IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle)

@@ -42,8 +42,9 @@ public:
 	virtual void OnRep_PlayerState() override;
 	virtual void OnRep_ActiveAbilityTag() override;
 	virtual void OnRep_StatusEffectTags() override;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AAuraPlayerState* GetAuraPlayerState() const;
-	UAuraAttributeSet* GetAuraAttributeSet() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent() const;
 	// ICombatInterface
 	virtual int32 GetCharacterLevel_Implementation() const override;
@@ -94,6 +95,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 	void LoadProgress();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;

@@ -14,6 +14,16 @@ AAuraPickupItemInstant::AAuraPickupItemInstant()
 	EffectComponent = CreateDefaultSubobject<UAuraEffectComponent>(TEXT("Effect Component"));
 }
 
+int32 AAuraPickupItemInstant::GetItemLevel_Implementation() const
+{
+	return EffectComponent->GetActorLevel();
+}
+
+void AAuraPickupItemInstant::SetItemLevel_Implementation(const int32 Level)
+{
+	EffectComponent->SetActorLevel(Level);
+}
+
 // Called when the game starts or when spawned
 void AAuraPickupItemInstant::BeginPlay()
 {

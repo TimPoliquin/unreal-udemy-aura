@@ -3,7 +3,7 @@
 
 #include "Actor/AuraPOILock.h"
 
-#include "Actor/AuraGateInterface.h"
+#include "Actor/AuraLockedInterface.h"
 #include "Aura/Aura.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -86,7 +86,7 @@ bool AAuraPOILock::Unlock(AActor* Player)
 			}
 			for (AActor* Gate : Gates)
 			{
-				IAuraGateInterface::Unlock(Gate);
+				IAuraLockedInterface::Unlock(Gate);
 			}
 			PlayUnlockEffect(Player);
 			DisablePOI();

@@ -35,7 +35,7 @@ void AMapEntrance::OnSphereOverlap(
 	if (IsValid(OtherActor) && OtherActor->Implements<UPlayerInterface>())
 	{
 		bHasBeenActivated = true;
-		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);
+		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
 		AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
 		GameMode->SaveWorldState(GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName());
 		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);

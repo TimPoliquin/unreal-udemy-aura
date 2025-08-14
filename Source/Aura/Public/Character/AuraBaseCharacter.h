@@ -29,6 +29,8 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UAuraAttributeSet* GetAuraAttributeSet() const;
 	virtual float TakeDamage(
 		float DamageAmount,
 		const struct FDamageEvent& DamageEvent,

@@ -57,4 +57,5 @@ private:
 
 	UFUNCTION()
 	void OnActorTrackerCountChangedHandler(const FOnAuraActorTrackerCountChangedPayload& Payload);
+	void AddChildSpawnPoints();
 };

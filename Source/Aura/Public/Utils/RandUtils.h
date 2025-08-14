@@ -42,4 +42,10 @@ public:
 	{
 		return Range.Value();
 	}
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static bool ShouldAct(const float Chance)
+	{
+		return FMath::FRandRange(0.f, 1.f) <= Chance;
+	}
 };

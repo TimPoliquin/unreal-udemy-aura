@@ -84,12 +84,11 @@ public:
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|AbilityInfo")
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
-	UFUNCTION(
-		BlueprintCallable,
-		Category = "AuraAbilitySystemLibrary|LootTiers",
-		meta=(DefaultToSelf="WorldContextObject")
-	)
-	static ULootTiers* GetLootTiers(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AuraAbilitySystemLibrary|Attributes")
+	static bool IsFullHealth(AActor* Actor);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "AuraAbilitySystemLibrary|Attributes")
+	static bool IsFullMana(AActor* Actor);
 
 	UFUNCTION(BlueprintPure, Category="AuraAbilitySystemLibrary|GameplayEffect")
 	static bool IsInfiniteEffect(const FGameplayEffectSpecHandle& SpecHandle);
