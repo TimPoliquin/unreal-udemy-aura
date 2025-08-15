@@ -13,6 +13,14 @@ class AAuraTreasurePickup;
 class AAuraPickupItemBase;
 class UAuraLockComponent;
 
+UENUM(BlueprintType)
+enum class EAuraTreasureChestState : uint8
+{
+	Locked,
+	Unlocked,
+	Open
+};
+
 USTRUCT(BlueprintType)
 struct FAuraLootDefinition
 {
@@ -46,8 +54,7 @@ public:
 	virtual bool HandleInteract_Implementation(AActor* Player) override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsUnlocked() const;
-	UFUNCTION(BlueprintCallable)
-	bool Unlock(AActor* Player);
+	void HandleInitialState();
 
 	/** Start ISaveInterface **/
 	virtual void LoadActor_Implementation() override;
@@ -56,8 +63,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual bool IsPreconditionMet_Implementation(AActor* Player) const override;
 	UFUNCTION(BlueprintImplementableEvent)
-	void PlayUnlockEffect(const bool ForceOpen);
+	void PlayUnlockEffect(const bool ForceUnlock);
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayOpenEffect(const bool ForceOpen);
 	UFUNCTION(BlueprintNativeEvent)
 	FTransform GetRewardInitialSpawnLocation() const;
 	UFUNCTION(BlueprintCallable)
@@ -72,6 +82,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UAuraLockComponent> LockComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, SaveGame, Category="Components")
+	EAuraTreasureChestState State = EAuraTreasureChestState::Locked;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items")
 	TArray<FAuraLootDefinition> LootDefinitions;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta=(MustImplement="/Script/Aura.SpawnEffectInterface"))
@@ -88,4 +100,8 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	static FAuraLootInstance Pop(UPARAM(ref)
 		TArray<FAuraLootInstance>& LootInstances);
+
+private:
+	UFUNCTION()
+	void OnChestUnlocked();
 };

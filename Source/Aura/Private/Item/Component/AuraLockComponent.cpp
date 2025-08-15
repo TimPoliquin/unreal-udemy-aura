@@ -3,7 +3,10 @@
 
 #include "Item/Component/AuraLockComponent.h"
 
+#include "Aura/AuraLogChannels.h"
+#include "Game/AuraGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "LevelAssets/Switch/SwitchInterface.h"
 #include "Player/InventoryActorInterface.h"
 
 
@@ -16,63 +19,229 @@ UAuraLockComponent::UAuraLockComponent()
 
 bool UAuraLockComponent::IsPreconditionMet(const AActor* Player) const
 {
-	if (bUnlocked)
+	switch (UnlockMode)
 	{
+	case EAuraUnlockMode::Unlocked:
+		return true;
+	case EAuraUnlockMode::Key:
+		return IsPreconditionMet_Key(Player);
+	case EAuraUnlockMode::Switch:
+		return IsPreconditionMet_Switch();
+	case EAuraUnlockMode::Custom:
+		return IsPreconditionMet_Custom();
+	default:
 		return false;
 	}
-	if (IsKeyRequiredToUnlock())
-	{
-		if (const UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
-		{
-			return InventoryComponent->HasItemInInventory(KeyTag);
-		}
-	}
-	else
-	{
-		return true;
-	}
-	return false;
 }
 
 bool UAuraLockComponent::TryUnlock(AActor* Player)
 {
-	if (bUnlocked)
+	if (IsUnlocked())
 	{
 		return false;
 	}
-	if (IsKeyRequiredToUnlock())
+	switch (UnlockMode)
 	{
-		if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
-		{
-			bUnlocked = InventoryComponent->UseKey(KeyTag);
-		}
+	case EAuraUnlockMode::Unlocked:
+		Unlock();
+		break;
+	case EAuraUnlockMode::Key:
+		TryUnlock_Key(Player);
+		break;
+	case EAuraUnlockMode::Switch:
+		TryUnlock_Switch();
+		break;
+	case EAuraUnlockMode::Custom:
+		TryUnlock_Custom(Player);
+		break;
 	}
-	else
-	{
-		bUnlocked = true;
-	}
-	if (bUnlocked)
-	{
-		if (UnlockSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, UnlockSound, GetOwner()->GetActorLocation());
-		}
-		OnUnlockDelegate.Broadcast();
-	}
-	return bUnlocked;
+	return IsUnlocked();
 }
 
 bool UAuraLockComponent::IsUnlocked() const
 {
-	return bUnlocked;
+	return UnlockMode == EAuraUnlockMode::Unlocked || bUnlocked;
 }
 
-bool UAuraLockComponent::IsKeyRequiredToUnlock() const
+bool UAuraLockComponent::IsLocked() const
 {
-	return KeyTag.IsValid();
+	return UnlockMode != EAuraUnlockMode::Unlocked && !bUnlocked;
+}
+
+bool UAuraLockComponent::IsManuallyUnlockable() const
+{
+	return UnlockMode == EAuraUnlockMode::Key;
 }
 
 FString UAuraLockComponent::GetUnlockText() const
 {
-	return IsKeyRequiredToUnlock() ? UnlockText : OpenText;
+	return IsManuallyUnlockable() && IsLocked() ? UnlockText : OpenText;
+}
+
+void UAuraLockComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	switch (UnlockMode)
+	{
+	case EAuraUnlockMode::Unlocked:
+		break;
+	case EAuraUnlockMode::Key:
+		InitializeUnlock_Key();
+		break;
+	case EAuraUnlockMode::Switch:
+		InitializeUnlock_Switch();
+		break;
+	case EAuraUnlockMode::Custom:
+		InitializeUnlock_Custom();
+		break;
+	}
+}
+
+void UAuraLockComponent::InitializeUnlock_Key_Implementation()
+{
+	if (!KeyTag.IsValid())
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] Configured with an invalid key"), *GetName());
+		return;
+	}
+	if (!AAuraGameModeBase::GetAuraGameMode(this)->FindItemDefinitionByItemTag(KeyTag).IsValid())
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] Configured key is missing an item definition: %s"), *GetName(), *KeyTag.GetTagName().ToString());
+	}
+}
+
+void UAuraLockComponent::InitializeUnlock_Switch_Implementation()
+{
+	if (Switches.Num() <= 0)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] No switches configured!"), *GetName());
+		return;
+	}
+	for (AActor* SwitchActor : Switches)
+	{
+		if (!IsValid(SwitchActor))
+		{
+			continue;
+		}
+		if (ISwitchInterface* SwitchInterface = Cast<ISwitchInterface>(SwitchActor))
+		{
+			SwitchInterface->GetOnSwitchActivatedDelegate().AddUniqueDynamic(this, &UAuraLockComponent::OnSwitchActivated);
+		}
+		else
+		{
+			UE_LOG(LogAura, Warning, TEXT("[%s] Configured switch does not implement ISwitchInterface: %s"), *GetName(), *SwitchActor->GetName());
+		}
+	}
+}
+
+void UAuraLockComponent::InitializeUnlock_Custom_Implementation()
+{
+	// Do nothing by default here
+}
+
+bool UAuraLockComponent::IsPreconditionMet_Custom_Implementation() const
+{
+	return false;
+}
+
+bool UAuraLockComponent::IsPreconditionMet_Key_Implementation(const AActor* Player) const
+{
+	if (const UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	{
+		return InventoryComponent->HasItemInInventory(KeyTag);
+	}
+	return false;
+}
+
+bool UAuraLockComponent::IsPreconditionMet_Switch_Implementation() const
+{
+	return Switches.ContainsByPredicate([](const AActor* Switch)
+	{
+		return !ISwitchInterface::IsSwitchActive(Switch);
+	});
+}
+
+void UAuraLockComponent::Unlock_Implementation(bool bBroadcast)
+{
+	bUnlocked = true;
+	if (bBroadcast)
+	{
+		OnUnlockDelegate.Broadcast();
+	}
+}
+
+void UAuraLockComponent::TryUnlock_Key_Implementation(AActor* Player)
+{
+	bool bShouldUnlock = false;
+	if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	{
+		if (bConsumesKey)
+		{
+			bShouldUnlock = InventoryComponent->UseKey(KeyTag);
+		}
+		else
+		{
+			bShouldUnlock = InventoryComponent->HasItemInInventory(KeyTag);
+		}
+	}
+	if (bShouldUnlock)
+	{
+		Unlock();
+	}
+}
+
+void UAuraLockComponent::TryUnlock_Switch_Implementation()
+{
+	bool bAllActive = true;
+	for (const AActor* SwitchActor : Switches)
+	{
+		if (!ISwitchInterface::IsSwitchActive(SwitchActor))
+		{
+			bAllActive = false;
+			break;
+		}
+	}
+	if (bAllActive)
+	{
+		Unlock();
+	}
+}
+
+void UAuraLockComponent::TryUnlock_Custom_Implementation(AActor* Player)
+{
+	// by default, do nothing
+}
+
+void UAuraLockComponent::OnSwitchActivated(const FOnSwitchStatusChangedPayload& Payload)
+{
+	bool bAllActivated = true;
+	bool PayloadSwitchFound = false;
+	bool bTriggerReset = false;
+	for (AActor* Switch : Switches)
+	{
+		if (Payload.Switch == Switch)
+		{
+			PayloadSwitchFound = true;
+		}
+		if (!ISwitchInterface::IsSwitchActive(Switch))
+		{
+			bAllActivated = false;
+			if (bOrdered && !PayloadSwitchFound)
+			{
+				bTriggerReset = true;
+				break;
+			}
+		}
+	}
+	if (bAllActivated)
+	{
+		TryUnlock_Switch();
+	}
+	else if (bTriggerReset)
+	{
+		for (AActor* Switch : Switches)
+		{
+			ISwitchInterface::ResetSwitch(Switch);
+		}
+	}
 }

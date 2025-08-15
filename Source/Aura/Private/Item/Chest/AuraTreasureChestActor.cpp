@@ -3,7 +3,6 @@
 
 #include "Item/Chest/AuraTreasureChestActor.h"
 
-#include "IDetailTreeNode.h"
 #include "Actor/Spawn/AuraSpawnBlueprintLibrary.h"
 #include "Item/Component/AuraLockComponent.h"
 #include "Item/Effect/SpawnEffectInterface.h"
@@ -19,48 +18,80 @@ AAuraTreasureChestActor::AAuraTreasureChestActor()
 	LockComponent = CreateDefaultSubobject<UAuraLockComponent>(TEXT("LockComponent"));
 }
 
-bool AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
-{
-	Unlock(Player);
-	return true;
-}
-
 bool AAuraTreasureChestActor::IsUnlocked() const
 {
 	return LockComponent->IsUnlocked();
 }
 
-bool AAuraTreasureChestActor::Unlock(AActor* Player)
+void AAuraTreasureChestActor::HandleInitialState()
 {
-	if (LockComponent->IsPreconditionMet(Player))
+	if (State == EAuraTreasureChestState::Locked && LockComponent->IsUnlocked())
 	{
-		if (LockComponent->TryUnlock(Player))
-		{
-			PlayUnlockEffect(false);
-			DisablePOI();
-			return true;
-		}
+		State = EAuraTreasureChestState::Unlocked;
 	}
-	return false;
+	switch (State)
+	{
+	case EAuraTreasureChestState::Locked:
+		// do nothing
+		break;
+	case EAuraTreasureChestState::Unlocked:
+		// do nothing
+		PlayUnlockEffect(true);
+		break;
+	case EAuraTreasureChestState::Open:
+		PlayOpenEffect(true);
+		DisablePOI();
+		break;
+	}
 }
 
 void AAuraTreasureChestActor::LoadActor_Implementation()
 {
-	if (HasActorBegunPlay() && LockComponent->IsUnlocked())
+	if (HasActorBegunPlay())
 	{
-		PlayUnlockEffect(true);
-		DisablePOI();
+		HandleInitialState();
 	}
 }
 
 void AAuraTreasureChestActor::BeginPlay()
 {
 	Super::BeginPlay();
-	if (LockComponent->IsUnlocked())
+	HandleInitialState();
+	if (!LockComponent->IsUnlocked())
 	{
-		PlayUnlockEffect(true);
-		DisablePOI();
+		LockComponent->OnUnlockDelegate.AddUniqueDynamic(this, &AAuraTreasureChestActor::OnChestUnlocked);
 	}
+}
+
+bool AAuraTreasureChestActor::IsPreconditionMet_Implementation(AActor* Player) const
+{
+	switch (State)
+	{
+	case EAuraTreasureChestState::Locked:
+		return LockComponent->IsPreconditionMet(Player);
+	default:
+		return true;
+	}
+}
+
+bool AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
+{
+	switch (State)
+	{
+	case EAuraTreasureChestState::Locked:
+		if (LockComponent->IsManuallyUnlockable() && LockComponent->TryUnlock(Player))
+		{
+			PlayOpenEffect(false);
+		}
+		break;
+	case EAuraTreasureChestState::Unlocked:
+		PlayOpenEffect(false);
+		break;
+	case EAuraTreasureChestState::Open:
+		// do nothing
+		break;
+	}
+	return true;
 }
 
 FTransform AAuraTreasureChestActor::GetRewardInitialSpawnLocation_Implementation() const
@@ -123,6 +154,15 @@ TArray<FAuraLootInstance> AAuraTreasureChestActor::InstantiateRewardActors()
 FAuraLootInstance AAuraTreasureChestActor::Pop(TArray<FAuraLootInstance>& LootInstances)
 {
 	return LootInstances.Pop();
+}
+
+void AAuraTreasureChestActor::OnChestUnlocked()
+{
+	if (State == EAuraTreasureChestState::Locked)
+	{
+		State = EAuraTreasureChestState::Unlocked;
+		PlayUnlockEffect(false);
+	}
 }
 
 void AAuraTreasureChestActor::PlaySpawnReward_Implementation(const FAuraLootInstance& RewardInstance)
