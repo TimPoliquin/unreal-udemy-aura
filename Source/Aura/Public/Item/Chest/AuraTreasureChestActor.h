@@ -9,6 +9,7 @@
 #include "AuraTreasureChestActor.generated.h"
 
 
+struct FOnAuraLockComponentUnlockPayload;
 class AAuraTreasurePickup;
 class AAuraPickupItemBase;
 class UAuraLockComponent;
@@ -51,7 +52,7 @@ class AURA_API AAuraTreasureChestActor : public AAuraPOI, public ISaveInterface,
 public:
 	// Sets default values for this actor's properties
 	AAuraTreasureChestActor();
-	virtual bool HandleInteract_Implementation(AActor* Player) override;
+	virtual void HandleInteract_Implementation(AActor* Player) override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsUnlocked() const;
 	void HandleInitialState();
@@ -103,5 +104,5 @@ protected:
 
 private:
 	UFUNCTION()
-	void OnChestUnlocked();
+	void OnChestUnlocked(const FOnAuraLockComponentUnlockPayload& Payload);
 };

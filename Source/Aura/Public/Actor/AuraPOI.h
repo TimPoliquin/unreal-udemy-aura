@@ -23,13 +23,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="POI")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UWidgetComponent> POIWidget;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="POI")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UWidgetComponent> InteractionWidget;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="POI")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UWidgetComponent> PreconditionWidget;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="POI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UCapsuleComponent> OverlapDetectionComponent;
 
 	UFUNCTION()
@@ -58,10 +58,12 @@ protected:
 	/** AuraInteractionInterface Start **/
 	virtual bool OnInteract_Implementation(AActor* Player) override;
 	UFUNCTION(BlueprintNativeEvent)
-	bool HandleInteract(AActor* Player);
+	void HandleInteract(AActor* Player);
 	virtual void OnInteractionEnd_Implementation(AActor* Player, const bool bIsCancelled) override;
 	/** AuraInteractionInterface End **/
+	void EnablePOI();
 	void DisablePOI();
+	bool IsPOIDisabled() const;
 
 private:
 	bool IsPlayerActor(const AActor* Actor) const;

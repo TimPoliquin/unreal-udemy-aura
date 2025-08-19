@@ -8,7 +8,7 @@
 #include "LevelAssets/Switch/SwitchDelegates.h"
 #include "AuraLockComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuraLockComponentUnlockSignature);
+class UAuraLockComponent;
 
 UENUM(BlueprintType)
 enum class EAuraUnlockMode : uint8
@@ -19,6 +19,19 @@ enum class EAuraUnlockMode : uint8
 	Custom,
 };
 
+USTRUCT(BlueprintType)
+struct FOnAuraLockComponentUnlockPayload
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AActor> LockedActor;
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UAuraLockComponent> LockComponent;
+	UPROPERTY(BlueprintReadOnly)
+	EAuraUnlockMode UnlockType;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAuraLockComponentUnlockSignature, const FOnAuraLockComponentUnlockPayload&, Payload);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class AURA_API UAuraLockComponent : public UActorComponent
@@ -41,6 +54,14 @@ public:
 	bool IsManuallyUnlockable() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FString GetUnlockText() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsUnlockedAlways() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsUnlockedByKey() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsUnlockedBySwitch() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsUnlockedByCustomLogic() const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")

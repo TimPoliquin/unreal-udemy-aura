@@ -78,6 +78,26 @@ FString UAuraLockComponent::GetUnlockText() const
 	return IsManuallyUnlockable() && IsLocked() ? UnlockText : OpenText;
 }
 
+bool UAuraLockComponent::IsUnlockedAlways() const
+{
+	return UnlockMode == EAuraUnlockMode::Unlocked;
+}
+
+bool UAuraLockComponent::IsUnlockedByKey() const
+{
+	return UnlockMode == EAuraUnlockMode::Key;
+}
+
+bool UAuraLockComponent::IsUnlockedBySwitch() const
+{
+	return UnlockMode == EAuraUnlockMode::Switch;
+}
+
+bool UAuraLockComponent::IsUnlockedByCustomLogic() const
+{
+	return UnlockMode == EAuraUnlockMode::Custom;
+}
+
 void UAuraLockComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -166,7 +186,7 @@ void UAuraLockComponent::Unlock_Implementation(bool bBroadcast)
 	bUnlocked = true;
 	if (bBroadcast)
 	{
-		OnUnlockDelegate.Broadcast();
+		OnUnlockDelegate.Broadcast(FOnAuraLockComponentUnlockPayload(GetOwner(), this, UnlockMode));
 	}
 }
 

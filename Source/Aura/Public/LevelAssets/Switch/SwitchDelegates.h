@@ -10,8 +10,6 @@ struct FOnSwitchStatusChangedPayload
 
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<AActor> Switch;
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<AActor> TriggeringActor;
 
 	bool IsValid() const
 	{

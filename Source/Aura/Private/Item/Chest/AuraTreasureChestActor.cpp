@@ -74,7 +74,7 @@ bool AAuraTreasureChestActor::IsPreconditionMet_Implementation(AActor* Player) c
 	}
 }
 
-bool AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
+void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 {
 	switch (State)
 	{
@@ -91,7 +91,6 @@ bool AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 		// do nothing
 		break;
 	}
-	return true;
 }
 
 FTransform AAuraTreasureChestActor::GetRewardInitialSpawnLocation_Implementation() const
@@ -156,12 +155,17 @@ FAuraLootInstance AAuraTreasureChestActor::Pop(TArray<FAuraLootInstance>& LootIn
 	return LootInstances.Pop();
 }
 
-void AAuraTreasureChestActor::OnChestUnlocked()
+void AAuraTreasureChestActor::OnChestUnlocked(const FOnAuraLockComponentUnlockPayload& Payload)
 {
 	if (State == EAuraTreasureChestState::Locked)
 	{
 		State = EAuraTreasureChestState::Unlocked;
-		PlayUnlockEffect(false);
+		if (Payload.UnlockType != EAuraUnlockMode::Key)
+		{
+			// Only play the unlock effect if the chest was unlocked by means other than a key.
+			// If a key was used to unlock the chest, we'll want to jump straight to opening the chest.
+			PlayUnlockEffect(false);
+		}
 	}
 }
 
