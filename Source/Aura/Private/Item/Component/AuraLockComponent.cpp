@@ -12,9 +12,48 @@
 
 class UPlayerInventoryComponent;
 
+EAuraLockSFXPlaybackLocation FAuraLockSFXConfig::GetPlaybackLocation(const EAuraLockSFXPlaybackLocation OverridePlaybackLocation) const
+{
+	switch (PlaybackLocation)
+	{
+	case EAuraLockSFXPlaybackLocation::Default:
+		return PlaybackLocation;
+	default:
+		return OverridePlaybackLocation;
+	}
+}
+
+void FAuraLockSFXConfig::AutoPlay(const AActor* WorldContextObject) const
+{
+	if (bAutoPlay)
+	{
+		Play(WorldContextObject);
+	}
+}
+
+void FAuraLockSFXConfig::Play(const AActor* WorldContextObject, const EAuraLockSFXPlaybackLocation OverridePlaybackLocation) const
+{
+	FLoadSoftObjectPathAsyncDelegate OnLoadCompletedDelegate;
+	OnLoadCompletedDelegate.BindLambda([this, OverridePlaybackLocation, WorldContextObject](FSoftObjectPath ObjectPath, UObject* LoadedSound)
+	{
+		switch (GetPlaybackLocation(OverridePlaybackLocation))
+		{
+		case EAuraLockSFXPlaybackLocation::Default:
+		case EAuraLockSFXPlaybackLocation::UI:
+			UGameplayStatics::PlaySound2D(WorldContextObject, SoundEffect.Get());
+			break;
+		case EAuraLockSFXPlaybackLocation::ActorLocation:
+			UGameplayStatics::PlaySoundAtLocation(WorldContextObject, SoundEffect.Get(), WorldContextObject->GetActorLocation(), WorldContextObject->GetActorRotation());
+			break;
+		}
+	});
+	SoundEffect.LoadAsync(OnLoadCompletedDelegate);
+}
+
 UAuraLockComponent::UAuraLockComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	CompletedSound.PlaybackLocation = EAuraLockSFXPlaybackLocation::ActorLocation;
 }
 
 bool UAuraLockComponent::IsPreconditionMet(const AActor* Player) const
@@ -96,6 +135,11 @@ bool UAuraLockComponent::IsUnlockedBySwitch() const
 bool UAuraLockComponent::IsUnlockedByCustomLogic() const
 {
 	return UnlockMode == EAuraUnlockMode::Custom;
+}
+
+void UAuraLockComponent::SetUnlockMode(const EAuraUnlockMode InUnlockMode)
+{
+	UnlockMode = InUnlockMode;
 }
 
 void UAuraLockComponent::BeginPlay()
@@ -232,11 +276,27 @@ void UAuraLockComponent::TryUnlock_Custom_Implementation(AActor* Player)
 	// by default, do nothing
 }
 
+void UAuraLockComponent::PlaySuccessSound(const EAuraLockSFXPlaybackLocation PlaybackLocation)
+{
+	SuccessSound.Play(GetOwner(), PlaybackLocation);
+}
+
+void UAuraLockComponent::PlayResetSound(const EAuraLockSFXPlaybackLocation PlaybackLocation)
+{
+	ResetSound.Play(GetOwner(), PlaybackLocation);
+}
+
+void UAuraLockComponent::PlayCompletedSound(const EAuraLockSFXPlaybackLocation PlaybackLocation)
+{
+	CompletedSound.Play(GetOwner(), PlaybackLocation);
+}
+
 void UAuraLockComponent::OnSwitchActivated(const FOnSwitchStatusChangedPayload& Payload)
 {
 	bool bAllActivated = true;
 	bool PayloadSwitchFound = false;
 	bool bTriggerReset = false;
+	int32 UnlockedCount = 0;
 	for (AActor* Switch : Switches)
 	{
 		if (Payload.Switch == Switch)
@@ -252,9 +312,24 @@ void UAuraLockComponent::OnSwitchActivated(const FOnSwitchStatusChangedPayload& 
 				break;
 			}
 		}
+		else
+		{
+			UnlockedCount++;
+		}
+	}
+	if (bTriggerReset)
+	{
+		ResetSound.AutoPlay(Payload.Switch);
+		OnResetDelegate.Broadcast();
+	}
+	else
+	{
+		SuccessSound.AutoPlay(Payload.Switch);
+		OnUnlockProgressDelegate.Broadcast(FOnAuraLockComponentUnlockProgressPayload(GetOwner(), this, UnlockedCount, Switches.Num()));
 	}
 	if (bAllActivated)
 	{
+		CompletedSound.AutoPlay(GetOwner());
 		TryUnlock_Switch();
 	}
 	else if (bTriggerReset)

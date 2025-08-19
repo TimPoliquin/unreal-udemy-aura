@@ -85,6 +85,7 @@ void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 		}
 		break;
 	case EAuraTreasureChestState::Unlocked:
+		State = EAuraTreasureChestState::Open;
 		PlayOpenEffect(false);
 		break;
 	case EAuraTreasureChestState::Open:
