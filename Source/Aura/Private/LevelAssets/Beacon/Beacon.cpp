@@ -86,6 +86,7 @@ void ABeacon::ResetSwitch_Implementation()
 {
 	BeaconMesh->SetMaterial(0, OriginalMaterial);
 	bIsSwitchActive = false;
+	EnablePOI();
 }
 
 

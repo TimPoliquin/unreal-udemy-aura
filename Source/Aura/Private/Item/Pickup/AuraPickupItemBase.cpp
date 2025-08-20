@@ -5,7 +5,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "Aura/Aura.h"
-#include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Item/Component/SinusoidalMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -15,14 +15,14 @@ AAuraPickupItemBase::AAuraPickupItemBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Component"));
-	SphereComponent->SetupAttachment(GetRootComponent());
-	SphereComponent->SetCollisionObjectType(ECC_WorldDynamic);
-	SphereComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
-	SphereComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	SphereComponent->SetCollisionResponseToChannel(ECC_Projectile, ECR_Ignore);
+	CollisionComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision Component"));
+	CollisionComponent->SetupAttachment(GetRootComponent());
+	CollisionComponent->SetCollisionObjectType(ECC_WorldDynamic);
+	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	CollisionComponent->SetCollisionResponseToChannel(ECC_Projectile, ECR_Ignore);
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
-	MeshComponent->SetupAttachment(SphereComponent);
+	MeshComponent->SetupAttachment(CollisionComponent);
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MeshComponent->SetRenderCustomDepth(false);
 	SinusoidalMovementComponent = CreateDefaultSubobject<USinusoidalMovementComponent>(TEXT("Sinusoidal Movement Component"));
@@ -32,6 +32,8 @@ AAuraPickupItemBase::AAuraPickupItemBase()
 void AAuraPickupItemBase::BeginPlay()
 {
 	Super::BeginPlay();
+	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPickupItemBase::OnBeginOverlap);
+	CollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPickupItemBase::OnEndOverlap);
 	MeshComponent->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	PlaySpawnEffect();
 }

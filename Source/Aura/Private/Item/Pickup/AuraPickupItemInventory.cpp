@@ -3,7 +3,6 @@
 
 #include "Item/Pickup/AuraPickupItemInventory.h"
 
-#include "Components/SphereComponent.h"
 #include "Player/InventoryActorInterface.h"
 #include "Player/PlayerInventoryComponent.h"
 
@@ -16,7 +15,6 @@ AAuraPickupItemInventory::AAuraPickupItemInventory()
 void AAuraPickupItemInventory::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPickupItemInventory::OnBeginOverlap);
 }
 
 void AAuraPickupItemInventory::ActivatePickup(AActor* PickupActor)

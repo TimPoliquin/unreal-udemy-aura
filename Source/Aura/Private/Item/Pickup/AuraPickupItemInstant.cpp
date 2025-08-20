@@ -3,7 +3,7 @@
 
 #include "Item/Pickup/AuraPickupItemInstant.h"
 
-#include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Item/Component/AuraEffectComponent.h"
 
 
@@ -28,8 +28,8 @@ void AAuraPickupItemInstant::SetItemLevel_Implementation(const int32 Level)
 void AAuraPickupItemInstant::BeginPlay()
 {
 	Super::BeginPlay();
-	SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnBeginOverlap);
-	SphereComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnEndOverlap);
+	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnBeginOverlap);
+	CollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnEndOverlap);
 }
 
 void AAuraPickupItemInstant::OnBeginOverlap(

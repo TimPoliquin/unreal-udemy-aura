@@ -40,7 +40,6 @@ void AAuraTreasureChestActor::HandleInitialState()
 		break;
 	case EAuraTreasureChestState::Open:
 		PlayOpenEffect(true);
-		DisablePOI();
 		break;
 	}
 }
@@ -74,6 +73,12 @@ bool AAuraTreasureChestActor::IsPreconditionMet_Implementation(AActor* Player) c
 	}
 }
 
+void AAuraTreasureChestActor::PlayOpenEffect_Implementation(const bool ForceOpen)
+{
+	State = EAuraTreasureChestState::Open;
+	DisablePOI();
+}
+
 void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 {
 	switch (State)
@@ -85,7 +90,6 @@ void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 		}
 		break;
 	case EAuraTreasureChestState::Unlocked:
-		State = EAuraTreasureChestState::Open;
 		PlayOpenEffect(false);
 		break;
 	case EAuraTreasureChestState::Open:

@@ -39,6 +39,8 @@ public:
 	TArray<AActor*> IgnoreActors;
 	UPROPERTY(BlueprintAssignable)
 	FMouseTargetDataSignature HasMouseTarget;
+	UPROPERTY(BlueprintAssignable)
+	FMouseTargetDataSignature HasNoTarget;
 
 protected:
 	void OnTargetDataReplicatedCallback(

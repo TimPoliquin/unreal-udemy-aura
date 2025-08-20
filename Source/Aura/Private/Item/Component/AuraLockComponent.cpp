@@ -219,10 +219,14 @@ bool UAuraLockComponent::IsPreconditionMet_Key_Implementation(const AActor* Play
 
 bool UAuraLockComponent::IsPreconditionMet_Switch_Implementation() const
 {
-	return Switches.ContainsByPredicate([](const AActor* Switch)
+	for (const AActor* SwitchActor : Switches)
 	{
-		return !ISwitchInterface::IsSwitchActive(Switch);
-	});
+		if (!ISwitchInterface::IsSwitchActive(SwitchActor))
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 void UAuraLockComponent::Unlock_Implementation(bool bBroadcast)

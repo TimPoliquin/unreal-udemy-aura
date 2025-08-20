@@ -67,7 +67,7 @@ protected:
 	virtual bool IsPreconditionMet_Implementation(AActor* Player) const override;
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayUnlockEffect(const bool ForceUnlock);
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintNativeEvent)
 	void PlayOpenEffect(const bool ForceOpen);
 	UFUNCTION(BlueprintNativeEvent)
 	FTransform GetRewardInitialSpawnLocation() const;
