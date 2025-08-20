@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
+#include "Aura/AuraLogChannels.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utils/TagUtils.h"
 
@@ -26,12 +27,21 @@ bool UAuraEffectComponent::CheckPreRequisites(AActor* PickupActor) const
 
 void UAuraEffectComponent::OnOverlap(AActor* TargetActor)
 {
+	if (GameplayEffectConfigs.IsEmpty())
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s][%s] No overlap effect configured for effect component!"), *GetOwner()->GetName(), *GetName());
+		return;
+	}
 	if (!CheckPreRequisites(TargetActor))
 	{
 		return;
 	}
 	for (auto GameplayEffectConfig : GameplayEffectConfigs)
 	{
+		if (!GameplayEffectConfig.IsValid())
+		{
+			UE_LOG(LogAura, Warning, TEXT("[%s][%s] Invalid overlap effect configured for component"), *GetOwner()->GetName(), *GetName())
+		}
 		if (GameplayEffectConfig.IsApplyOnOverlap())
 		{
 			ApplyEffectToTarget(TargetActor, GameplayEffectConfig);

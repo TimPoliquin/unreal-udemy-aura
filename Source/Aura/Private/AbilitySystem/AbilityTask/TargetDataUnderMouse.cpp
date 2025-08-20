@@ -41,14 +41,16 @@ void UTargetDataUnderMouse::SendMouseCursorDataToServer() const
 {
 	if (const APlayerController* PlayerController = Ability->GetCurrentActorInfo()->PlayerController.Get())
 	{
-		if (FHitResult CursorHit; PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit))
+		FHitResult CursorHit;
+		FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
+		FGameplayAbilityTargetDataHandle DataHandle;
+
+		if (PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit))
 		{
-			// create a prediction window for this ability system
-			FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
-			FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
-			FGameplayAbilityTargetDataHandle DataHandle;
 			Data->HitResult = CursorHit;
 			DataHandle.Add(Data);
+			// create a prediction window for this ability system
+			FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
 			// replicate data to server
 			AbilitySystemComponent->ServerSetReplicatedTargetData(
 				GetAbilitySpecHandle(),
@@ -61,6 +63,15 @@ void UTargetDataUnderMouse::SendMouseCursorDataToServer() const
 			if (ShouldBroadcastAbilityTaskDelegates())
 			{
 				HasMouseTarget.Broadcast(DataHandle);
+			}
+		}
+		else
+		{
+			Data->HitResult = CursorHit;
+			DataHandle.Add(Data);
+			if (ShouldBroadcastAbilityTaskDelegates())
+			{
+				HasNoTarget.Broadcast(DataHandle);
 			}
 		}
 	}

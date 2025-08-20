@@ -36,4 +36,7 @@ class AURA_API ISpawnEffectInterface
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void PlaySpawnEffect(const FAuraSpawnEffectParams& SpawnParams);
+
+	static void PlaySpawnEffect(AActor* Actor, const FTransform& SpawnTransform, const FTransform& TargetTransform, const float HeightMultiplier = 1.f);
+	static AActor* CreateSpawnEffectActor(const UObject* WorldContextObject, TSubclassOf<AActor> EffectClass, AActor* Child, bool bStartHidden = false);
 };

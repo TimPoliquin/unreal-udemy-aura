@@ -15,5 +15,5 @@ public:
 	// Sets default values for this actor's properties
 	AAuraTreasurePickup();
 
-	static AAuraTreasurePickup* SpawnTreasure(const AActor* WorldContextObject, const FVector& Location, float Value);
+	static AAuraTreasurePickup* SpawnTreasure(const AActor* WorldContextObject, const FVector& Location, const float Value, const bool bRandomize = true);
 };

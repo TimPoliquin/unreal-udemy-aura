@@ -64,16 +64,16 @@ bool AAuraPOILock::IsPreconditionMet_Implementation(AActor* Player) const
 	return false;
 }
 
-bool AAuraPOILock::HandleInteract_Implementation(AActor* Player)
+void AAuraPOILock::HandleInteract_Implementation(AActor* Player)
 {
-	return Unlock(Player);
+	Unlock(Player);
 }
 
-bool AAuraPOILock::Unlock(AActor* Player)
+void AAuraPOILock::Unlock(AActor* Player)
 {
 	if (bUnlocked)
 	{
-		return true;
+		return;
 	}
 	if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
 	{
@@ -91,8 +91,6 @@ bool AAuraPOILock::Unlock(AActor* Player)
 			PlayUnlockEffect(Player);
 			DisablePOI();
 			UnHighlightActor(this);
-			return true;
 		}
 	}
-	return false;
 }

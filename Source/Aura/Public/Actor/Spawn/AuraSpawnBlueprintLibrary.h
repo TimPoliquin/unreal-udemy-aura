@@ -31,9 +31,10 @@ class AURA_API UAuraSpawnBlueprintLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static TArray<FTransform> GenerateSpawnLocations(const FVector& Center, const float Radius, const int32 NumSpawns);
+	static TArray<FTransform> GenerateSpawnLocations(const FVector& Center, const float Radius, const int32 NumSpawns, const float Spread = 360, const FVector ForwardVector = FVector::ForwardVector,
+	                                                 const FVector UpVector = FVector::UpVector);
 	UFUNCTION(BlueprintCallable)
-	static FAuraSpawnParams Pop(UPARAM(ref)
+	static FAuraSpawnParams SafePop(UPARAM(ref)
 		TArray<FAuraSpawnParams>& SpawnParams);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static bool IsValid(UPARAM(ref)

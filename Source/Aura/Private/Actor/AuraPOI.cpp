@@ -109,19 +109,30 @@ bool AAuraPOI::OnInteract_Implementation(AActor* Player)
 {
 	if (IsPreconditionMet(Player))
 	{
-		return HandleInteract(Player);
+		HandleInteract(Player);
 	}
-	return false;
+	// always terminate the interaction ability
+	return true;
 }
 
-bool AAuraPOI::HandleInteract_Implementation(AActor* Player)
+void AAuraPOI::HandleInteract_Implementation(AActor* Player)
 {
-	return true;
+	// by default, do nothing
 }
 
 void AAuraPOI::OnInteractionEnd_Implementation(AActor* Player, const bool bIsCancelled)
 {
 	// TODO ?
+}
+
+void AAuraPOI::EnablePOI()
+{
+	bDisabled = false;
+	OverlapDetectionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (POIWidget && POIWidget->GetWidget())
+	{
+		POIWidget->GetWidget()->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void AAuraPOI::DisablePOI()
@@ -132,6 +143,11 @@ void AAuraPOI::DisablePOI()
 	{
 		POIWidget->GetWidget()->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+bool AAuraPOI::IsPOIDisabled() const
+{
+	return bDisabled;
 }
 
 bool AAuraPOI::IsPlayerActor(const AActor* Actor) const

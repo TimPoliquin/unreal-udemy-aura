@@ -8,8 +8,8 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPickupItemBase.generated.h"
 
+class UCapsuleComponent;
 class UNiagaraSystem;
-class USphereComponent;
 class UAuraEffectComponent;
 class USinusoidalMovementComponent;
 
@@ -27,7 +27,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
-	TObjectPtr<USphereComponent> SphereComponent;
+	TObjectPtr<UCapsuleComponent> CollisionComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UStaticMeshComponent> MeshComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components")
@@ -50,4 +50,13 @@ protected:
 	void PlaySpawnEffect();
 	UFUNCTION(BlueprintNativeEvent)
 	void PlayPickupEffect(AActor* PickupActor, const bool bAutoDestroy);
+	UFUNCTION()
+	virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+	{
+	}
+
+	UFUNCTION()
+	virtual void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+	{
+	}
 };

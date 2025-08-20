@@ -29,9 +29,9 @@ protected:
 	void InitializeInteractionWidgetSettings(UUserWidget* InInteractionWidget, const FString& InInteractionText);
 	UFUNCTION(BlueprintImplementableEvent)
 	void InitializePreconditionWidgetSettings(UUserWidget* InPreconditionWidget, const UTexture2D* InRuneIcon);
-	virtual bool HandleInteract_Implementation(AActor* Player) override;
+	virtual void HandleInteract_Implementation(AActor* Player) override;
 	UFUNCTION(BlueprintCallable)
-	bool Unlock(AActor* Player);
+	void Unlock(AActor* Player);
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayUnlockEffect(AActor* Player);
 

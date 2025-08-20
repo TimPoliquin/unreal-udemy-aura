@@ -34,7 +34,7 @@ struct FGameplayEffectConfig
 	/** RemovalPolicy is only applicable to Infinite effects **/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
 	EEffectRemovalPolicy RemovalPolicy = EEffectRemovalPolicy::DoNotRemove;
-
+	bool IsValid() const { return GameplayEffectClass != nullptr; }
 	bool IsApplyOnOverlap() const { return EffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap; }
 	bool IsApplyOnEndOverlap() const { return EffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap; }
 	bool IsRemoveOnEndOverlap() const { return RemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap; }
