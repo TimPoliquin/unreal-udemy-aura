@@ -28,7 +28,7 @@ struct FOnAuraLockComponentUnlockPayload
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UAuraLockComponent> LockComponent;
 	UPROPERTY(BlueprintReadOnly)
-	EAuraUnlockMode UnlockType;
+	EAuraUnlockMode UnlockType = EAuraUnlockMode::Unlocked;
 };
 
 USTRUCT(BlueprintType)

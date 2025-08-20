@@ -46,6 +46,7 @@ void AAuraTreasureChestActor::HandleInitialState()
 
 void AAuraTreasureChestActor::LoadActor_Implementation()
 {
+	Super::LoadActor_Implementation();
 	if (HasActorBegunPlay())
 	{
 		HandleInitialState();

@@ -11,6 +11,7 @@
 AMapEntrance::AMapEntrance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bDisableAfterActivation = false;
 }
 
 void AMapEntrance::LoadActor_Implementation()

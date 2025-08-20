@@ -45,7 +45,7 @@ struct FAuraLootInstance
 };
 
 UCLASS()
-class AURA_API AAuraTreasureChestActor : public AAuraPOI, public ISaveInterface, public IHighlightInterface
+class AURA_API AAuraTreasureChestActor : public AAuraPOI, public IHighlightInterface
 {
 	GENERATED_BODY()
 

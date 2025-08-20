@@ -129,4 +129,5 @@ public:
 	static USkeletalMeshComponent* GetWeapon(const UObject* Actor);
 	static FGameplayTag GetHitReactAbilityTagByDamageType(const UObject* Actor, const FGameplayTag& DamageTypeTag);
 	static bool IsHitReacting(const UObject* Actor);
+	static bool IsAbilitySystemReady(AActor* Actor);
 };

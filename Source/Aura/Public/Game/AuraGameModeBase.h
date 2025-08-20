@@ -99,6 +99,10 @@ protected:
 	int32 DefaultPlayerLevel = 1;
 	UPROPERTY(EditDefaultsOnly, Category="Save Game")
 	bool bAutoSaveOnStart = false;
+	UPROPERTY(EditDefaultsOnly, Category="Save Game", meta=(EditCondition="bAutoSaveOnStart", EditConditionHides))
+	FString AutoSaveName = FString("Transient");
+	UPROPERTY(EditDefaultsOnly, Category="Save Game", meta=(EditCondition="bAutoSaveOnStart", EditConditionHides))
+	int32 AutoSaveSlot = 9;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Save Game")
 	TSubclassOf<USaveGame> LoadScreenSaveGameClass;

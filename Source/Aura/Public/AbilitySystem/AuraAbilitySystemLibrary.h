@@ -56,6 +56,13 @@ public:
 		meta = (DefaultToSelf = "WorldContextObject")
 	)
 	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
+	UFUNCTION(
+		BlueprintCallable,
+		BlueprintPure,
+		Category= "AuraAbilitySystemLibrary|AbilitySystem",
+		meta = (DefaultToSelf = "Actor")
+	)
+	static UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent(AActor* Actor);
 
 	UFUNCTION(BlueprintCallable, Category= "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static void InitializeDefaultAttributes(

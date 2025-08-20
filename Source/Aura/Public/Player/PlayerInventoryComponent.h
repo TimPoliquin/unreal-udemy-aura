@@ -92,6 +92,7 @@ public:
 	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
 	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
 	/** ISavableInterface end **/
+	TArray<FAuraItemInventoryEntry> GetInventory() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -100,19 +101,12 @@ protected:
 	int32 MaxItems = 25;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
 	TArray<FAuraItemInventoryEntry> Inventory;
-
-public:
-	TArray<FAuraItemInventoryEntry> GetInventory() const;
-
-protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Equipment")
 	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory|Equipment")
 	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory|Equipment")
 	TMap<EAuraEquipmentSlot, FName> EquipmentSocketNames;
-
 	UPROPERTY()
 	TObjectPtr<AAuraEquipmentBase> Weapon;
 	UPROPERTY()
@@ -121,4 +115,5 @@ protected:
 private:
 	AAuraEquipmentBase* SpawnEquipment(const EAuraEquipmentSlot& Slot);
 	bool UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory);
+	void InitializeEquipment();
 };

@@ -30,7 +30,7 @@ void ACheckpoint::LoadActor_Implementation()
 {
 	if (bHasBeenActivated && HasActorBegunPlay())
 	{
-		HandleGlowEffects();
+		PlayActivatedEffect();
 	}
 }
 
@@ -38,9 +38,9 @@ void ACheckpoint::BeginPlay()
 {
 	Super::BeginPlay();
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ACheckpoint::OnSphereOverlap);
-	if (bHasBeenActivated)
+	if (bHasBeenActivated && HasActorBegunPlay())
 	{
-		HandleGlowEffects();
+		PlayActivatedEffect();
 	}
 }
 
@@ -56,16 +56,19 @@ void ACheckpoint::OnSphereOverlap(
 	if (IsValid(OtherActor) && OtherActor->Implements<UPlayerInterface>())
 	{
 		bHasBeenActivated = true;
-		HandleGlowEffects();
+		PlayActivatedEffect();
 		AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
 		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);
 		GameMode->SaveWorldState(GetWorld());
 	}
 }
 
-void ACheckpoint::HandleGlowEffects()
+void ACheckpoint::PlayActivatedEffect_Implementation()
 {
-	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (bDisableAfterActivation)
+	{
+		Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 	UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
 		CheckpointMesh->GetMaterial(0),
 		this

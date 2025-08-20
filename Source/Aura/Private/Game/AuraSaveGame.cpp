@@ -39,11 +39,9 @@ bool UAuraSaveGame::HasMap(const FString& InMapAssetName)
 
 void UAuraSaveGame::ReplaceSavedMap(const FString& InMapAssetName, const FSavedMap& SavedMap)
 {
-	for (FSavedMap& MapToReplace : SavedMaps)
+	SavedMaps.RemoveAll([InMapAssetName](const FSavedMap& Map)
 	{
-		if (MapToReplace.MapAssetName.Equals(InMapAssetName))
-		{
-			MapToReplace = SavedMap;
-		}
-	}
+		return Map.MapAssetName.Equals(InMapAssetName);
+	});
+	SavedMaps.AddUnique(SavedMap);
 }

@@ -3,6 +3,7 @@
 
 #include "Item/AuraItemBlueprintLibrary.h"
 
+#include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
 #include "Fishing/AuraFishTypes.h"
 #include "Game/AuraGameModeBase.h"
@@ -12,7 +13,12 @@ FAuraItemDefinition UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(
 	const FGameplayTag& ItemType
 )
 {
-	return AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->FindItemDefinitionByItemTag(ItemType);
+	if (AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject))
+	{
+		return GameMode->FindItemDefinitionByItemTag(ItemType);
+	}
+	UE_LOG(LogAura, Error, TEXT("[%s] Attempted get item definition, but game mode was null!"), *FString("UAuraItemBlueprintLibrary::GetItemDefinitionByItemType"));
+	return FAuraItemDefinition();
 }
 
 FString UAuraItemBlueprintLibrary::GetItemNameByItemType(

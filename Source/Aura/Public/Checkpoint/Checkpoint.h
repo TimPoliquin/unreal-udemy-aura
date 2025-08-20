@@ -44,8 +44,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void CheckpointReached(UMaterialInstanceDynamic* DynamicInstance);
 
-	UFUNCTION(BlueprintCallable)
-	void HandleGlowEffects();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void PlayActivatedEffect();
 
 	/** Highlight Interface*/
 	virtual void HighlightActor_Implementation() override;
@@ -55,12 +55,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> CheckpointMesh;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USphereComponent> Sphere;
-
 	UPROPERTY(BlueprintReadWrite, SaveGame)
 	bool bHasBeenActivated = false;
+	UPROPERTY(BlueprintReadOnly)
+	bool bDisableAfterActivation = true;
 
 private:
 	UPROPERTY(VisibleAnywhere)

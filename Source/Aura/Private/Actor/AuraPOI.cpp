@@ -22,6 +22,8 @@ AAuraPOI::AAuraPOI()
 	OverlapDetectionComponent->SetupAttachment(GetRootComponent());
 	POIWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("POIWidget"));
 	POIWidget->SetupAttachment(GetRootComponent());
+	POIWidget->SetCollisionResponseToChannel(ECC_Projectile, ECR_Ignore);
+	POIWidget->SetCollisionResponseToChannel(ECC_Target, ECR_Ignore);
 	InteractionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractionWidget"));
 	InteractionWidget->SetupAttachment(GetRootComponent());
 	PreconditionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PreconditionWidget"));
@@ -40,6 +42,20 @@ void AAuraPOI::BeginPlay()
 	OverlapDetectionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPOI::OnEndOverlap);
 	IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget(), false);
 	IInteractionWidgetInterface::Hide(PreconditionWidget->GetWidget(), false);
+	InitializeState();
+}
+
+void AAuraPOI::LoadActor_Implementation()
+{
+	InitializeState();
+}
+
+void AAuraPOI::InitializeState()
+{
+	if (bDisabled && HasActorBegunPlay())
+	{
+		DisablePOI();
+	}
 }
 
 void AAuraPOI::OnBeginOverlap(

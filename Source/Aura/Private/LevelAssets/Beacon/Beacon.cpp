@@ -21,6 +21,7 @@ ABeacon::ABeacon()
 
 void ABeacon::LoadActor_Implementation()
 {
+	Super::LoadActor_Implementation();
 	if (bIsSwitchActive && HasActorBegunPlay())
 	{
 		ActivateBeacon(true);
