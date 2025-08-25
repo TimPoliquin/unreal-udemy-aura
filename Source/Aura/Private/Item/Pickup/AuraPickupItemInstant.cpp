@@ -24,14 +24,6 @@ void AAuraPickupItemInstant::SetItemLevel_Implementation(const int32 Level)
 	EffectComponent->SetActorLevel(Level);
 }
 
-// Called when the game starts or when spawned
-void AAuraPickupItemInstant::BeginPlay()
-{
-	Super::BeginPlay();
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnBeginOverlap);
-	CollisionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPickupItemInstant::OnEndOverlap);
-}
-
 void AAuraPickupItemInstant::OnBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,

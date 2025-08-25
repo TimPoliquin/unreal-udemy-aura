@@ -6,6 +6,14 @@
 #include "Engine/GameInstance.h"
 #include "AuraGameInstance.generated.h"
 
+UENUM()
+enum class EAuraGameSaveState : uint8
+{
+	Undefined,
+	Transient,
+	SaveSlot
+};
+
 /**
  * 
  */
@@ -19,21 +27,20 @@ public:
 	FName PlayerStartTag = FName();
 
 	UPROPERTY()
-	FString LoadSlotName = FString("Transient");
+	FString LoadSlotName;
 
 	UPROPERTY()
-	int32 LoadSlotIndex = 9;
+	int32 LoadSlotIndex;
 
 	UPROPERTY()
-	bool bTransient = true;
-
-	UPROPERTY()
-	bool bAutoCleanup = false;
+	EAuraGameSaveState SaveState = EAuraGameSaveState::Undefined;
 
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> ActivePlayerActors;
 
 	virtual void Shutdown() override;
+
+	EAuraGameSaveState GetSaveState() const { return SaveState; }
 
 	void RegisterActivePlayer(AActor* Actor)
 	{

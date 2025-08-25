@@ -6,6 +6,7 @@
 #include "AuraEffectActor.h"
 #include "AuraInteractionInterface.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/SaveInterface.h"
 #include "AuraPOI.generated.h"
 
 class UCapsuleComponent;
@@ -13,7 +14,7 @@ class USphereComponent;
 class UWidgetComponent;
 
 UCLASS()
-class AURA_API AAuraPOI : public AAuraEffectActor, public IAuraInteractionInterface
+class AURA_API AAuraPOI : public AAuraEffectActor, public IAuraInteractionInterface, public ISaveInterface
 {
 	GENERATED_BODY()
 
@@ -22,6 +23,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void InitializeState();
+
+	/** Start ISavableInterface **/
+	virtual void LoadActor_Implementation() override;
+	virtual bool ShouldLoadTransform_Implementation() const override { return false; }
+	/** End ISavableInterface **/
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UWidgetComponent> POIWidget;
@@ -67,5 +74,6 @@ protected:
 
 private:
 	bool IsPlayerActor(const AActor* Actor) const;
+	UPROPERTY(SaveGame)
 	bool bDisabled = false;
 };

@@ -4,11 +4,16 @@
 #include "Item/Chest/AuraTreasureChestActor.h"
 
 #include "Actor/Spawn/AuraSpawnBlueprintLibrary.h"
+#include "Aura/AuraLogChannels.h"
+#include "Game/AuraGameModeBase.h"
+#include "Item/AuraItemTypes.h"
 #include "Item/Component/AuraLockComponent.h"
 #include "Item/Effect/SpawnEffectInterface.h"
-#include "Item/Pickup/AuraPickupItemBase.h"
 #include "Item/Pickup/AuraTreasurePickup.h"
 #include "Item/Pickup/TieredItemInterface.h"
+#include "Player/InventoryActorInterface.h"
+#include "Player/PlayerInventoryComponent.h"
+#include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 
 
@@ -36,16 +41,17 @@ void AAuraTreasureChestActor::HandleInitialState()
 		break;
 	case EAuraTreasureChestState::Unlocked:
 		// do nothing
-		PlayUnlockEffect(true);
+		PlayUnlockForcedEffect();
 		break;
 	case EAuraTreasureChestState::Open:
-		PlayOpenEffect(true);
+		PlayOpenForcedEffect();
 		break;
 	}
 }
 
 void AAuraTreasureChestActor::LoadActor_Implementation()
 {
+	Super::LoadActor_Implementation();
 	if (HasActorBegunPlay())
 	{
 		HandleInitialState();
@@ -73,10 +79,32 @@ bool AAuraTreasureChestActor::IsPreconditionMet_Implementation(AActor* Player) c
 	}
 }
 
-void AAuraTreasureChestActor::PlayOpenEffect_Implementation(const bool ForceOpen)
+void AAuraTreasureChestActor::Unlock(AActor* Player)
+{
+	if (LockComponent->IsUnlocked())
+	{
+		State = EAuraTreasureChestState::Unlocked;
+	}
+}
+
+void AAuraTreasureChestActor::Open(AActor* Player)
 {
 	State = EAuraTreasureChestState::Open;
 	DisablePOI();
+	PlayOpenEffect(Player);
+}
+
+void AAuraTreasureChestActor::GrantRewards(AActor* Player)
+{
+	switch (GrantMode)
+	{
+	case EAuraTreasureChestGrantMode::Spawn:
+		GrantRewards_Spawn();
+		break;
+	case EAuraTreasureChestGrantMode::DirectToInventory:
+		GrantRewards_DirectToInventory(Player);
+		break;
+	}
 }
 
 void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
@@ -86,11 +114,11 @@ void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 	case EAuraTreasureChestState::Locked:
 		if (LockComponent->IsManuallyUnlockable() && LockComponent->TryUnlock(Player))
 		{
-			PlayOpenEffect(false);
+			Open(Player);
 		}
 		break;
 	case EAuraTreasureChestState::Unlocked:
-		PlayOpenEffect(false);
+		Open(Player);
 		break;
 	case EAuraTreasureChestState::Open:
 		// do nothing
@@ -101,6 +129,21 @@ void AAuraTreasureChestActor::HandleInteract_Implementation(AActor* Player)
 FTransform AAuraTreasureChestActor::GetRewardInitialSpawnLocation_Implementation() const
 {
 	return GetActorTransform();
+}
+
+void AAuraTreasureChestActor::GrantRewards_DirectToInventory_Implementation(AActor* Player)
+{
+	if (UPlayerInventoryComponent* PlayerInventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	{
+		for (const FAuraLootDefinition& LootDefinition : LootDefinitions)
+		{
+			PlayerInventoryComponent->AddToInventory(LootDefinition.ItemTag);
+		}
+		if (GoldAmount > 0.0)
+		{
+			PlayerInventoryComponent->AddToInventory(FAuraGameplayTags::Get().Item_Type_Treasure, GoldAmount);
+		}
+	}
 }
 
 TArray<FAuraLootInstance> AAuraTreasureChestActor::InstantiateRewardActors()
@@ -116,12 +159,24 @@ TArray<FAuraLootInstance> AAuraTreasureChestActor::InstantiateRewardActors()
 	TArray<FAuraLootInstance> RewardActors;
 	UArrayUtils::ShuffleArray(Transforms);
 	const FTransform InitialTransform = GetRewardInitialSpawnLocation();
+	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
 	for (int32 LootDefinitionIndex = 0; LootDefinitionIndex < LootDefinitions.Num(); LootDefinitionIndex++)
 	{
 		const FAuraLootDefinition& LootDefinition = LootDefinitions[LootDefinitionIndex];
 		const FTransform& TargetTransform = Transforms[LootDefinitionIndex];
-		if (AAuraPickupItemBase* Item = GetWorld()->SpawnActorDeferred<AAuraPickupItemBase>(LootDefinition.ItemClass, InitialTransform, nullptr, nullptr,
-		                                                                                    ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
+		const FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(LootDefinition.ItemTag);
+		if (!ItemDefinition.IsValid())
+		{
+			UE_LOG(LogAura, Warning, TEXT("[%s] Invalid item definition for item: [%s]"), *GetName(), *LootDefinition.ItemTag.ToString());
+			continue;
+		}
+		if (AActor* Item = GetWorld()->SpawnActorDeferred<AActor>(
+			ItemDefinition.ItemClass,
+			InitialTransform,
+			nullptr,
+			nullptr,
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn)
+		)
 		{
 			ITieredItemInterface::SetItemLevel(Item, LootDefinition.Level);
 			if (RewardAnimatorClass)
@@ -169,7 +224,7 @@ void AAuraTreasureChestActor::OnChestUnlocked(const FOnAuraLockComponentUnlockPa
 		{
 			// Only play the unlock effect if the chest was unlocked by means other than a key.
 			// If a key was used to unlock the chest, we'll want to jump straight to opening the chest.
-			PlayUnlockEffect(false);
+			PlayUnlockEffect();
 		}
 	}
 }

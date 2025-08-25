@@ -4,6 +4,7 @@
 #include "Game/AuraGameModeBase.h"
 
 #include "EngineUtils.h"
+#include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameInstance.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/PlayerStart.h"
@@ -115,6 +116,14 @@ void AAuraGameModeBase::LoadWorldState(UWorld* World) const
 	if (UGameplayStatics::DoesSaveGameExist(AuraGameInstance->LoadSlotName, AuraGameInstance->LoadSlotIndex))
 	{
 		UAuraSaveGame* SaveData = GetSaveSlotData(AuraGameInstance->LoadSlotName, AuraGameInstance->LoadSlotIndex);
+		const FSavedMap& SavedMap = SaveData->GetSavedMapByMapName(WorldName);
+		if (!SavedMap.IsValid())
+		{
+			UE_LOG(LogAura, Error, TEXT("[%s] Could not find saved map with name: %s"), *GetName(), *WorldName);
+			return;
+		}
+		TMap<FName, FSavedActor> SavedActorMap;
+		SavedMap.FillActorsByName(SavedActorMap);
 		for (FActorIterator ActorIterator(World); ActorIterator; ++ActorIterator)
 		{
 			AActor* Actor = *ActorIterator;
@@ -122,16 +131,13 @@ void AAuraGameModeBase::LoadWorldState(UWorld* World) const
 			{
 				continue;
 			}
-			// TODO - PERF - this should be a map or something to prevent N^2 operations
-			for (FSavedActor SavedActor : SaveData->GetSavedMapByMapName(WorldName).SavedActors)
+			if (SavedActorMap.Contains(Actor->GetFName()))
 			{
-				if (SavedActor.ActorName != Actor->GetFName())
-				{
-					return;
-				}
-				if (ISaveInterface::Execute_ShouldLoadTransform(Actor))
+				const FSavedActor& SavedActor = SavedActorMap[Actor->GetFName()];
+				if (ISaveInterface::ShouldLoadTransform(Actor))
 				{
 					Actor->SetActorTransform(SavedActor.Transform);
+					UE_LOG(LogAura, Warning, TEXT("[%s] Loading transform for actor: %s"), *GetName(), *Actor->GetName());
 				}
 				FMemoryReader MemoryReader(SavedActor.Bytes);
 				FObjectAndNameAsStringProxyArchive Archive(MemoryReader, true);
@@ -289,24 +295,24 @@ void AAuraGameModeBase::InitializeItemDefinitions()
 
 void AAuraGameModeBase::AutoSaveTransient() const
 {
-	UAuraGameInstance* GameInstance = GetAuraGameInstance();
-	if (!GameInstance->bTransient)
+	if (UAuraGameInstance* GameInstance = GetAuraGameInstance(); GameInstance->SaveState == EAuraGameSaveState::Undefined)
 	{
-		return;
+		GameInstance->LoadSlotIndex = AutoSaveSlot;
+		GameInstance->LoadSlotName = AutoSaveName;
+		GameInstance->SaveState = EAuraGameSaveState::Transient;
+		if (UGameplayStatics::DoesSaveGameExist(GameInstance->LoadSlotName, GameInstance->LoadSlotIndex))
+		{
+			DeleteSlot(GameInstance->LoadSlotName, GameInstance->LoadSlotIndex);
+		}
+		UAuraSaveGame* SaveGame = Cast<UAuraSaveGame>(UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass));
+		SaveGame->SlotIndex = GameInstance->LoadSlotIndex;
+		SaveGame->SlotName = GameInstance->LoadSlotName;
+		SaveGame->PlayerName = GameInstance->LoadSlotName;
+		SaveGame->MapAssetName = GetDefaultMapAssetName();
+		SaveGame->MapName = GetDefaultMapName();
+		SaveGame->SaveSlotStatus = Taken;
+		SaveGame->PlayerStartTag = GetDefaultPlayerStartTag();
+		SaveGame->PlayerLevel = GetDefaultPlayerLevel();
+		UGameplayStatics::SaveGameToSlot(SaveGame, GameInstance->LoadSlotName, GameInstance->LoadSlotIndex);
 	}
-	if (UGameplayStatics::DoesSaveGameExist(GameInstance->LoadSlotName, GameInstance->LoadSlotIndex))
-	{
-		DeleteSlot(GameInstance->LoadSlotName, GameInstance->LoadSlotIndex);
-	}
-	GameInstance->bAutoCleanup = true;
-	UAuraSaveGame* SaveGame = Cast<UAuraSaveGame>(UGameplayStatics::CreateSaveGameObject(LoadScreenSaveGameClass));
-	SaveGame->SlotIndex = GameInstance->LoadSlotIndex;
-	SaveGame->SlotName = GameInstance->LoadSlotName;
-	SaveGame->PlayerName = GameInstance->LoadSlotName;
-	SaveGame->MapAssetName = GetDefaultMapAssetName();
-	SaveGame->MapName = GetDefaultMapName();
-	SaveGame->SaveSlotStatus = Taken;
-	SaveGame->PlayerStartTag = GetDefaultPlayerStartTag();
-	SaveGame->PlayerLevel = GetDefaultPlayerLevel();
-	UGameplayStatics::SaveGameToSlot(SaveGame, GameInstance->LoadSlotName, GameInstance->LoadSlotIndex);
 }

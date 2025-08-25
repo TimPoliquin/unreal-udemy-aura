@@ -71,6 +71,15 @@ USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellMenuWidgetControl
 	return nullptr;
 }
 
+UAuraAbilitySystemComponent* UAuraAbilitySystemLibrary::GetAuraAbilitySystemComponent(AActor* Actor)
+{
+	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Actor))
+	{
+		return Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent);
+	}
+	return nullptr;
+}
+
 void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 	const UObject* WorldContextObject,
 	const ECharacterClass CharacterClass,

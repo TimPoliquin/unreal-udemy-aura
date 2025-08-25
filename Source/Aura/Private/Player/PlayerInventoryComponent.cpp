@@ -9,6 +9,7 @@
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
 #include "GameFramework/Character.h"
+#include "Interaction/CombatInterface.h"
 #include "Item/Equipment/AuraFishingRod.h"
 #include "Item/Equipment/AuraEquipmentBase.h"
 #include "Item/AuraItemBlueprintLibrary.h"
@@ -250,17 +251,16 @@ void UPlayerInventoryComponent::ToSaveData(UAuraSaveGame* SaveData) const
 void UPlayerInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	switch (EquipmentUseMode)
+	if (ICombatInterface::IsAbilitySystemReady(GetOwner()))
 	{
-	case EAuraEquipmentUseMode::Tool:
-		UseTool();
-		break;
-	case EAuraEquipmentUseMode::Weapon:
-		UseWeapon();
-		break;
-	default:
-		UseNothing();
-		break;
+		InitializeEquipment();
+	}
+	else if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner()))
+	{
+		CombatInterface->GetOnAbilitySystemRegisteredDelegate().AddLambda([this](UAbilitySystemComponent* AbilitySystemComponent)
+		{
+			InitializeEquipment();
+		});
 	}
 }
 
@@ -289,7 +289,7 @@ AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipme
 	SpawnParameters.Owner = Player;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AAuraEquipmentBase* Equipment = GetWorld()->SpawnActor<AAuraEquipmentBase>(
-		ItemDefinition.ItemClass,
+		ItemDefinition.EquipmentClass,
 		SocketLocation,
 		SocketRotation,
 		SpawnParameters
@@ -354,4 +354,21 @@ bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAura
 		NewValue
 	));
 	return true;
+}
+
+
+void UPlayerInventoryComponent::InitializeEquipment()
+{
+	switch (EquipmentUseMode)
+	{
+	case EAuraEquipmentUseMode::Tool:
+		UseTool();
+		break;
+	case EAuraEquipmentUseMode::Weapon:
+		UseWeapon();
+		break;
+	default:
+		UseNothing();
+		break;
+	}
 }

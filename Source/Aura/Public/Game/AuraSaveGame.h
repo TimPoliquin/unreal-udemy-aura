@@ -60,9 +60,22 @@ struct FSavedMap
 	UPROPERTY()
 	TArray<FSavedActor> SavedActors;
 
+	bool IsValid() const
+	{
+		return !MapAssetName.IsEmpty();
+	}
+
 	bool operator==(const FSavedMap& Other) const
 	{
 		return MapAssetName.Equals(Other.MapAssetName);
+	}
+
+	void FillActorsByName(TMap<FName, FSavedActor>& InActorMap) const
+	{
+		for (auto Actor : SavedActors)
+		{
+			InActorMap.Add(Actor.ActorName, Actor);
+		}
 	}
 };
 

@@ -21,7 +21,7 @@ enum class EBeaconValidationState : uint8
 };
 
 UCLASS()
-class AURA_API ABeacon : public AAuraPOI, public ISaveInterface, public IHighlightInterface, public ISwitchInterface
+class AURA_API ABeacon : public AAuraPOI, public IHighlightInterface, public ISwitchInterface
 {
 	GENERATED_BODY()
 

@@ -9,7 +9,7 @@
 void UAuraGameInstance::Shutdown()
 {
 	Super::Shutdown();
-	if (bTransient && bAutoCleanup)
+	if (SaveState == EAuraGameSaveState::Undefined || SaveState == EAuraGameSaveState::Transient)
 	{
 		UE_LOG(LogAura, Warning, TEXT("[%s] Deleting save game: %s"), *GetName(), *LoadSlotName);
 		UGameplayStatics::DeleteGameInSlot(LoadSlotName, LoadSlotIndex);
