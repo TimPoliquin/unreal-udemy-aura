@@ -87,7 +87,9 @@ struct FAuraItemDefinition
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(Categories="Message"))
 	FGameplayTag UseMessageTag = FGameplayTag::EmptyTag;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item")
-	TSubclassOf<AAuraEquipmentBase> ItemClass;
+	TSubclassOf<AActor> ItemClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item", meta=(EditCondition="EquipmentCategory != EAuraEquipmentCategory::None", EditConditionHides))
+	TSubclassOf<AAuraEquipmentBase> EquipmentClass;
 
 	bool IsValid() const
 	{

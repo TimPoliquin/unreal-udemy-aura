@@ -22,12 +22,19 @@ enum class EAuraTreasureChestState : uint8
 	Open
 };
 
+UENUM(BlueprintType)
+enum class EAuraTreasureChestGrantMode : uint8
+{
+	Spawn,
+	DirectToInventory
+};
+
 USTRUCT(BlueprintType)
 struct FAuraLootDefinition
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AAuraPickupItemBase> ItemClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(Categories="Item"))
+	FGameplayTag ItemTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Level = 1;
 };
@@ -65,10 +72,22 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual bool IsPreconditionMet_Implementation(AActor* Player) const override;
+	void Unlock(AActor* Player);
+	void Open(AActor* Player);
+	UFUNCTION(BlueprintCallable)
+	void GrantRewards(AActor* Player);
 	UFUNCTION(BlueprintImplementableEvent)
-	void PlayUnlockEffect(const bool ForceUnlock);
+	void PlayUnlockEffect();
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayUnlockForcedEffect();
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayOpenEffect(AActor* Player);
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayOpenForcedEffect();
+	UFUNCTION(BlueprintImplementableEvent)
+	void GrantRewards_Spawn();
 	UFUNCTION(BlueprintNativeEvent)
-	void PlayOpenEffect(const bool ForceOpen);
+	void GrantRewards_DirectToInventory(AActor* Player);
 	UFUNCTION(BlueprintNativeEvent)
 	FTransform GetRewardInitialSpawnLocation() const;
 	UFUNCTION(BlueprintCallable)
@@ -87,15 +106,18 @@ protected:
 	EAuraTreasureChestState State = EAuraTreasureChestState::Locked;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items")
 	TArray<FAuraLootDefinition> LootDefinitions;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta=(MustImplement="/Script/Aura.SpawnEffectInterface"))
-	TSubclassOf<AActor> RewardAnimatorClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items")
 	int32 GoldAmount = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items")
+	EAuraTreasureChestGrantMode GrantMode = EAuraTreasureChestGrantMode::Spawn;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items",
+		meta=(MustImplement="/Script/Aura.SpawnEffectInterface", EditCondition="GrantMode == EAuraTreasureChestGrantMode::Spawn", EditConditionHides))
+	TSubclassOf<AActor> RewardAnimatorClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta=(EditCondition="GrantMode == EAuraTreasureChestGrantMode::Spawn", EditConditionHides))
 	float SpawnDistance = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta=(EditCondition="GrantMode == EAuraTreasureChestGrantMode::Spawn", EditConditionHides))
 	float SpawnRadius = 120.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta=(EditCondition="GrantMode == EAuraTreasureChestGrantMode::Spawn", EditConditionHides))
 	float HeightMultiplier = 1.f;
 
 	UFUNCTION(BlueprintCallable)
