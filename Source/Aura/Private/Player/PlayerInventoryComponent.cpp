@@ -289,7 +289,7 @@ AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipme
 	SpawnParameters.Owner = Player;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AAuraEquipmentBase* Equipment = GetWorld()->SpawnActor<AAuraEquipmentBase>(
-		ItemDefinition.ItemClass,
+		ItemDefinition.EquipmentClass,
 		SocketLocation,
 		SocketRotation,
 		SpawnParameters
