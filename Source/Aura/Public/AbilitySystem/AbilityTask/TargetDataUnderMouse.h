@@ -32,8 +32,16 @@ public:
 		)
 	)
 	static UTargetDataUnderMouse* CreateTargetDataUnderMouse(
-		UGameplayAbility* OwningAbility
+		UGameplayAbility* OwningAbility,
+		bool bPreferLivingActors,
+		float SweepRadius = 5.f,
+		float SweepDistance = 10000,
+		bool bDebug = false
 	);
+	bool bPreferLivingActors = true;
+	float SweepRadius = 5.f;
+	float SweepDistance = 10000;
+	bool bDebug = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ExposeOnSpawn=true))
 	TArray<AActor*> IgnoreActors;
@@ -51,4 +59,5 @@ protected:
 
 private:
 	void SendMouseCursorDataToServer() const;
+	bool ShouldTrySphereTrace(const FHitResult& HitResult) const;
 };

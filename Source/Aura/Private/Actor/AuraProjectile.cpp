@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Actor/AuraActorBlueprintFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
 #include "Interaction/CombatInterface.h"
@@ -47,12 +48,42 @@ UProjectileMovementComponent* AAuraProjectile::GetProjectileMovementComponent() 
 	return ProjectileMovement;
 }
 
+void AAuraProjectile::SetHomingTarget(AActor* Target)
+{
+	if (IsValid(Target))
+	{
+		USceneComponent* HomingComponent = UAuraActorBlueprintFunctionLibrary::FindCollisionComponent(Target);
+		if (!HomingComponent)
+		{
+			HomingComponent = UAuraActorBlueprintFunctionLibrary::FindMeshComponent(Target);
+		}
+		if (!HomingComponent)
+		{
+			HomingComponent = Target->GetRootComponent();
+		}
+		ProjectileMovement->HomingTargetComponent = HomingComponent;
+		ProjectileMovement->bIsHomingProjectile = true;
+	}
+	if (ICombatInterface::IsAlive(Target))
+	{
+		Cast<ICombatInterface>(Target)->GetOnDeathDelegate().AddDynamic(this, &AAuraProjectile::OnTargetDead);
+	}
+}
+
 void AAuraProjectile::OnTargetDead(AActor* DeadActor)
 {
-	PlayImpactEffect();
-	if (HasAuthority())
+	if (bShouldDestroyOnTargetDeath)
 	{
-		Destroy();
+		PlayImpactEffect();
+		if (HasAuthority())
+		{
+			Destroy();
+		}
+	}
+	else
+	{
+		ProjectileMovement->bIsHomingProjectile = false;
+		ProjectileMovement->HomingTargetComponent = nullptr;
 	}
 }
 
@@ -170,6 +201,11 @@ void AAuraProjectile::Destroyed()
 	if (!HasAuthority())
 	{
 		PlayImpactEffect();
+	}
+	if (TravelSoundComponent)
+	{
+		TravelSoundComponent->Stop();
+		TravelSoundComponent->DestroyComponent();
 	}
 	Super::Destroyed();
 }

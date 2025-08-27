@@ -213,7 +213,6 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 	{
 		Inventory.Add(*ItemEntry);
 	}
-	UE_LOG(LogAura, Warning, TEXT("[%s][%s] Adding item to inventory: %s [%d]->[%d]"), *GetOwner()->GetName(), *GetName(), *ItemType.ToString(), OldValue, NewValue)
 	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
 		ItemEntry->ItemType,
 		OldValue,

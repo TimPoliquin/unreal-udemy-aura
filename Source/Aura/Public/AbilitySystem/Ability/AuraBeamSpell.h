@@ -104,4 +104,6 @@ private:
 	void BindCascadeTargetDeath(AActor* Actor);
 	bool IsTargetALivingEnemy(const AActor* TargetActor) const;
 	void EndAbilityOnTargets();
+	UFUNCTION()
+	void OnRecieveNoTarget(const FGameplayAbilityTargetDataHandle& DataHandle);
 };

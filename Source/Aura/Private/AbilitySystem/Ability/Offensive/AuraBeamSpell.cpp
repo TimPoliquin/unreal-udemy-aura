@@ -41,10 +41,12 @@ void UAuraBeamSpell::ActivateAbility(
 		ExecuteTask(WaitInputRelease);
 	}
 	if (UTargetDataUnderMouse* TargetDataUnderMouseTask = UTargetDataUnderMouse::CreateTargetDataUnderMouse(
-		this
+		this,
+		false
 	))
 	{
 		TargetDataUnderMouseTask->HasMouseTarget.AddDynamic(this, &UAuraBeamSpell::OnReceiveMouseData);
+		TargetDataUnderMouseTask->HasNoTarget.AddDynamic(this, &UAuraBeamSpell::OnRecieveNoTarget);
 		ExecuteTask(TargetDataUnderMouseTask);
 	}
 }
@@ -436,4 +438,9 @@ void UAuraBeamSpell::EndAbilityOnTargets()
 			UAuraAbilitySystemLibrary::ApplyDamageEffect(LastHit);
 		}
 	}
+}
+
+void UAuraBeamSpell::OnRecieveNoTarget(const FGameplayAbilityTargetDataHandle& DataHandle)
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
 }

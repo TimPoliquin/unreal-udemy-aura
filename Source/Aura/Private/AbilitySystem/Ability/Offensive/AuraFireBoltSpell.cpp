@@ -4,9 +4,11 @@
 #include "AbilitySystem/Ability/AuraFireBoltSpell.h"
 
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "Aura/Aura.h"
+#include "Aura/AuraLogChannels.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Interaction/CombatInterface.h"
-#include "Interaction/HighlightInterface.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 FString UAuraFireBoltSpell::GetDescription_Implementation(const int32 AbilityLevel) const
 {
@@ -63,21 +65,15 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 	);
 	FOnSpawnProjectileFinishedSignature OnSpawnFinish;
 	OnSpawnFinish.BindLambda(
-		[this, Target](const AAuraProjectile* SpawnedProjectile)
+		[this, Target](AAuraProjectile* SpawnedProjectile)
 		{
-			if (IsValid(Target) && Target->Implements<UHighlightInterface>() && Target != GetAvatarActorFromActorInfo())
-			{
-				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = Target->GetRootComponent();
-				SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = true;
-				if (ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(Target))
-				{
-					SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = false;
-					SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = nullptr;
-				}
-			}
+			SpawnedProjectile->SetHomingTarget(Target);
+			SpawnedProjectile->GetProjectileMovementComponent()->HomingAccelerationMagnitude = FMath::FRandRange(
+				HomingAccelerationMin,
+				HomingAccelerationMax
+			);
 		}
 	);
-
 	for (const FRotator& ProjectileRotation : Rotations)
 	{
 		SpawnProjectile(
@@ -91,4 +87,24 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 int32 UAuraFireBoltSpell::GetNumProjectiles(const int32 AbilityLevel) const
 {
 	return FMath::RoundToInt32(ProjectileCount.GetValueAtLevel(AbilityLevel));
+}
+
+AActor* UAuraFireBoltSpell::FindTargetAlongProjectilePath(const FVector& SpawnLocation, const FVector& Forward) const
+{
+	FHitResult CursorHit;
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(GetAvatarActorFromActorInfo());
+	UKismetSystemLibrary::SphereTraceSingle(
+		GetAvatarActorFromActorInfo(),
+		SpawnLocation,
+		SpawnLocation + Forward * TraceRange,
+		50,
+		UEngineTypes::ConvertToTraceType(ECC_Target),
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::None,
+		CursorHit,
+		true
+	);
+	return CursorHit.GetActor();
 }

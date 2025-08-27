@@ -7,7 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
-#include "Interaction/HighlightInterface.h"
 #include "Templates/Function.h"
 
 void UAuraProjectileSpell::ActivateAbility(
@@ -18,9 +17,6 @@ void UAuraProjectileSpell::ActivateAbility(
 )
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
-	// FGameplayTagContainer Tags;
-	// CommitAbility(Handle, ActorInfo, ActivationInfo, &Tags);
 }
 
 void UAuraProjectileSpell::SpawnProjectile(
@@ -56,7 +52,7 @@ FRotator UAuraProjectileSpell::GetProjectileSpawnRotation(
 ) const
 {
 	FRotator Rotation = (TargetLocation - SpawnLocation).Rotation();
-	if (!IsValid(TargetActor) || !TargetActor->Implements<UHighlightInterface>())
+	if (!ICombatInterface::IsAlive(TargetActor))
 	{
 		// reset pitch if the hit actor is not something that can be targeted
 		Rotation.Pitch = Pitch;
@@ -67,7 +63,7 @@ FRotator UAuraProjectileSpell::GetProjectileSpawnRotation(
 AAuraProjectile* UAuraProjectileSpell::SpawnProjectile(
 	const FVector& SpawnLocation,
 	const FRotator& SpawnRotation,
-	FOnSpawnProjectileFinishedSignature* BeforeFinishSpawning
+	const FOnSpawnProjectileFinishedSignature* BeforeFinishSpawning
 ) const
 {
 	FTransform SpawnTransform;

@@ -24,4 +24,7 @@ public:
 	);
 
 	static void DisableActor(AActor* Actor);
+
+	static UShapeComponent* FindCollisionComponent(const AActor* Actor);
+	static UMeshComponent* FindMeshComponent(const AActor* Actor);
 };

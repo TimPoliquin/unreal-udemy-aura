@@ -48,7 +48,7 @@ protected:
 	AAuraProjectile* SpawnProjectile(
 		const FVector& SpawnLocation,
 		const FRotator& SpawnRotation,
-		FOnSpawnProjectileFinishedSignature* BeforeFinishSpawning = nullptr
+		const FOnSpawnProjectileFinishedSignature* BeforeFinishSpawning = nullptr
 	) const;
 
 	/**
