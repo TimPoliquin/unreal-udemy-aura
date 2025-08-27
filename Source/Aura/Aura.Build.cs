@@ -10,7 +10,7 @@ public class Aura : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayAbilities", "UMG", "SlateCore",
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "CommonInput", "GameplayAbilities", "UMG", "SlateCore",
 			"ModelViewViewModel", "CableComponent", "AIModule"
 		});
 

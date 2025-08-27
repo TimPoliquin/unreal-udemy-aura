@@ -7,6 +7,7 @@
 #include "Interaction/HighlightInterface.h"
 #include "AuraPlayerController.generated.h"
 
+enum class ECommonInputType : uint8;
 class AMagicCircle;
 class UNiagaraSystem;
 class UDamageTextComponent;
@@ -17,6 +18,13 @@ class UAuraInputConfiguration;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
+
+UENUM(BlueprintType)
+enum class EAuraInputMode : uint8
+{
+	MouseAndKeyboard,
+	Gamepad
+};
 
 enum class ETargetingStatus
 {
@@ -124,19 +132,21 @@ public:
 	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
 	UFUNCTION(BlueprintCallable)
 	void HideMagicCircle();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsInputTypeMouse() const { return InputType == EAuraInputMode::MouseAndKeyboard; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsInputTypeGamepad() const { return InputType == EAuraInputMode::Gamepad; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-	void ClearAutoMove();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputMappingContext> AuraContext;
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
-	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="Attack Target"))
-	TObjectPtr<UInputAction> Input_AttackTarget;
 
 	FHighlightContext HighlightContext;
 
@@ -161,28 +171,18 @@ private:
 	// Character Movement / Targeting
 	FVector CachedDestination = FVector::ZeroVector;
 	float FollowTime = 0.f;
-	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	float ShortPressThreshold = 0.5f;
-	bool bAutoRunning = false;
 	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
-	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	float AutoRunAcceptanceRadius = 50.f;
-	UPROPERTY(VisibleAnywhere, Category = "Movement")
-	TObjectPtr<USplineComponent> Spline;
-	UPROPERTY(EditDefaultsOnly, Category = "Movement")
-	TObjectPtr<UNiagaraSystem> ClickNiagaraSystem;
 	UPROPERTY(EditDefaultsOnly, Category="Combat")
 	TSubclassOf<AMagicCircle> MagicCircleClass;
 	UPROPERTY(VisibleInstanceOnly, Category = "Combat")
 	TObjectPtr<AMagicCircle> MagicCircle;
 	FHitResult CursorHit;
+	EAuraInputMode InputType = EAuraInputMode::MouseAndKeyboard;
 
-	void AutoMove_Start();
-	void AutoMove_Process();
-	void AutoMove_End();
-	void UpdateMagicCircleLocation();
+	void UpdateMagicCircleLocation() const;
 
 	bool IsTargetingEnemy() const;
 	bool IsTargetingOther() const;
 	bool IsNotTargeting() const;
+	void InitializeInputMode(ECommonInputType NewInputMode);
 };

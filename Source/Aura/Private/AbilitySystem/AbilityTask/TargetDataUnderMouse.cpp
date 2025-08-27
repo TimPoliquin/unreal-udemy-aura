@@ -5,6 +5,8 @@
 
 #include "AbilitySystemComponent.h"
 #include "Aura/Aura.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Player/AuraPlayerController.h"
 
 UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(
 	UGameplayAbility* OwningAbility
@@ -39,37 +41,51 @@ void UTargetDataUnderMouse::Activate()
 
 void UTargetDataUnderMouse::SendMouseCursorDataToServer() const
 {
-	if (const APlayerController* PlayerController = Ability->GetCurrentActorInfo()->PlayerController.Get())
+	if (const AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(Ability->GetCurrentActorInfo()->PlayerController.Get()))
 	{
 		FHitResult CursorHit;
 		FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
 		FGameplayAbilityTargetDataHandle DataHandle;
-
-		if (PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit))
+		if (PlayerController->IsInputTypeMouse())
 		{
-			Data->HitResult = CursorHit;
-			DataHandle.Add(Data);
-			// create a prediction window for this ability system
-			FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
-			// replicate data to server
-			AbilitySystemComponent->ServerSetReplicatedTargetData(
-				GetAbilitySpecHandle(),
-				GetActivationPredictionKey(),
-				DataHandle,
-				FGameplayTag(),
-				AbilitySystemComponent->ScopedPredictionKey
-			);
-			// broadcast the ability locally if enabled
-			if (ShouldBroadcastAbilityTaskDelegates())
-			{
-				HasMouseTarget.Broadcast(DataHandle);
-			}
+			PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit);
 		}
 		else
 		{
-			Data->HitResult = CursorHit;
-			DataHandle.Add(Data);
-			if (ShouldBroadcastAbilityTaskDelegates())
+			TArray<AActor*> ActorsToIgnore;
+			UKismetSystemLibrary::SphereTraceSingle(
+				GetAvatarActor(),
+				GetAvatarActor()->GetActorLocation(),
+				GetAvatarActor()->GetActorLocation() + GetAvatarActor()->GetActorForwardVector() * 10000,
+				50,
+				UEngineTypes::ConvertToTraceType(ECC_Target),
+				false,
+				ActorsToIgnore,
+				EDrawDebugTrace::None,
+				CursorHit,
+				true
+			);
+		}
+		Data->HitResult = CursorHit;
+		DataHandle.Add(Data);
+		// create a prediction window for this ability system
+		FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
+		// replicate data to server
+		AbilitySystemComponent->ServerSetReplicatedTargetData(
+			GetAbilitySpecHandle(),
+			GetActivationPredictionKey(),
+			DataHandle,
+			FGameplayTag(),
+			AbilitySystemComponent->ScopedPredictionKey
+		);
+		// broadcast the ability locally if enabled
+		if (ShouldBroadcastAbilityTaskDelegates())
+		{
+			if (CursorHit.bBlockingHit)
+			{
+				HasMouseTarget.Broadcast(DataHandle);
+			}
+			else
 			{
 				HasNoTarget.Broadcast(DataHandle);
 			}

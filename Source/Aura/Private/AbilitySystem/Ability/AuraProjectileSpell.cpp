@@ -8,7 +8,6 @@
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/HighlightInterface.h"
-#include "Tags/AuraGameplayTags.h"
 #include "Templates/Function.h"
 
 void UAuraProjectileSpell::ActivateAbility(
