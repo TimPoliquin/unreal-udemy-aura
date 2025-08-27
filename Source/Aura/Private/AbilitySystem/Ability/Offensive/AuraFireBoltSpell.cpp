@@ -63,33 +63,18 @@ void UAuraFireBoltSpell::SpawnProjectiles(
 	);
 	FOnSpawnProjectileFinishedSignature OnSpawnFinish;
 	OnSpawnFinish.BindLambda(
-		[this, ProjectileTargetLocation, Target](AAuraProjectile* SpawnedProjectile)
+		[this, Target](const AAuraProjectile* SpawnedProjectile)
 		{
 			if (IsValid(Target) && Target->Implements<UHighlightInterface>() && Target != GetAvatarActorFromActorInfo())
 			{
 				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = Target->GetRootComponent();
+				SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = true;
 				if (ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(Target))
 				{
-					TargetCombatInterface->GetOnDeathDelegate().AddDynamic(
-						SpawnedProjectile,
-						&AAuraProjectile::OnTargetDead
-					);
+					SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = false;
+					SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = nullptr;
 				}
 			}
-			else
-			{
-				SpawnedProjectile->HomingTargetSceneComponent = NewObject<USceneComponent>(
-					USceneComponent::StaticClass()
-				);
-				SpawnedProjectile->HomingTargetSceneComponent->SetWorldLocation(ProjectileTargetLocation);
-				SpawnedProjectile->GetProjectileMovementComponent()->HomingTargetComponent = SpawnedProjectile->
-					HomingTargetSceneComponent;
-			}
-			SpawnedProjectile->GetProjectileMovementComponent()->HomingAccelerationMagnitude = FMath::FRandRange(
-				HomingAccelerationMin,
-				HomingAccelerationMax
-			);
-			SpawnedProjectile->GetProjectileMovementComponent()->bIsHomingProjectile = true;
 		}
 	);
 

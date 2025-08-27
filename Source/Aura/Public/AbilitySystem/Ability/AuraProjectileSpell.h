@@ -12,7 +12,6 @@ class UGameplayEffect;
 
 DECLARE_DELEGATE_OneParam(FOnSpawnProjectileFinishedSignature, AAuraProjectile*);
 
-
 /**
  * 
  */

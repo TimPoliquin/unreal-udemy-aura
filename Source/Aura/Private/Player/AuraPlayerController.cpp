@@ -6,15 +6,13 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "NavigationPath.h"
-#include "NavigationSystem.h"
-#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Actor/MagicCircle.h"
 #include "Aura/Aura.h"
+#include "CommonInputSubsystem.h"
+#include "Aura/AuraLogChannels.h"
 #include "Camera/CameraComponent.h"
 #include "Character/EnemyInterface.h"
-#include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "UI/Widget/DamageTextComponent.h"
@@ -22,7 +20,6 @@
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
-	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -31,26 +28,23 @@ void AAuraPlayerController::BeginPlay()
 	// Stop the game if AuraContext is not set
 	check(AuraContext);
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
 		GetLocalPlayer()
-	);
-	if (Subsystem)
+	))
 	{
 		Subsystem->AddMappingContext(AuraContext, 0);
 	}
-	bShowMouseCursor = true;
-	DefaultMouseCursor = EMouseCursor::Default;
-	FInputModeGameAndUI InputModeData;
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputModeData.SetHideCursorDuringCapture(false);
-	SetInputMode(InputModeData);
+	if (UCommonInputSubsystem* CommonSubsystem = UCommonInputSubsystem::Get(GetLocalPlayer()))
+	{
+		CommonSubsystem->OnInputMethodChangedNative.AddUObject(this, &AAuraPlayerController::InitializeInputMode);
+		InitializeInputMode(CommonSubsystem->GetCurrentInputType());
+	}
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
-	AutoMove_Process();
 	UpdateMagicCircleLocation();
 }
 
@@ -120,7 +114,6 @@ void AAuraPlayerController::Move(const FInputActionValue& Value)
 	}
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{
-		ClearAutoMove();
 		const FVector2D InputAxisVector = Value.Get<FVector2D>();
 		// const FRotator Rotation = GetControlRotation();
 		const FRotator Rotation = ControlledPawn->FindComponentByClass<UCameraComponent>()->
@@ -144,7 +137,7 @@ void AAuraPlayerController::CursorTrace()
 	}
 	const ECollisionChannel TraceChannel = IsValid(MagicCircle)
 		                                       ? ECC_ExcludeCharacters
-		                                       : ECC_Visibility;
+		                                       : ECC_Target;
 	GetHitResultUnderCursor(TraceChannel, false, CursorHit);
 	if (CursorHit.bBlockingHit)
 	{
@@ -177,10 +170,6 @@ UAuraAbilitySystemComponent* AAuraPlayerController::GetAuraAbilitySystemComponen
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	if (FAuraGameplayTags::IsLeftMouseButton(InputTag))
-	{
-		ClearAutoMove();
-	}
 	if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
 	{
 		LocalAbilitySystem->AbilityInputTagPressed(InputTag);
@@ -189,138 +178,21 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (IsTargetingEnemy() || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
+	if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
 	{
-		if (UAuraAbilitySystemComponent* LocalAbilitySystem = GetAuraAbilitySystemComponent())
-		{
-			LocalAbilitySystem->AbilityInputTagHeld(InputTag);
-		}
-	}
-	else if (!IsTargetingEnemy())
-	{
-		if (GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-			FAuraGameplayTags::Get().Player_Block_Movement
-		))
-		{
-			// abort if player cannot move
-			return;
-		}
-		FollowTime += GetWorld()->GetDeltaSeconds();
-		if (CursorHit.bBlockingHit)
-		{
-			CachedDestination = CursorHit.ImpactPoint;
-		}
-		if (APawn* ControlledPawn = GetPawn<APawn>())
-		{
-			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-			ControlledPawn->AddMovementInput(WorldDirection);
-		}
+		LocalAbilitySystem->AbilityInputTagHeld(InputTag);
 	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (IsTargetingEnemy() || !FAuraGameplayTags::IsLeftMouseButton(InputTag))
+	if (UAuraAbilitySystemComponent* LocalAbilitySystemComponent = GetAuraAbilitySystemComponent())
 	{
-		if (UAuraAbilitySystemComponent* LocalAbilitySystemComponent = GetAuraAbilitySystemComponent())
-		{
-			LocalAbilitySystemComponent->AbilityInputTagReleased(InputTag);
-		}
-	}
-	else if (!IsTargetingEnemy())
-	{
-		AutoMove_Start();
+		LocalAbilitySystemComponent->AbilityInputTagReleased(InputTag);
 	}
 }
 
-void AAuraPlayerController::AutoMove_Start()
-{
-	if (GetAuraAbilitySystemComponent() && GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_Movement
-	))
-	{
-		// do not automove if movement is blocked
-		return;
-	}
-	if (const APawn* ControlledPawn = GetPawn<APawn>(); FollowTime <= ShortPressThreshold)
-	{
-		if (HighlightContext.HasCurrentTarget())
-		{
-			IHighlightInterface::SetMoveToLocation(HighlightContext.CurrentActor, CachedDestination);
-		}
-		// DEVNOTE: this only works in multiplayer if the Allow Client-side Navigation toggle is checked
-		// in the Unreal Engine Project Settings. (see corresponding change in DefaultEngine.ini)
-		if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
-			this,
-			ControlledPawn->GetActorLocation(),
-			CachedDestination
-		))
-		{
-			Spline->ClearSplinePoints();
-			for (const FVector& PathPoint : NavPath->PathPoints)
-			{
-				Spline->AddSplinePoint(PathPoint, ESplineCoordinateSpace::World);
-			}
-			//
-			if (NavPath->PathPoints.Num() > 0)
-			{
-				CachedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
-				bAutoRunning = true;
-			}
-		}
-		if (ClickNiagaraSystem)
-		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ClickNiagaraSystem, CachedDestination);
-		}
-	}
-	FollowTime = 0.f;
-}
-
-void AAuraPlayerController::AutoMove_Process()
-{
-	if (!bAutoRunning || GetAuraAbilitySystemComponent()->HasMatchingGameplayTag(
-		FAuraGameplayTags::Get().Player_Block_Movement
-	))
-	{
-		// stop automove if not auto running or if movement is blocked
-		ClearAutoMove();
-		return;
-	}
-	if (APawn* ControlledPawn = GetPawn())
-	{
-		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(
-			ControlledPawn->GetActorLocation(),
-			ESplineCoordinateSpace::World
-		);
-		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(
-			LocationOnSpline,
-			ESplineCoordinateSpace::World
-		);
-		ControlledPawn->AddMovementInput(Direction);
-		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
-		if (DistanceToDestination <= AutoRunAcceptanceRadius)
-		{
-			AutoMove_End();
-		}
-	}
-}
-
-void AAuraPlayerController::AutoMove_End()
-{
-	ClearAutoMove();
-}
-
-void AAuraPlayerController::ClearAutoMove()
-{
-	if (bAutoRunning)
-	{
-		bAutoRunning = false;
-		Spline->ClearSplinePoints();
-		CachedDestination = FVector::ZeroVector;
-	}
-}
-
-void AAuraPlayerController::UpdateMagicCircleLocation()
+void AAuraPlayerController::UpdateMagicCircleLocation() const
 {
 	if (IsValid(MagicCircle))
 	{
@@ -341,4 +213,29 @@ bool AAuraPlayerController::IsTargetingOther() const
 bool AAuraPlayerController::IsNotTargeting() const
 {
 	return TargetingStatus == ETargetingStatus::NotTargeting;
+}
+
+void AAuraPlayerController::InitializeInputMode(const ECommonInputType NewInputMode)
+{
+	FInputModeGameAndUI InputModeData;
+	switch (NewInputMode)
+	{
+	case ECommonInputType::MouseAndKeyboard:
+		InputType = EAuraInputMode::MouseAndKeyboard;
+		bShowMouseCursor = true;
+		DefaultMouseCursor = EMouseCursor::Default;
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputModeData.SetHideCursorDuringCapture(false);
+		SetInputMode(InputModeData);
+		break;
+	case ECommonInputType::Gamepad:
+	default:
+		InputType = EAuraInputMode::Gamepad;
+		bShowMouseCursor = false;
+		DefaultMouseCursor = EMouseCursor::Default;
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputModeData.SetHideCursorDuringCapture(true);
+		SetInputMode(InputModeData);
+		break;
+	}
 }
