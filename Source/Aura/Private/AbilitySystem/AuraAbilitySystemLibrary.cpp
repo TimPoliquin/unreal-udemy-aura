@@ -313,7 +313,8 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 	const TArray<FName>& TagsToIgnore,
 	const FVector& SphereOrigin,
 	const float Radius,
-	TArray<AActor*>& OutOverlappingActors
+	TArray<AActor*>& OutOverlappingActors,
+	const bool bDebug
 )
 {
 	FCollisionQueryParams SphereParams;
@@ -332,6 +333,10 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 			FCollisionShape::MakeSphere(Radius),
 			SphereParams
 		);
+		if (bDebug)
+		{
+			DrawDebugSphere(World, SphereOrigin, Radius, 10, FColor::Red, false, 1.f, 0, 1.f);
+		}
 		for (const FOverlapResult& Overlap : Overlaps)
 		{
 			AActor* OverlapActor = Overlap.GetActor();
@@ -345,6 +350,10 @@ void UAuraAbilitySystemLibrary::GetLivePlayersWithinRadius(
 				OutOverlappingActors.AddUnique(OverlapActor);
 			}
 		}
+	}
+	else
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] No world found for context object %s!"), *FString("AuraAbilitySystemLibrary::GetLivePlayersWithinRadius"), *WorldContextObject->GetName())
 	}
 }
 

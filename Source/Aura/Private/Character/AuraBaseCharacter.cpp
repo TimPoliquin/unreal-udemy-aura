@@ -97,7 +97,7 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	if (const FTaggedMontage* ActiveMontageDef = AttackMontages.FindByPredicate(
 		[MontageTag](const FTaggedMontage& Item)
 		{
-			return Item.SocketTag.MatchesTagExact(MontageTag);
+			return Item.MontageTag.MatchesTagExact(MontageTag) || Item.SocketTag.MatchesTagExact(MontageTag);
 		}
 	))
 	{
@@ -107,7 +107,11 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 		{
 			return Weapon->GetSocketLocation(SocketName);
 		}
-		return GetMesh()->GetSocketLocation(SocketName);
+		if (GetMesh()->GetSocketByName(SocketName))
+		{
+			return GetMesh()->GetSocketLocation(SocketName);
+		}
+		return GetActorLocation();
 	}
 	UE_LOG(LogTemp, Warning, TEXT("%s: No montage definition found for tag [%s]"), *GetName(), *MontageTag.ToString());
 	return GetActorLocation();

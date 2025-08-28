@@ -247,8 +247,9 @@ public:
 		const TArray<AActor*>& ActorsToIgnore,
 		const TArray<FName>& TagsToIgnore,
 		const FVector& SphereOrigin,
-		float Radius,
-		TArray<AActor*>& OutOverlappingActors
+		const float Radius,
+		TArray<AActor*>& OutOverlappingActors,
+		const bool bDebug = false
 	);
 
 	UFUNCTION(BlueprintCallable, Category="AuraAbilitySystemLibrary|GameplayMechanics")
