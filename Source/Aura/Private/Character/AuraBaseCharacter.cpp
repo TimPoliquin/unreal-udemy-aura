@@ -22,7 +22,7 @@ AAuraBaseCharacter::AAuraBaseCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_ExcludeCharacters, ECR_Overlap);
-	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile, ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_ExcludeCharacters, ECR_Ignore);
@@ -72,6 +72,11 @@ FGameplayTag AAuraBaseCharacter::GetHitReactAbilityTagByDamageType_Implementatio
 	return FAuraGameplayTags::Get().Effect_HitReact_Default;
 }
 
+UShapeComponent* AAuraBaseCharacter::GetPrimaryCollisionComponent() const
+{
+	return GetCapsuleComponent();
+}
+
 void AAuraBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -92,7 +97,7 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	if (const FTaggedMontage* ActiveMontageDef = AttackMontages.FindByPredicate(
 		[MontageTag](const FTaggedMontage& Item)
 		{
-			return Item.SocketTag.MatchesTagExact(MontageTag);
+			return Item.MontageTag.MatchesTagExact(MontageTag) || Item.SocketTag.MatchesTagExact(MontageTag);
 		}
 	))
 	{
@@ -102,7 +107,11 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 		{
 			return Weapon->GetSocketLocation(SocketName);
 		}
-		return GetMesh()->GetSocketLocation(SocketName);
+		if (GetMesh()->GetSocketByName(SocketName))
+		{
+			return GetMesh()->GetSocketLocation(SocketName);
+		}
+		return GetActorLocation();
 	}
 	UE_LOG(LogTemp, Warning, TEXT("%s: No montage definition found for tag [%s]"), *GetName(), *MontageTag.ToString());
 	return GetActorLocation();

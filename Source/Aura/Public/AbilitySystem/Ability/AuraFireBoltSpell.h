@@ -28,7 +28,10 @@ protected:
 	float HomingAccelerationMax = 3200.f;
 	UPROPERTY(EditDefaultsOnly, Category="FireBolt")
 	FScalableFloat ProjectileCount;
+	UPROPERTY(EditDefaultsOnly, Category = "FireBolt")
+	float TraceRange = 2000.f;
 
 private:
 	int32 GetNumProjectiles(const int32 AbilityLevel) const;
+	AActor* FindTargetAlongProjectilePath(const FVector& SpawnLocation, const FVector& Forward) const;
 };

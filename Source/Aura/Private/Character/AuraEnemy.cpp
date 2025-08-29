@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/Widget/AuraUserWidget.h"
 #include "Actor/Spawn/TrackableInterface.h"
+#include "Components/CapsuleComponent.h"
 #include "Game/AuraGameModeBase.h"
 #include "Item/Pickup/AuraTreasurePickup.h"
 #include "Item/Pickup/TieredItemInterface.h"

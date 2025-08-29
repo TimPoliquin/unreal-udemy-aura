@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
+#include "Actor/CollidableInterface.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
@@ -19,7 +20,7 @@ class UAttributeSet;
 class UAbilitySystemComponent;
 
 UCLASS(Abstract)
-class AURA_API AAuraBaseCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
+class AURA_API AAuraBaseCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatInterface, public ICollidableInterface
 {
 	GENERATED_BODY()
 
@@ -91,6 +92,10 @@ public:
 	GetHitReactAbilityTagByDamageType_Implementation(const FGameplayTag& DamageTypeTag) const override;
 
 	/** Combat Interface End **/
+
+	/** Start ICollidableInterface **/
+	virtual UShapeComponent* GetPrimaryCollisionComponent() const override;
+	/** End ICollidableInterface **/
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath();

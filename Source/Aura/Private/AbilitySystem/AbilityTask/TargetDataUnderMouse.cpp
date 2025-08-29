@@ -5,14 +5,19 @@
 
 #include "AbilitySystemComponent.h"
 #include "Aura/Aura.h"
+#include "Interaction/CombatInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Player/AuraPlayerController.h"
 
 UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(
-	UGameplayAbility* OwningAbility
+	UGameplayAbility* OwningAbility, bool bPreferLivingActors, float SweepRadius, float SweepDistance, bool bDebug
 )
 {
 	UTargetDataUnderMouse* Task = NewAbilityTask<UTargetDataUnderMouse>(OwningAbility);
+	Task->bPreferLivingActors = bPreferLivingActors;
+	Task->SweepRadius = SweepRadius;
+	Task->SweepDistance = SweepDistance;
+	Task->bDebug = bDebug;
 	return Task;
 }
 
@@ -46,24 +51,31 @@ void UTargetDataUnderMouse::SendMouseCursorDataToServer() const
 		FHitResult CursorHit;
 		FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
 		FGameplayAbilityTargetDataHandle DataHandle;
+		FVector TargetDirection = GetAvatarActor()->GetActorForwardVector();
 		if (PlayerController->IsInputTypeMouse())
 		{
 			PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit);
+			TargetDirection = (CursorHit.ImpactPoint - GetAvatarActor()->GetActorLocation()).GetSafeNormal();
+			TargetDirection.Z = 0;
 		}
-		else
+		if (ShouldTrySphereTrace(CursorHit))
 		{
 			TArray<AActor*> ActorsToIgnore;
+			ActorsToIgnore.Add(GetAvatarActor());
 			UKismetSystemLibrary::SphereTraceSingle(
 				GetAvatarActor(),
 				GetAvatarActor()->GetActorLocation(),
-				GetAvatarActor()->GetActorLocation() + GetAvatarActor()->GetActorForwardVector() * 10000,
-				50,
+				GetAvatarActor()->GetActorLocation() + TargetDirection * SweepDistance,
+				SweepRadius,
 				UEngineTypes::ConvertToTraceType(ECC_Target),
 				false,
 				ActorsToIgnore,
-				EDrawDebugTrace::None,
+				bDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None,
 				CursorHit,
-				true
+				true,
+				FLinearColor::Green,
+				FLinearColor::Red,
+				5.f
 			);
 		}
 		Data->HitResult = CursorHit;
@@ -91,6 +103,15 @@ void UTargetDataUnderMouse::SendMouseCursorDataToServer() const
 			}
 		}
 	}
+}
+
+bool UTargetDataUnderMouse::ShouldTrySphereTrace(const FHitResult& HitResult) const
+{
+	if (bPreferLivingActors && !ICombatInterface::IsAlive(HitResult.GetActor()))
+	{
+		return true;
+	}
+	return !HitResult.bBlockingHit;
 }
 
 void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(

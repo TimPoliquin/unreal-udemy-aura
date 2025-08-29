@@ -21,7 +21,6 @@ class AURA_API AAuraProjectile : public AActor
 public:
 	AAuraProjectile();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = true), Replicated)
 	FDamageEffectParams DamageEffectParams;
 
@@ -30,7 +29,8 @@ public:
 	TObjectPtr<USceneComponent> HomingTargetSceneComponent;
 	UPROPERTY(EditDefaultsOnly)
 	bool bShouldDestroyOnTargetDeath = true;
-
+	UFUNCTION(BlueprintCallable)
+	void SetHomingTarget(AActor* Target);
 	UFUNCTION()
 	void OnTargetDead(AActor* DeadActor);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Projectile")
@@ -69,5 +69,5 @@ private:
 	TObjectPtr<UAudioComponent> TravelSoundComponent;
 	bool bHit = false;
 	UPROPERTY(EditDefaultsOnly)
-	float LifeSpan = 10.f;
+	float LifeSpan = 2.f;
 };
