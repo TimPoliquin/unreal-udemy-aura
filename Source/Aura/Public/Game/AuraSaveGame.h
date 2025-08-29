@@ -139,7 +139,7 @@ struct FSavedInventory
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class AURA_API UAuraSaveGame : public USaveGame
 {
 	GENERATED_BODY()

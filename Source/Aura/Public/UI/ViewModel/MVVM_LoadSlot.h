@@ -60,6 +60,8 @@ public:
 	void SetPlayerStartTag(const FName& InPlayerStartTag);
 	FString GetMapAssetName() const;
 	void SetMapAssetName(const FString& InMapAssetName);
+	void ToSaveGame(UAuraSaveGame* SaveGame) const;
+	void FromSaveGame(const UAuraSaveGame* SaveGame);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))

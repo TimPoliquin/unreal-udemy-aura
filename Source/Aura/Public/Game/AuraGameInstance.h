@@ -6,14 +6,9 @@
 #include "Engine/GameInstance.h"
 #include "AuraGameInstance.generated.h"
 
-UENUM()
-enum class EAuraGameSaveState : uint8
-{
-	Undefined,
-	Transient,
-	SaveSlot
-};
-
+class UAuraCharacterGameInstanceSubsystem;
+class ULocalPlayerSaveGameSubsystem;
+class ULevelGameInstanceSubsystem;
 /**
  * 
  */
@@ -23,24 +18,11 @@ class AURA_API UAuraGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
-	FName PlayerStartTag = FName();
-
-	UPROPERTY()
-	FString LoadSlotName;
-
-	UPROPERTY()
-	int32 LoadSlotIndex;
-
-	UPROPERTY()
-	EAuraGameSaveState SaveState = EAuraGameSaveState::Undefined;
-
+	static UAuraGameInstance* Get(const UObject* WorldContextObject);
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> ActivePlayerActors;
 
 	virtual void Shutdown() override;
-
-	EAuraGameSaveState GetSaveState() const { return SaveState; }
 
 	void RegisterActivePlayer(AActor* Actor)
 	{
@@ -53,4 +35,12 @@ public:
 	}
 
 	TArray<AActor*> GetActivePlayerActors();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
+	TSubclassOf<UAuraCharacterGameInstanceSubsystem> CharacterSubsystem;
+	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
+	TSubclassOf<ULevelGameInstanceSubsystem> LevelSubsystem;
+	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
+	TSubclassOf<ULocalPlayerSaveGameSubsystem> SaveGameSubsystem;
 };

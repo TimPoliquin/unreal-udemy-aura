@@ -3,7 +3,7 @@
 
 #include "Checkpoint/MapEntrance.h"
 
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -37,8 +37,12 @@ void AMapEntrance::OnSphereOverlap(
 	{
 		bHasBeenActivated = true;
 		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
-		AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
-		GameMode->SaveWorldState(GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName());
+		if (const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
+			Cast<ULocalPlayer>(OtherActor->GetNetOwningPlayer())
+		))
+		{
+			SaveGameSubsystem->SaveWorldState(GetWorld());
+		}
 		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);
 	}
 }

@@ -29,7 +29,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IInventoryActorInterface, public IFishingActorInterface
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IInventoryActorInterface,
+                                public IFishingActorInterface
 {
 	GENERATED_BODY()
 
@@ -96,7 +97,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
-	void LoadProgress();
+	void LoadProgress(const UAuraSaveGame* SaveData);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

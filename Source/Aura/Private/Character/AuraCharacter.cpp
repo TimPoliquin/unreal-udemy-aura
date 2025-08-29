@@ -20,6 +20,8 @@
 #include "Game/AuraGameInstance.h"
 #include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
+#include "Game/Subsystem/LevelGameInstanceSubsystem.h"
+#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PlayerInventoryComponent.h"
@@ -93,66 +95,64 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	// Init ability actor info for the server
 	InitializeAbilityActorInfo();
-	LoadProgress();
 	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
+		const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
+			PlayerController->GetLocalPlayer()
+		);
+		LoadProgress(SaveGameSubsystem->GetInGameSaveData());
+		SaveGameSubsystem->LoadWorldState(GetWorld());
 	}
-	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
-	GameMode->LoadWorldState(GetWorld());
 }
 
 
-void AAuraCharacter::LoadProgress()
+void AAuraCharacter::LoadProgress(const UAuraSaveGame* SaveData)
 {
-	if (const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+	if (!SaveData)
 	{
-		const UAuraSaveGame* SaveData = GameMode->GetInGameSaveData();
-		if (!SaveData)
+		return;
+	}
+	switch (SaveData->SaveSlotAttributeSource)
+	{
+	case FromDefault:
+		InitializeDefaultAttributes();
+		AddCharacterAbilities();
+		break;
+	case FromDisk:
+		if (UAuraAttributeSet* AuraAttributeSet = GetAuraAttributeSet())
 		{
-			return;
+			AuraAttributeSet->FromSaveData(SaveData);
 		}
-		switch (SaveData->SaveSlotAttributeSource)
+		if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
 		{
-		case FromDefault:
-			InitializeDefaultAttributes();
-			AddCharacterAbilities();
-			break;
-		case FromDisk:
-			if (UAuraAttributeSet* AuraAttributeSet = GetAuraAttributeSet())
-			{
-				AuraAttributeSet->FromSaveData(SaveData);
-			}
-			if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
-			{
-				AuraPlayerState->FromSaveData(SaveData);
-			}
-			if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
-			{
-				TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
-				InitializeEffects.Add(DefaultSecondaryAttributes);
-				InitializeEffects.Add(InitializeVitalAttributes);
-				UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
-					this,
-					AuraAbilitySystemComponent,
-					SaveData,
-					InitializeEffects
-				);
-				AuraAbilitySystemComponent->FromSaveData(SaveData);
-			}
-			if (PlayerInventoryComponent)
-			{
-				PlayerInventoryComponent->FromSaveData(SaveData);
-			}
-			break;
-		default:
-			UE_LOG(
-				LogAura,
-				Warning,
-				TEXT("Unexpected SaveData->SaveSlotAttributeSource: [%d]"),
-				SaveData->SaveSlotAttributeSource.GetValue()
+			AuraPlayerState->FromSaveData(SaveData);
+		}
+		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+		{
+			TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
+			InitializeEffects.Add(DefaultSecondaryAttributes);
+			InitializeEffects.Add(InitializeVitalAttributes);
+			UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
+				this,
+				AuraAbilitySystemComponent,
+				SaveData,
+				InitializeEffects
 			);
+			AuraAbilitySystemComponent->FromSaveData(SaveData);
 		}
+		if (PlayerInventoryComponent)
+		{
+			PlayerInventoryComponent->FromSaveData(SaveData);
+		}
+		break;
+	default:
+		UE_LOG(
+			LogAura,
+			Warning,
+			TEXT("Unexpected SaveData->SaveSlotAttributeSource: [%d]"),
+			SaveData->SaveSlotAttributeSource.GetValue()
+		);
 	}
 }
 
@@ -270,9 +270,16 @@ void AAuraCharacter::Die()
 	DeathTimerDelegate.BindLambda(
 		[this]()
 		{
-			if (AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+			if (ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
+				Cast<ULocalPlayer>(GetNetOwningPlayer())
+			))
 			{
-				GameMode->PlayerDied(this);
+				ULevelGameInstanceSubsystem* LevelSubsystem = ULevelGameInstanceSubsystem::Get(GetWorld());
+				LevelSubsystem->LoadMap(this, SaveGameSubsystem->GetInGameSaveData()->MapName);
+			}
+			else
+			{
+				UE_LOG(LogAura, Error, TEXT("[%s] Failed to get local player from aura character"), *GetName())
 			}
 		}
 	);
@@ -392,9 +399,10 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 
 void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 {
-	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
-	UAuraSaveGame* SaveData = GameMode
-		                          ? GameMode->GetInGameSaveData()
+	const ULocalPlayer* Player = Cast<ULocalPlayer>(GetNetOwningPlayer());
+	ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(Player);
+	UAuraSaveGame* SaveData = SaveGameSubsystem
+		                          ? SaveGameSubsystem->GetInGameSaveData()
 		                          : nullptr;
 	if (SaveData)
 	{
@@ -428,7 +436,7 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		}
 		SaveData->SaveSlotAttributeSource = FromDisk;
 		SaveData->PlayerStartTag = CheckpointTag;
-		GameMode->SaveInGameProgressData(SaveData);
+		SaveGameSubsystem->SaveInGameProgressData(SaveData);
 	}
 }
 

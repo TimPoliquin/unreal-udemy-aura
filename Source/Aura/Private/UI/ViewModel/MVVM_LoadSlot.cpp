@@ -63,6 +63,28 @@ void UMVVM_LoadSlot::SetMapAssetName(const FString& InMapAssetName)
 	this->MapAssetName = InMapAssetName;
 }
 
+void UMVVM_LoadSlot::ToSaveGame(UAuraSaveGame* SaveGame) const
+{
+	SaveGame->SlotIndex = GetSlotIndex();
+	SaveGame->SlotName = GetLoadSlotName();
+	SaveGame->PlayerName = GetPlayerName();
+	SaveGame->MapAssetName = GetMapAssetName();
+	SaveGame->MapName = GetMapName();
+	SaveGame->SaveSlotStatus = GetLoadSlotStatus();
+	SaveGame->PlayerStartTag = GetPlayerStartTag();
+	SaveGame->PlayerLevel = GetPlayerLevel();
+}
+
+void UMVVM_LoadSlot::FromSaveGame(const UAuraSaveGame* SaveGame)
+{
+	SetPlayerName(SaveGame->PlayerName);
+	SetPlayerLevel(SaveGame->PlayerLevel);
+	SetMapName(SaveGame->MapName);
+	SetLoadSlotStatus(SaveGame->SaveSlotStatus);
+	SetPlayerStartTag(SaveGame->PlayerStartTag);
+	InitializeSlot();
+}
+
 FString UMVVM_LoadSlot::GetMapName() const
 {
 	return MapName;

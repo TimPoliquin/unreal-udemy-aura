@@ -12,8 +12,8 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraBaseCharacter.h"
-#include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
+#include "Game/Subsystem/AuraCharacterGameInstanceSubsystem.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
@@ -73,7 +73,9 @@ USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellMenuWidgetControl
 
 UAuraAbilitySystemComponent* UAuraAbilitySystemLibrary::GetAuraAbilitySystemComponent(AActor* Actor)
 {
-	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Actor))
+	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		Actor
+	))
 	{
 		return Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 	}
@@ -87,9 +89,11 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 	UAbilitySystemComponent* AbilitySystemComponent
 )
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		const UCharacterClassInfo* ClassInfo = GameMode->GetCharacterClassInfo();
+		const UCharacterClassInfo* ClassInfo = CharacterSubsystem->GetCharacterClassInfo();
 		const FCharacterClassDefaultInfo DefaultInfo = ClassInfo->GetClassDefaultInfo(CharacterClass);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, DefaultInfo.PrimaryAttributes, Level);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
@@ -162,9 +166,11 @@ void UAuraAbilitySystemLibrary::GrantStartupAbilities(
 	const int Level
 )
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		UCharacterClassInfo* CharacterClassInfo = GameMode->GetCharacterClassInfo();
+		UCharacterClassInfo* CharacterClassInfo = CharacterSubsystem->GetCharacterClassInfo();
 		GrantAbilities(AbilitySystemComponent, CharacterClassInfo->CommonAbilities, 1);
 		GrantAbilities(
 			AbilitySystemComponent,
@@ -190,18 +196,22 @@ void UAuraAbilitySystemLibrary::GrantAbilities(
 
 UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		return GameMode->GetCharacterClassInfo();
+		return CharacterSubsystem->GetCharacterClassInfo();
 	}
 	return nullptr;
 }
 
 UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContextObject)
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		return GameMode->GetAbilityInfo();
+		return CharacterSubsystem->GetAbilityInfo();
 	}
 	return nullptr;
 }
@@ -299,9 +309,11 @@ int32 UAuraAbilitySystemLibrary::GetXPReward(
 	const int32 Level
 )
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		return GameMode->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
+		return CharacterSubsystem->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
 	}
 	UE_LOG(LogAura, Error, TEXT("Game mode is not set to AuraGameMode!"))
 	return 0;

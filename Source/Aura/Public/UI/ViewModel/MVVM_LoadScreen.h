@@ -52,6 +52,8 @@ public:
 	void PlayButtonPressed();
 
 	void LoadData();
+	ULocalPlayer* GetLocalPlayer() const;
+	void SetLocalPlayer(class ULocalPlayer* InLocalPlayer);
 
 private:
 	UPROPERTY()
@@ -62,7 +64,8 @@ private:
 	TObjectPtr<UMVVM_LoadSlot> LoadSlot_1;
 	UPROPERTY()
 	TObjectPtr<UMVVM_LoadSlot> LoadSlot_2;
-
 	UPROPERTY()
 	TObjectPtr<UMVVM_LoadSlot> SelectedSlot;
+	UPROPERTY()
+	TObjectPtr<ULocalPlayer> LocalPlayer;
 };
