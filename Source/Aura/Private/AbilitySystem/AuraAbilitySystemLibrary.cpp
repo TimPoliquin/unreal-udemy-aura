@@ -12,8 +12,9 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraBaseCharacter.h"
+#include "Engine/OverlapResult.h"
 #include "Game/AuraSaveGame.h"
-#include "Game/Subsystem/AuraCharacterGameInstanceSubsystem.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
@@ -89,11 +90,11 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 	UAbilitySystemComponent* AbilitySystemComponent
 )
 {
-	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
 		WorldContextObject
 	))
 	{
-		const UCharacterClassInfo* ClassInfo = CharacterSubsystem->GetCharacterClassInfo();
+		const UCharacterClassInfo* ClassInfo = GameDataSubsystem->GetCharacterClassInfo();
 		const FCharacterClassDefaultInfo DefaultInfo = ClassInfo->GetClassDefaultInfo(CharacterClass);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, DefaultInfo.PrimaryAttributes, Level);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
@@ -166,11 +167,11 @@ void UAuraAbilitySystemLibrary::GrantStartupAbilities(
 	const int Level
 )
 {
-	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
 		WorldContextObject
 	))
 	{
-		UCharacterClassInfo* CharacterClassInfo = CharacterSubsystem->GetCharacterClassInfo();
+		UCharacterClassInfo* CharacterClassInfo = GameDataSubsystem->GetCharacterClassInfo();
 		GrantAbilities(AbilitySystemComponent, CharacterClassInfo->CommonAbilities, 1);
 		GrantAbilities(
 			AbilitySystemComponent,
@@ -196,22 +197,22 @@ void UAuraAbilitySystemLibrary::GrantAbilities(
 
 UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
 {
-	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
 		WorldContextObject
 	))
 	{
-		return CharacterSubsystem->GetCharacterClassInfo();
+		return GameDataSubsystem->GetCharacterClassInfo();
 	}
 	return nullptr;
 }
 
 UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContextObject)
 {
-	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
 		WorldContextObject
 	))
 	{
-		return CharacterSubsystem->GetAbilityInfo();
+		return GameDataSubsystem->GetAbilityInfo();
 	}
 	return nullptr;
 }
@@ -309,11 +310,11 @@ int32 UAuraAbilitySystemLibrary::GetXPReward(
 	const int32 Level
 )
 {
-	if (const UAuraCharacterGameInstanceSubsystem* CharacterSubsystem = UAuraCharacterGameInstanceSubsystem::Get(
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
 		WorldContextObject
 	))
 	{
-		return CharacterSubsystem->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
+		return GameDataSubsystem->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
 	}
 	UE_LOG(LogAura, Error, TEXT("Game mode is not set to AuraGameMode!"))
 	return 0;

@@ -3,7 +3,6 @@
 
 #include "UI/ViewModel/MVVM_InventoryItem.h"
 
-#include "Game/AuraGameModeBase.h"
 #include "Item/AuraItemBlueprintLibrary.h"
 #include "Character/AuraCharacter.h"
 

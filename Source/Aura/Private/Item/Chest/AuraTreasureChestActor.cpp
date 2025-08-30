@@ -5,7 +5,7 @@
 
 #include "Actor/Spawn/AuraSpawnBlueprintLibrary.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Item/AuraItemTypes.h"
 #include "Item/Component/AuraLockComponent.h"
 #include "Item/Effect/SpawnEffectInterface.h"
@@ -159,12 +159,12 @@ TArray<FAuraLootInstance> AAuraTreasureChestActor::InstantiateRewardActors()
 	TArray<FAuraLootInstance> RewardActors;
 	UArrayUtils::ShuffleArray(Transforms);
 	const FTransform InitialTransform = GetRewardInitialSpawnLocation();
-	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
+	UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(this);
 	for (int32 LootDefinitionIndex = 0; LootDefinitionIndex < LootDefinitions.Num(); LootDefinitionIndex++)
 	{
 		const FAuraLootDefinition& LootDefinition = LootDefinitions[LootDefinitionIndex];
 		const FTransform& TargetTransform = Transforms[LootDefinitionIndex];
-		const FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(LootDefinition.ItemTag);
+		const FAuraItemDefinition ItemDefinition = GameDataSubsystem->FindItemDefinitionByItemTag(LootDefinition.ItemTag);
 		if (!ItemDefinition.IsValid())
 		{
 			UE_LOG(LogAura, Warning, TEXT("[%s] Invalid item definition for item: [%s]"), *GetName(), *LootDefinition.ItemTag.ToString());

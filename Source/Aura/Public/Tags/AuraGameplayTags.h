@@ -193,6 +193,10 @@ struct FAuraGameplayTags
 	FGameplayTag Fish_Rarity;
 	FGameplayTag Fish_Tag;
 
+	/** Message Tags **/
+	FGameplayTag Message_Default_Item_Pickup;
+	FGameplayTag Message_Default_Item_Use;
+
 
 	/**
 	 * Montage Attack Tags 

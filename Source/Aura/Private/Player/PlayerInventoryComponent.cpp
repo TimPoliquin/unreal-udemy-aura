@@ -6,8 +6,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Item/Equipment/AuraFishingRod.h"
@@ -177,7 +177,7 @@ void UPlayerInventoryComponent::PlayEquipAnimation(const EAuraEquipmentSlot Slot
 
 int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, const int32 Count)
 {
-	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->FindItemDefinitionByItemTag(ItemType);
+	const FAuraItemDefinition ItemDefinition = UAuraGameDataSubsystem::Get(GetOwner())->FindItemDefinitionByItemTag(ItemType);
 	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
 		{
@@ -308,7 +308,7 @@ AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipme
 
 bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory)
 {
-	const FAuraItemDefinition ItemDefinition = AAuraGameModeBase::GetAuraGameMode(GetOwner())->FindItemDefinitionByItemTag(ItemTag);
+	const FAuraItemDefinition ItemDefinition = UAuraGameDataSubsystem::Get(GetOwner())->FindItemDefinitionByItemTag(ItemTag);
 	if (!ItemDefinition.IsValid())
 	{
 		UE_LOG(LogAura, Warning, TEXT("[%s][%s] Attempted to find item that has no definition: %s"), *GetOwner()->GetName(), *GetName(), *ItemTag.ToString());

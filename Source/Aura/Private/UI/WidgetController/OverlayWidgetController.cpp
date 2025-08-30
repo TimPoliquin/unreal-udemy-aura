@@ -8,7 +8,7 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Player/AuraPlayerState.h"
 #include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
@@ -129,8 +129,13 @@ void UOverlayWidgetController::OnPlayerHideHUDTagChanged(FGameplayTag GameplayTa
 
 void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCountChangedPayload& Payload)
 {
-	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(Player);
-	const FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(Payload.ItemType);
+	UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(Player);
+	if (!GameDataSubsystem)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] Could not get game data subsystem for Player [%s]"), *GetName(), *Player->GetName())
+		return;
+	}
+	const FAuraItemDefinition ItemDefinition = GameDataSubsystem->FindItemDefinitionByItemTag(Payload.ItemType);
 	FGameplayTag MessageTag;
 	if (!ItemDefinition.IsValid())
 	{
@@ -139,11 +144,11 @@ void UOverlayWidgetController::OnPlayerInventoryChanged(const FOnInventoryItemCo
 	}
 	if (Payload.IsItemAddedChange())
 	{
-		MessageTag = ItemDefinition.PickupMessageTag.IsValid() ? ItemDefinition.PickupMessageTag : GameMode->GetDefaultItemPickupMessageTag();
+		MessageTag = ItemDefinition.PickupMessageTag.IsValid() ? ItemDefinition.PickupMessageTag : GameDataSubsystem->GetDefaultItemPickupMessageTag();
 	}
 	else if (Payload.IsItemUsedChange())
 	{
-		MessageTag = ItemDefinition.UseMessageTag.IsValid() ? ItemDefinition.UseMessageTag : GameMode->GetDefaultItemUseMessageTag();
+		MessageTag = ItemDefinition.UseMessageTag.IsValid() ? ItemDefinition.UseMessageTag : GameDataSubsystem->GetDefaultItemUseMessageTag();
 	}
 	if (!MessageTag.IsValid())
 	{

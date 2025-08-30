@@ -7,7 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Item/Equipment/AuraFishingRod.h"
 #include "Item/AuraItemTypes.h"
 #include "Player/PlayerInventoryComponent.h"
@@ -201,11 +201,11 @@ float UAuraFishingComponent::GetRarityMultiplier(const FGameplayTag& Rarity) con
 		GetOwner(),
 		FAuraGameplayTags::Get().Abilities_Fishing
 	);
-	return AAuraGameModeBase::GetAuraGameMode(GetOwner())->GetFishInfo()->
-	                                                       GetFishRarityMultiplierByPlayerFishingLevel(
-		                                                       FishingLevel,
-		                                                       Rarity
-	                                                       );
+	return UAuraGameDataSubsystem::Get(GetOwner())->GetFishInfo()->
+	                                                GetFishRarityMultiplierByPlayerFishingLevel(
+		                                                FishingLevel,
+		                                                Rarity
+	                                                );
 }
 
 FGameplayTagContainer UAuraFishingComponent::GetFishingTags() const

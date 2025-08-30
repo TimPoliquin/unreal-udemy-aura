@@ -6,16 +6,16 @@
 #include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
 #include "Fishing/AuraFishTypes.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 
 FAuraItemDefinition UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(
 	const UObject* WorldContextObject,
 	const FGameplayTag& ItemType
 )
 {
-	if (AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject))
+	if (UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(WorldContextObject))
 	{
-		return GameMode->FindItemDefinitionByItemTag(ItemType);
+		return GameDataSubsystem->FindItemDefinitionByItemTag(ItemType);
 	}
 	UE_LOG(LogAura, Error, TEXT("[%s] Attempted get item definition, but game mode was null!"), *FString("UAuraItemBlueprintLibrary::GetItemDefinitionByItemType"));
 	return FAuraItemDefinition();
@@ -51,9 +51,9 @@ UTexture2D* UAuraItemBlueprintLibrary::SubstituteMessageIcon(UTexture2D* Message
 
 FAuraFishCatch UAuraItemBlueprintLibrary::ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType)
 {
-	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(WorldContextObject);
-	FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(FishType);
-	FAuraFishDefinition FishDefinition = GameMode->GetFishInfo()->GetFishDefinitionByFishType(FishType);
+	UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(WorldContextObject);
+	FAuraItemDefinition ItemDefinition = GameDataSubsystem->FindItemDefinitionByItemTag(FishType);
+	FAuraFishDefinition FishDefinition = GameDataSubsystem->GetFishInfo()->GetFishDefinitionByFishType(FishType);
 	FAuraFishCatch Catch;
 	Catch.FishType = FishType;
 	Catch.Description = ItemDefinition.ItemDescription;

@@ -4,7 +4,7 @@
 #include "Item/Component/AuraLockComponent.h"
 
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelAssets/Switch/SwitchInterface.h"
 #include "Player/InventoryActorInterface.h"
@@ -168,7 +168,7 @@ void UAuraLockComponent::InitializeUnlock_Key_Implementation()
 		UE_LOG(LogAura, Warning, TEXT("[%s] Configured with an invalid key"), *GetName());
 		return;
 	}
-	if (!AAuraGameModeBase::GetAuraGameMode(this)->FindItemDefinitionByItemTag(KeyTag).IsValid())
+	if (UAuraGameDataSubsystem::Get(this)->FindItemDefinitionByItemTag(KeyTag).IsValid())
 	{
 		UE_LOG(LogAura, Warning, TEXT("[%s] Configured key is missing an item definition: %s"), *GetName(), *KeyTag.GetTagName().ToString());
 	}

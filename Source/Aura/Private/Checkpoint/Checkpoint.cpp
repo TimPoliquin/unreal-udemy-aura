@@ -5,7 +5,6 @@
 
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
-#include "Game/AuraGameModeBase.h"
 #include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
 #include "Interaction/PlayerInterface.h"
 

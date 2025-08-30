@@ -560,6 +560,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Fish = TagManager.AddNativeGameplayTag(FName("Fish"), FString("Fish root tag"));
 	Instance.Fish_Rarity = TagManager.AddNativeGameplayTag(FName("Fish.Rarity"), FString("Fish Rarity root tag"));
 	Instance.Fish_Tag = TagManager.AddNativeGameplayTag(FName("Fish.Tag"), FString("Fish Tags root tag"));
+	/** Message Tags **/
+	Instance.Message_Default_Item_Pickup = TagManager.AddNativeGameplayTag(FName("Message.Default.Item.Pickup"), FString("Pickup item message tag"));
+	Instance.Message_Default_Item_Use = TagManager.AddNativeGameplayTag(FName("Message.Default.Item.Use"), FString("Use item message tag"));
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

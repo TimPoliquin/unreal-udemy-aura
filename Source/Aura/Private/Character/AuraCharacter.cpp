@@ -17,9 +17,8 @@
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Fishing/AuraFishingComponent.h"
-#include "Game/AuraGameInstance.h"
-#include "Game/AuraGameModeBase.h"
 #include "Game/AuraSaveGame.h"
+#include "Game/Subsystem/AuraAIDirectorGameInstanceSubsystem.h"
 #include "Game/Subsystem/LevelGameInstanceSubsystem.h"
 #include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -64,19 +63,19 @@ AAuraCharacter::AAuraCharacter()
 void AAuraCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	AAuraGameModeBase::GetAuraGameMode(this)->GetAuraGameInstance()->RegisterActivePlayer(this);
+	if (UAuraAIDirectorGameInstanceSubsystem* AIDirectorSubsystem = UAuraAIDirectorGameInstanceSubsystem::Get(this))
+	{
+		AIDirectorSubsystem->RegisterActivePlayer(this);
+	}
 	OnCameraReturnDelegate.BindUObject(this, &AAuraCharacter::OnCameraReturned);
 }
 
 void AAuraCharacter::BeginDestroy()
 {
 	Super::BeginDestroy();
-	if (const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+	if (UAuraAIDirectorGameInstanceSubsystem* AIDirectorSubsystem = UAuraAIDirectorGameInstanceSubsystem::Get(this))
 	{
-		if (UAuraGameInstance* GameInstance = GameMode->GetAuraGameInstance())
-		{
-			GameInstance->UnregisterActivePlayer(this);
-		}
+		AIDirectorSubsystem->UnregisterActivePlayer(this);
 	}
 }
 
@@ -98,11 +97,13 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
-		const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
+		if (const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
 			PlayerController->GetLocalPlayer()
-		);
-		LoadProgress(SaveGameSubsystem->GetInGameSaveData());
-		SaveGameSubsystem->LoadWorldState(GetWorld());
+		))
+		{
+			LoadProgress(SaveGameSubsystem->GetInGameSaveData());
+			SaveGameSubsystem->LoadWorldState(GetWorld());
+		}
 	}
 }
 

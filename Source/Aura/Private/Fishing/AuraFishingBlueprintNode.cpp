@@ -6,7 +6,6 @@
 #include "Aura/AuraLogChannels.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Fishing/AuraFishInfo.h"
-#include "Game/AuraGameModeBase.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/FishingComponentInterface.h"

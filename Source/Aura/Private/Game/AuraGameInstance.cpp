@@ -13,21 +13,3 @@ UAuraGameInstance* UAuraGameInstance::Get(const UObject* WorldContextObject)
 	}
 	return nullptr;
 }
-
-void UAuraGameInstance::Shutdown()
-{
-	Super::Shutdown();
-}
-
-TArray<AActor*> UAuraGameInstance::GetActivePlayerActors()
-{
-	TArray<AActor*> Results;
-	for (TWeakObjectPtr<AActor> Actor : ActivePlayerActors)
-	{
-		if (Actor.IsValid())
-		{
-			Results.Add(Actor.Get());
-		}
-	}
-	return Results;
-}

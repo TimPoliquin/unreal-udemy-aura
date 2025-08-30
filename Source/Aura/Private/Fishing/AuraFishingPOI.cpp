@@ -5,9 +5,8 @@
 
 #include "Aura/AuraLogChannels.h"
 #include "Fishing/AuraFishInfo.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Interaction/FishingComponentInterface.h"
-#include "Utils/ArrayUtils.h"
 
 
 // Sets default values
@@ -24,7 +23,7 @@ TArray<FWeightedFish> AAuraFishingPOI::GetCurrentlyAvailableFish(const AActor* P
 	FGameplayTagContainer CombinedFishTags;
 	CombinedFishTags.AppendTags(PoolTags);
 	CombinedFishTags.AppendTags(PlayerFishTags);
-	if (const AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this))
+	if (const UAuraGameDataSubsystem* GameMode = UAuraGameDataSubsystem::Get(this))
 	{
 		for (const FFishConfig& FishConfig : FishConfigs)
 		{
