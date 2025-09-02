@@ -27,10 +27,16 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Show();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void Hide(bool bAnimate = true);
+	void Hide();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetInteractionKey(const FString& Key);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetActionText(const FString& InActionText);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetStartHidden(const bool bInStartHidden);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetAutoDestroyOnHide(const bool bInAutoDestroyOnHide);
 
 	static void Show(UUserWidget* Widget);
-	static void Hide(UUserWidget* Widget, const bool bAnimate = true);
+	static void Hide(UUserWidget* Widget);
 };

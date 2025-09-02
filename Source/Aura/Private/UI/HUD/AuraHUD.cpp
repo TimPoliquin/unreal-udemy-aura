@@ -68,6 +68,7 @@ void AAuraHUD::InitializeWidgets(
 			GetOverlayWidgetController(Params)->BroadcastInitialValues();
 			GetAttributeMenuWidgetController(Params)->BroadcastInitialValues();
 			GetSpellMenuWidgetController(Params)->BroadcastInitialValues();
+			InventoryViewModel->InitializeDependencies(InPlayer);
 		}
 		else
 		{
@@ -75,7 +76,7 @@ void AAuraHUD::InitializeWidgets(
 			{
 				GetOverlayWidgetController(Params)->BroadcastInitialValues();
 				GetAttributeMenuWidgetController(Params)->BroadcastInitialValues();
-				GetSpellMenuWidgetController(Params)->BroadcastInitialValues();
+				InventoryViewModel->InitializeDependencies(Params.Player);
 			});
 		}
 	}
@@ -163,5 +164,4 @@ void AAuraHUD::InitializeInventoryViewModel(AActor* InPlayer)
 {
 	InventoryViewModel = NewObject<UMVVM_Inventory>(this, InventoryViewModelClass);
 	InventoryViewModel->InitializeInventoryItems();
-	InventoryViewModel->InitializeDependencies(InPlayer);
 }

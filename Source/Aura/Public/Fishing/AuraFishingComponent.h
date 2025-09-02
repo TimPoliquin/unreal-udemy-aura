@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraFishTypes.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "Components/ActorComponent.h"
-#include "Interaction/FishingComponentInterface.h"
 #include "Item/Equipment/AuraFishingBob.h"
 #include "Item/AuraItemTypes.h"
 #include "AuraFishingComponent.generated.h"
@@ -37,33 +37,38 @@ struct FAfterFishingRestore
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class AURA_API UAuraFishingComponent : public UActorComponent, public IFishingComponentInterface
+class AURA_API UAuraFishingComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 	UAuraFishingComponent();
 	void SetPlayerInventoryComponent(UPlayerInventoryComponent* InPlayerInventoryComponent);
-	virtual void SetupForFishing(const FVector& InFishingDestination) override;
-	virtual bool HasFishingRod_Implementation() override;
-	virtual bool HasFishingRodEquipped_Implementation() override;
-	virtual void EquipFishingRod_Implementation() override;
-	virtual void CastFishingRod_Implementation() override;
-	virtual void FishStateChanged(const EFishState& FishState) override;
-	virtual void Reel() override;
-	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate() override;
-	virtual void PrepareForContinue() override;
 	UFUNCTION(BlueprintCallable)
-	virtual void EndFishing() override;
+	virtual void SetupForFishing(const FVector& InFishingDestination);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual bool HasFishingRod() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual bool HasFishingRodEquipped() const;
+	UFUNCTION(BlueprintCallable)
+	virtual void EquipFishingRod();
+	UFUNCTION(BlueprintCallable)
+	virtual void CastFishingRod();
+	virtual void FishStateChanged(const EFishState& FishState);
+	virtual void Reel();
+	virtual FOnFishingStateChangedSignature& GetOnFishingStateChangedDelegate();
+	virtual void PrepareForContinue();
+	UFUNCTION(BlueprintCallable)
+	virtual void EndFishing();
 	UFUNCTION(BlueprintCallable)
 	void ReleaseCast();
-	virtual bool IsFishing() const override;
+	virtual bool IsFishing() const;
 	UFUNCTION(BlueprintCallable)
 	EFishingState GetFishingState() const;
 	UFUNCTION(BlueprintCallable)
-	virtual float GetRarityMultiplier(const FGameplayTag& Rarity) const override;
+	virtual float GetRarityMultiplier(const FGameplayTag& Rarity) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	virtual FGameplayTagContainer GetFishingTags() const override;
+	virtual FGameplayTagContainer GetFishingTags() const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnFishingStateChangedSignature OnFishingStateChangedDelegate;

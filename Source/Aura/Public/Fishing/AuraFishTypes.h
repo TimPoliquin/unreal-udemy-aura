@@ -17,22 +17,6 @@ enum class EFishState : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FAuraFishCatch
-{
-	GENERATED_BODY()
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FishCatch")
-	FGameplayTag FishType = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
-	FString FishName = FString("");
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FishCatch")
-	float Size = 0.f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
-	FString Description = FString("");
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FishInfo")
-	TObjectPtr<const UTexture2D> Icon = nullptr;
-};
-
-USTRUCT(BlueprintType)
 struct FAuraFishDefinition
 {
 	GENERATED_BODY()
@@ -67,3 +51,23 @@ struct FAuraPlayerFishingLevelRarity
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "FishInfo", meta=(Categories="Fish.Rarity"))
 	TMap<FGameplayTag, float> RarityMultipliers;
 };
+
+UENUM(BlueprintType)
+enum class EFishingState : uint8
+{
+	None,
+	Preparing,
+	Equipping,
+	Equipped,
+	Casting,
+	Cast,
+	Waiting,
+	Lured,
+	Biting,
+	Reeling,
+	Caught,
+	Fled,
+};
+
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFishingStateChangedSignature, EFishingState, FishingState);

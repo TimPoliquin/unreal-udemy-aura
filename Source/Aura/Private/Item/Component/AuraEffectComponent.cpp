@@ -99,7 +99,11 @@ bool UAuraEffectComponent::IsAffectingActor(AActor* Actor) const
 
 void UAuraEffectComponent::ApplyEffectToTarget(AActor* TargetActor, const FGameplayEffectConfig& GameplayEffectConfig)
 {
-	check(GameplayEffectConfig.GameplayEffectClass);
+	if (!GameplayEffectConfig.GameplayEffectClass)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s:%s] No effect configured!"), *GetOwner()->GetName(), *GetName());
+		return;
+	}
 	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		TargetActor
 	))

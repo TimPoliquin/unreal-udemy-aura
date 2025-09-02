@@ -27,10 +27,17 @@ void UAuraFishingComponent::SetPlayerInventoryComponent(UPlayerInventoryComponen
 void UAuraFishingComponent::SetupForFishing(const FVector& InFishingDestination)
 {
 	FishingDestination = InFishingDestination;
-	PlayerInventoryComponent->OnEquipmentAnimationCompleteDelegate.AddDynamic(
-		this,
-		&UAuraFishingComponent::OnInventoryEquipAnimationComplete
-	);
+	if (IsValid(PlayerInventoryComponent))
+	{
+		PlayerInventoryComponent->OnEquipmentAnimationCompleteDelegate.AddUniqueDynamic(
+			this,
+			&UAuraFishingComponent::OnInventoryEquipAnimationComplete
+		);
+	}
+	else
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s:%s] No player inventory component set! Unable to bind equipment animation completion delegate."), *GetOwner()->GetName(), *GetName())
+	}
 	if (!FishingRestore.bSet)
 	{
 		FishingRestore.UseMode = PlayerInventoryComponent->GetEquipmentUseMode();
@@ -40,18 +47,33 @@ void UAuraFishingComponent::SetupForFishing(const FVector& InFishingDestination)
 	}
 }
 
-bool UAuraFishingComponent::HasFishingRod_Implementation()
+bool UAuraFishingComponent::HasFishingRod() const
 {
+	if (!PlayerInventoryComponent)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s:%s] No player inventory component set!"), *GetOwner()->GetName(), *GetName())
+		return false;
+	}
 	return PlayerInventoryComponent->HasItemInInventory(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod);
 }
 
-bool UAuraFishingComponent::HasFishingRodEquipped_Implementation()
+bool UAuraFishingComponent::HasFishingRodEquipped() const
 {
+	if (!PlayerInventoryComponent)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s:%s] No player inventory component set!"), *GetOwner()->GetName(), *GetName())
+		return false;
+	}
 	return PlayerInventoryComponent->HasToolEquipped(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod);
 }
 
-void UAuraFishingComponent::EquipFishingRod_Implementation()
+void UAuraFishingComponent::EquipFishingRod()
 {
+	if (!PlayerInventoryComponent)
+	{
+		UE_LOG(LogAura, Error, TEXT("[%s:%s] No PlayerInventoryComponent set!"), *GetOwner()->GetName(), *GetName())
+		return;
+	}
 	if (PlayerInventoryComponent->HasToolEquipped(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod))
 	{
 		OnFishingRodEquipped();
@@ -66,8 +88,13 @@ void UAuraFishingComponent::EquipFishingRod_Implementation()
 	}
 }
 
-void UAuraFishingComponent::CastFishingRod_Implementation()
+void UAuraFishingComponent::CastFishingRod()
 {
+	if (!PlayerInventoryComponent)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s:%s] No player inventory component set!"), *GetOwner()->GetName(), *GetName())
+		return;
+	}
 	SetFishingState(EFishingState::Casting);
 	OnFishingComponentCastAnimationDelegate.Broadcast();
 }
@@ -214,7 +241,6 @@ FGameplayTagContainer UAuraFishingComponent::GetFishingTags() const
 		GetOwner()
 	))
 	{
-		const FGameplayTagContainer& TagContainer = AbilitySystemComponent->GetOwnedGameplayTags();
 		FGameplayTagContainer FishingTags;
 		FishingTags.AppendMatchingTags(
 			AbilitySystemComponent->GetOwnedGameplayTags(),
@@ -261,8 +287,7 @@ void UAuraFishingComponent::OnInventoryEquipAnimationComplete(
 	const FGameplayTag& EquippedItem
 )
 {
-	if (EquipmentSlot == EAuraEquipmentSlot::Tool && EquippedItem == FAuraGameplayTags::Get().
-		Item_Type_Equipment_FishingRod)
+	if (EquipmentSlot == EAuraEquipmentSlot::Tool && EquippedItem.MatchesTagExact(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod))
 	{
 		OnFishingRodEquipped();
 	}

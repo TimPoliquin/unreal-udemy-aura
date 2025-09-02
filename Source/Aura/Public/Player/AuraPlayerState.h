@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "InventoryActorInterface.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "GameFramework/PlayerState.h"
@@ -11,6 +12,9 @@
 #include "Item/AuraItemTypes.h"
 #include "AuraPlayerState.generated.h"
 
+class UAuraAttributeSet;
+class UAuraAbilitySystemComponent;
+class UPlayerInventoryComponent;
 class UAuraSaveGame;
 class ULevelUpInfo;
 
@@ -28,7 +32,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
  * 
  */
 UCLASS()
-class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface, public ISavableInterface
+class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface, public IInventoryActorInterface, public ISavableInterface
 {
 	GENERATED_BODY()
 
@@ -36,82 +40,25 @@ public:
 	AAuraPlayerState();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UAttributeSet* GetAttributeSet() const;
-	FORCEINLINE int32 GetCharacterLevel() const
-	{
-		return Level;
-	}
-
-	FORCEINLINE void InitializeLevel(const int32 InLevel)
-	{
-		Level = InLevel;
-		OnLevelInitializedDelegate.Broadcast(Level);
-	}
-
-	FORCEINLINE void SetLevel(const int32 NewLevel)
-	{
-		Level = NewLevel;
-		OnLevelChangeDelegate.Broadcast(Level);
-	}
-
-	FORCEINLINE void AddToLevel(const int32 AddLevel)
-	{
-		SetLevel(Level + AddLevel);
-	}
-
-	FORCEINLINE int32 GetXP() const
-	{
-		return XP;
-	}
-
-	FORCEINLINE void SetXP(const int32 InXP)
-	{
-		XP = InXP;
-		OnXPChangeDelegate.Broadcast(XP);
-	}
-
-	FORCEINLINE void AddToXP(const int32 InXP)
-	{
-		SetXP(InXP + XP);
-	}
-
-	FORCEINLINE int32 GetAttributePoints() const
-	{
-		return AttributePoints;
-	}
-
-	FORCEINLINE void SetAttributePoints(const int32 InAttributePoints)
-	{
-		AttributePoints = InAttributePoints;
-		OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
-	}
-
-	FORCEINLINE void AddAttributePoints(const int32 InAttributePoints)
-	{
-		SetAttributePoints(AttributePoints + InAttributePoints);
-	}
-
-	FORCEINLINE int32 GetSpellPoints() const
-	{
-		return SpellPoints;
-	}
-
-	FORCEINLINE void SetSpellPoints(const int32 InSpellPoints)
-	{
-		SpellPoints = InSpellPoints;
-		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
-	}
-
-	FORCEINLINE void AddSpellPoints(const int32 InSpellPoints)
-	{
-		SetSpellPoints(SpellPoints + InSpellPoints);
-	}
+	virtual UPlayerInventoryComponent* GetInventoryComponent_Implementation() const override;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int32 GetCharacterLevel() const;
+	void AddToLevel(const int32 AddLevel);
+	int32 GetXP() const;
+	void AddToXP(const int32 InXP);
+	int32 GetAttributePoints() const;
+	void AddAttributePoints(const int32 InAttributePoints);
+	int32 GetSpellPoints() const;
+	void AddSpellPoints(const int32 InSpellPoints);
 
 	float GetXPToNextLevelPercentage() const;
 	int32 FindLevelByXP(const int32 InXP) const;
 	FAuraLevelUpRewards GetLevelUpRewards(int32 int32) const;
 	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
 	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
+	void InitializeAbilityActorInfo();
 
 	FOnPlayerStatChangedSignature OnXPChangeDelegate;
 	FOnPlayerStatChangedSignature OnLevelChangeDelegate;
@@ -121,12 +68,13 @@ public:
 	FOnPlayerInventoryChangedSignature OnPlayerInventoryChangedDelegate;
 
 protected:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
-	UPROPERTY()
-	TObjectPtr<UAttributeSet> AttributeSet;
+	UPROPERTY(Replicated)
+	TObjectPtr<UAuraAbilitySystemComponent> AbilitySystemComponent;
+	UPROPERTY(Replicated)
+	TObjectPtr<UAuraAttributeSet> AttributeSet;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
 
-private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_Level)
@@ -138,27 +86,19 @@ private:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_SpellPoints)
 	int32 SpellPoints;
 
-	UFUNCTION()
-	FORCEINLINE void OnRep_Level(int32 OldLevel) const
-	{
-		OnLevelChangeDelegate.Broadcast(Level);
-	}
+private:
+	void InitializeLevel(const int32 InLevel);
+	void SetLevel(const int32 NewLevel);
+	void SetXP(const int32 InXP);
+	void SetAttributePoints(const int32 InAttributePoints);
+	void SetSpellPoints(const int32 InSpellPoints);
 
 	UFUNCTION()
-	FORCEINLINE void OnRep_XP(int32 OldXP) const
-	{
-		OnXPChangeDelegate.Broadcast(XP);
-	}
-
+	void OnRep_Level(int32 OldLevel) const;
 	UFUNCTION()
-	FORCEINLINE void OnRep_AttributePoints(int32 InAttributePoints) const
-	{
-		OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
-	}
-
+	void OnRep_XP(int32 OldXP) const;
 	UFUNCTION()
-	FORCEINLINE void OnRep_SpellPoints(int32 InSpellPoints) const
-	{
-		OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
-	}
+	void OnRep_AttributePoints(int32 InAttributePoints) const;
+	UFUNCTION()
+	FORCEINLINE void OnRep_SpellPoints(int32 InSpellPoints) const;
 };

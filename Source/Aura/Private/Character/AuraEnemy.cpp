@@ -94,7 +94,7 @@ void AAuraEnemy::InitializeDefaultAttributes()
 	{
 		UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 	}
-	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
+	OnAbilitySystemReady(Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent));
 }
 
 void AAuraEnemy::OnStatusShockAdded()

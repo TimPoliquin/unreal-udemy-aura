@@ -8,7 +8,6 @@
 #include "Aura/AuraLogChannels.h"
 #include "Game/AuraSaveGame.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
-#include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Item/Equipment/AuraFishingRod.h"
 #include "Item/Equipment/AuraEquipmentBase.h"
@@ -115,7 +114,14 @@ void UPlayerInventoryComponent::UseNothing()
 
 void UPlayerInventoryComponent::Equip(const EAuraEquipmentSlot& Slot, const FGameplayTag& ItemType)
 {
-	EquipmentSlots[Slot] = ItemType;
+	if (EquipmentSlots.Contains(Slot))
+	{
+		EquipmentSlots[Slot] = ItemType;
+	}
+	else
+	{
+		EquipmentSlots.Add(Slot, ItemType);
+	}
 }
 
 USkeletalMeshComponent* UPlayerInventoryComponent::GetWeapon() const
@@ -231,6 +237,11 @@ bool UPlayerInventoryComponent::UseKey(const FGameplayTag& ItemType)
 	return UseItem(ItemType, EAuraItemCategory::Key);
 }
 
+void UPlayerInventoryComponent::SetCharacterMesh(UMeshComponent* InMeshComponent)
+{
+	CharacterMesh = InMeshComponent;
+}
+
 void UPlayerInventoryComponent::FromSaveData(const UAuraSaveGame* SaveData)
 {
 	MaxItems = SaveData->SavedInventory.MaxItems;
@@ -247,22 +258,6 @@ void UPlayerInventoryComponent::ToSaveData(UAuraSaveGame* SaveData) const
 	SaveData->SavedInventory.EquipmentSlots = EquipmentSlots;
 }
 
-void UPlayerInventoryComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	if (ICombatInterface::IsAbilitySystemReady(GetOwner()))
-	{
-		InitializeEquipment();
-	}
-	else if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner()))
-	{
-		CombatInterface->GetOnAbilitySystemRegisteredDelegate().AddLambda([this](UAbilitySystemComponent* AbilitySystemComponent)
-		{
-			InitializeEquipment();
-		});
-	}
-}
-
 TArray<FAuraItemInventoryEntry> UPlayerInventoryComponent::GetInventory() const
 {
 	return Inventory;
@@ -275,17 +270,21 @@ AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipme
 	{
 		return nullptr;
 	}
-	ACharacter* Player = Cast<ACharacter>(GetOwner());
+	if (!CharacterMesh.IsValid())
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] No character mesh set for player %s"), *GetName(), *GetOwner()->GetName())
+		return nullptr;
+	}
 	const FName SocketName = EquipmentSocketNames[Slot];
-	const FVector SocketLocation = Player->GetMesh()->GetSocketLocation(SocketName);
-	const FRotator SocketRotation = Player->GetMesh()->GetSocketRotation(SocketName);
+	const FVector SocketLocation = CharacterMesh->GetSocketLocation(SocketName);
+	const FRotator SocketRotation = CharacterMesh->GetSocketRotation(SocketName);
 
 	const FAuraItemDefinition ItemDefinition = UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(
 		this,
 		EquipmentSlots[Slot]
 	);
 	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = Player;
+	SpawnParameters.Owner = CharacterMesh->GetOwner();
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AAuraEquipmentBase* Equipment = GetWorld()->SpawnActor<AAuraEquipmentBase>(
 		ItemDefinition.EquipmentClass,
@@ -299,7 +298,7 @@ AAuraEquipmentBase* UPlayerInventoryComponent::SpawnEquipment(const EAuraEquipme
 		return nullptr;
 	}
 	Equipment->AttachToComponent(
-		Player->GetMesh(),
+		CharacterMesh.Get(),
 		FAttachmentTransformRules::KeepWorldTransform,
 		SocketName
 	);

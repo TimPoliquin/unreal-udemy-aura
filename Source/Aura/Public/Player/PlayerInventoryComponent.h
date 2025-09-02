@@ -44,6 +44,8 @@ public:
 
 	UPlayerInventoryComponent();
 
+	void InitializeEquipment();
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasItemInInventory(const FGameplayTag& ItemType) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -76,6 +78,8 @@ public:
 	bool UseConsumable(const FGameplayTag& ItemType);
 	UFUNCTION(BlueprintCallable, Category="Item")
 	bool UseKey(const FGameplayTag& ItemType);
+	UFUNCTION(BlueprintCallable)
+	void SetCharacterMesh(UMeshComponent* InMeshComponent);
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;
@@ -95,8 +99,6 @@ public:
 	TArray<FAuraItemInventoryEntry> GetInventory() const;
 
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
 	int32 MaxItems = 25;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
@@ -107,13 +109,15 @@ protected:
 	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory|Equipment")
 	TMap<EAuraEquipmentSlot, FName> EquipmentSocketNames;
+
+private:
 	UPROPERTY()
 	TObjectPtr<AAuraEquipmentBase> Weapon;
 	UPROPERTY()
 	TObjectPtr<AAuraEquipmentBase> Tool;
+	UPROPERTY()
+	TWeakObjectPtr<UMeshComponent> CharacterMesh;
 
-private:
 	AAuraEquipmentBase* SpawnEquipment(const EAuraEquipmentSlot& Slot);
 	bool UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory);
-	void InitializeEquipment();
 };

@@ -819,6 +819,10 @@ void UAuraAbilitySystemLibrary::RemoveGameplayEffect(
 	bool bRemoveAll
 )
 {
+	if (!GameplayEffectHandle.IsValid())
+	{
+		return;
+	}
 	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		TargetActor
 	))

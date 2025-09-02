@@ -4,6 +4,7 @@
 #include "Item/AuraItemBlueprintLibrary.h"
 
 #include "Aura/AuraLogChannels.h"
+#include "Fishing/AuraFishCatch.h"
 #include "Fishing/AuraFishInfo.h"
 #include "Fishing/AuraFishTypes.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
@@ -49,16 +50,16 @@ UTexture2D* UAuraItemBlueprintLibrary::SubstituteMessageIcon(UTexture2D* Message
 	return MessageIcon;
 }
 
-FAuraFishCatch UAuraItemBlueprintLibrary::ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType)
+UAuraFishCatch* UAuraItemBlueprintLibrary::ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType)
 {
 	UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(WorldContextObject);
 	FAuraItemDefinition ItemDefinition = GameDataSubsystem->FindItemDefinitionByItemTag(FishType);
 	FAuraFishDefinition FishDefinition = GameDataSubsystem->GetFishInfo()->GetFishDefinitionByFishType(FishType);
-	FAuraFishCatch Catch;
-	Catch.FishType = FishType;
-	Catch.Description = ItemDefinition.ItemDescription;
-	Catch.FishName = ItemDefinition.ItemName;
-	Catch.Icon = FishDefinition.Icon;
-	Catch.Size = FishDefinition.WeightRange.Value();
+	UAuraFishCatch* Catch = NewObject<UAuraFishCatch>();
+	Catch->FishType = FishType;
+	Catch->Description = ItemDefinition.ItemDescription;
+	Catch->FishName = ItemDefinition.ItemName;
+	Catch->Icon = FishDefinition.Icon;
+	Catch->Size = FishDefinition.WeightRange.Value();
 	return Catch;
 }

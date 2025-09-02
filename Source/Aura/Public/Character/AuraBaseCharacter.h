@@ -10,6 +10,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
+class UAuraAbilitySystemComponent;
 class UPassiveNiagaraComponent;
 class UDebuffNiagaraComponent;
 class UNiagaraSystem;
@@ -206,6 +207,9 @@ protected:
 	virtual void OnStatusBurnRemoved()
 	{
 	};
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnAbilitySystemReady(UAuraAbilitySystemComponent* InAbilitySystemComponent);
 
 private:
 	bool bDead = false;

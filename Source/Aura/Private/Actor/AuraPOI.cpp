@@ -40,8 +40,6 @@ void AAuraPOI::BeginPlay()
 	Super::BeginPlay();
 	OverlapDetectionComponent->OnComponentBeginOverlap.AddDynamic(this, &AAuraPOI::OnBeginOverlap);
 	OverlapDetectionComponent->OnComponentEndOverlap.AddDynamic(this, &AAuraPOI::OnEndOverlap);
-	IInteractionWidgetInterface::Hide(InteractionWidget->GetWidget(), false);
-	IInteractionWidgetInterface::Hide(PreconditionWidget->GetWidget(), false);
 	InitializeState();
 }
 

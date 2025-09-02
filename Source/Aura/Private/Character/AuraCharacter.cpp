@@ -11,7 +11,6 @@
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
-#include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/AuraLogChannels.h"
 #include "Camera/AuraCameraComponent.h"
@@ -50,9 +49,7 @@ AAuraCharacter::AAuraCharacter()
 	CameraComponent = CreateDefaultSubobject<UAuraCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
-	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("Player Inventory"));
 	FishingComponent = CreateDefaultSubobject<UAuraFishingComponent>(TEXT("Fishing Component"));
-	FishingComponent->SetPlayerInventoryComponent(PlayerInventoryComponent);
 	FishingStatusEffectNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Fishing Status Effect"));
 	FishingStatusEffectNiagaraComponent->SetupAttachment(GetRootComponent());
 	FishingStatusEffectNiagaraComponent->SetAutoActivate(false);
@@ -121,10 +118,6 @@ void AAuraCharacter::LoadProgress(const UAuraSaveGame* SaveData)
 		AddCharacterAbilities();
 		break;
 	case FromDisk:
-		if (UAuraAttributeSet* AuraAttributeSet = GetAuraAttributeSet())
-		{
-			AuraAttributeSet->FromSaveData(SaveData);
-		}
 		if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
 		{
 			AuraPlayerState->FromSaveData(SaveData);
@@ -141,10 +134,6 @@ void AAuraCharacter::LoadProgress(const UAuraSaveGame* SaveData)
 				InitializeEffects
 			);
 			AuraAbilitySystemComponent->FromSaveData(SaveData);
-		}
-		if (PlayerInventoryComponent)
-		{
-			PlayerInventoryComponent->FromSaveData(SaveData);
 		}
 		break;
 	default:
@@ -221,11 +210,17 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetAuraPlayerState();
 	check(AuraPlayerState);
-	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
+	AuraPlayerState->InitializeAbilityActorInfo();
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+	if (UPlayerInventoryComponent* InventoryComponent = GetInventoryComponent(AuraPlayerState))
+	{
+		InventoryComponent->SetCharacterMesh(GetMesh());
+		InventoryComponent->InitializeEquipment();
+		FishingComponent->SetPlayerInventoryComponent(InventoryComponent);
+	}
 	// Broadcast Ability System Setup
-	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
+	OnAbilitySystemReady(GetAuraAbilitySystemComponent());
 }
 
 void AAuraCharacter::InitializePlayerControllerHUD(
@@ -290,7 +285,12 @@ void AAuraCharacter::Die()
 
 USkeletalMeshComponent* AAuraCharacter::GetWeapon_Implementation() const
 {
-	return PlayerInventoryComponent->GetWeapon();
+	if (const UPlayerInventoryComponent* InventoryComponent = GetInventoryComponent(GetPlayerState()))
+	{
+		return InventoryComponent->GetWeapon();
+	}
+	UE_LOG(LogAura, Warning, TEXT("[%s] No inventory component available, returning null weapon"), *GetName())
+	return nullptr;
 }
 
 int32 AAuraCharacter::GetXP_Implementation()
@@ -415,26 +415,6 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		{
 			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No player state!"))
 		}
-		if (const UAuraAttributeSet* AuraAttributeSet = GetAuraAttributeSet())
-		{
-			AuraAttributeSet->ToSaveData(SaveData);
-		}
-		else
-		{
-			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No attribute set!"))
-		}
-		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
-		{
-			AuraAbilitySystemComponent->ToSaveData(SaveData);
-		}
-		else
-		{
-			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No AuraAbilitySystemComponent set!"))
-		}
-		if (PlayerInventoryComponent)
-		{
-			PlayerInventoryComponent->ToSaveData(SaveData);
-		}
 		SaveData->SaveSlotAttributeSource = FromDisk;
 		SaveData->PlayerStartTag = CheckpointTag;
 		SaveGameSubsystem->SaveInGameProgressData(SaveData);
@@ -483,10 +463,10 @@ void AAuraCharacter::ReturnCamera_Implementation(
 
 UPlayerInventoryComponent* AAuraCharacter::GetInventoryComponent_Implementation() const
 {
-	return PlayerInventoryComponent;
+	return GetInventoryComponent(GetPlayerState());
 }
 
-TScriptInterface<IFishingComponentInterface> AAuraCharacter::GetFishingComponent_Implementation() const
+UAuraFishingComponent* AAuraCharacter::GetFishingComponent_Implementation() const
 {
 	return FishingComponent;
 }

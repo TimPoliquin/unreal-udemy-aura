@@ -88,7 +88,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		FAuraGameplayTags::Get().Player_HUD_Hide,
 		EGameplayTagEventType::NewOrRemoved
 	).AddUObject(this, &UOverlayWidgetController::OnPlayerHideHUDTagChanged);
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(Player))
+	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(GetAuraPlayerState()))
 	{
 		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryChanged);
 		PlayerInventoryComponent->OnInventoryFullDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryFull);

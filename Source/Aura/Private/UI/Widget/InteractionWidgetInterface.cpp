@@ -14,10 +14,10 @@ void IInteractionWidgetInterface::Show(UUserWidget* Widget)
 	}
 }
 
-void IInteractionWidgetInterface::Hide(UUserWidget* Widget, const bool bAnimate)
+void IInteractionWidgetInterface::Hide(UUserWidget* Widget)
 {
 	if (IsValid(Widget) && Widget->Implements<UInteractionWidgetInterface>())
 	{
-		Execute_Hide(Widget, bAnimate);
+		Execute_Hide(Widget);
 	}
 }

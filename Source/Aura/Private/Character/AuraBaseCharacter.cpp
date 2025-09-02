@@ -300,6 +300,11 @@ void AAuraBaseCharacter::Dissolve()
 	}
 }
 
+void AAuraBaseCharacter::OnAbilitySystemReady_Implementation(UAuraAbilitySystemComponent* InAbilitySystemComponent)
+{
+	GetOnAbilitySystemRegisteredDelegate().Broadcast(InAbilitySystemComponent);
+}
+
 void AAuraBaseCharacter::Dissolve(
 	UMeshComponent* InMesh,
 	UMaterialInstance* MaterialInstance,

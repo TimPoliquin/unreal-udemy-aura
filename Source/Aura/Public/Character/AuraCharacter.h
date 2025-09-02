@@ -90,7 +90,7 @@ public:
 	/** InventoryInterface End */
 
 	/** FishingActorInterface Start */
-	virtual TScriptInterface<IFishingComponentInterface> GetFishingComponent_Implementation() const override;
+	virtual UAuraFishingComponent* GetFishingComponent_Implementation() const override;
 	virtual void ShowFishingStatusEffect_Implementation(UNiagaraSystem* EffectSystem) override;
 	/** FishingActorInterface End */
 
@@ -98,8 +98,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
 	void LoadProgress(const UAuraSaveGame* SaveData);
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAuraFishingComponent> FishingComponent;
 

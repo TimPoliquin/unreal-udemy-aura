@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "FishingActorInterface.generated.h"
 
+class UAuraFishingComponent;
 class UNiagaraSystem;
 class IFishingComponentInterface;
 // This class does not need to be modified.
@@ -25,9 +26,9 @@ class AURA_API IFishingActorInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	TScriptInterface<IFishingComponentInterface> GetFishingComponent() const;
+	UAuraFishingComponent* GetFishingComponent() const;
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void ShowFishingStatusEffect(UNiagaraSystem* EffectSystem);
 
-	static TScriptInterface<IFishingComponentInterface> GetFishingComponent(const UObject* Actor);
+	static UAuraFishingComponent* GetFishingComponent(const UObject* Actor);
 };
