@@ -17,4 +17,6 @@ class AURA_API AAuraGameModeBase : public AGameModeBase
 public:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	static AAuraGameModeBase* GetAuraGameMode(const UObject* WorldContextObject);
+
+	/** Do not put UPROPERTY attributes here! They will not be available in multiplayer modes! **/
 };

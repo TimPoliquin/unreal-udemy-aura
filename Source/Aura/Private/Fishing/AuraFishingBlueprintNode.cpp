@@ -174,7 +174,6 @@ void UAuraFishingBlueprintNode::End()
 			this,
 			&UAuraFishingBlueprintNode::OnFishingStateChanged
 		);
-		FishingComponent->EndFishing();
 	}
 	SetReadyToDestroy();
 }
