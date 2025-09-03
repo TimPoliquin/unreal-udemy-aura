@@ -1,17 +1,18 @@
 // Copyright Alien Shores
 
 
-#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
+#include "Game/Subsystem/SaveGameSubsystem.h"
 
 #include "EngineUtils.h"
 #include "Aura/AuraLogChannels.h"
+#include "Game/AuraGameState.h"
+#include "Game/Save/AuraSaveGame.h"
 #include "Game/Subsystem/LevelGameInstanceSubsystem.h"
 #include "Interaction/SaveInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
-#include "UI/ViewModel/MVVM_LoadSlot.h"
 
-void ULocalPlayerSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void USaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	UE_LOG(LogAura, Warning, TEXT("[%s] Initialize"), *GetName())
@@ -21,7 +22,7 @@ void ULocalPlayerSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	}
 }
 
-void ULocalPlayerSaveGameSubsystem::Deinitialize()
+void USaveGameSubsystem::Deinitialize()
 {
 	if (CurrentSaveState.SaveState == EAuraGameSaveState::Undefined || CurrentSaveState.SaveState ==
 		EAuraGameSaveState::Transient)
@@ -32,51 +33,50 @@ void ULocalPlayerSaveGameSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-ULocalPlayerSaveGameSubsystem* ULocalPlayerSaveGameSubsystem::Get(
-	const ULocalPlayer* LocalPlayer
+USaveGameSubsystem* USaveGameSubsystem::Get(
+	const UObject* WorldContextObject
 )
 {
-	if (IsValid(LocalPlayer))
+	if (IsValid(WorldContextObject))
 	{
-		return LocalPlayer->GetSubsystem<ULocalPlayerSaveGameSubsystem>();
+		return UGameplayStatics::GetGameInstance(WorldContextObject)->GetSubsystem<USaveGameSubsystem>();
 	}
 	UE_LOG(LogAura, Error, TEXT("[%s] Invalid local player"), *FString("LocalPlayerSaveGameSubsystem::Get"));
 	return nullptr;
 }
 
-UAuraSaveGame* ULocalPlayerSaveGameSubsystem::GetInGameSaveData() const
+UAuraSaveGame* USaveGameSubsystem::GetInGameSaveData() const
 {
 	return GetSaveSlotData(CurrentSaveState.SlotName, CurrentSaveState.SlotIndex);
 }
 
-UAuraSaveGame* ULocalPlayerSaveGameSubsystem::CreateDefaultSaveData(
+UAuraSaveGame* USaveGameSubsystem::CreateDefaultSaveData(
 	const int32 SlotIndex,
 	const FString& SlotName
 ) const
 {
+	const UObject* WorldContextObject = GetGameInstance()->GetWorld();
+	const ULevelGameInstanceSubsystem* LevelGameInstanceSubsystem = ULevelGameInstanceSubsystem::Get(WorldContextObject);
 	UAuraSaveGame* SaveGame = Cast<UAuraSaveGame>(
 		UGameplayStatics::CreateSaveGameObject(SaveGameClass)
 	);
 	SaveGame->SlotIndex = SlotIndex;
 	SaveGame->SlotName = SlotName;
 	SaveGame->PlayerName = SlotName;
-	SaveGame->MapAssetName = ULevelGameInstanceSubsystem::Get(GetLocalPlayer())->GetDefaultMapAssetName();
-	SaveGame->MapName = ULevelGameInstanceSubsystem::Get(GetLocalPlayer())->GetDefaultMapName();
+	SaveGame->MapAssetName = LevelGameInstanceSubsystem->GetDefaultMapAssetName();
+	SaveGame->MapName = LevelGameInstanceSubsystem->GetDefaultMapName();
 	SaveGame->SaveSlotStatus = Taken;
-	SaveGame->PlayerStartTag = ULevelGameInstanceSubsystem::Get(GetLocalPlayer())->GetDefaultPlayerStartTag(
-		SaveGame->MapName
-	);
-	SaveGame->PlayerLevel = ULevelGameInstanceSubsystem::Get(GetLocalPlayer())->
-		GetDefaultPlayerLevel(SaveGame->MapName);
+	SaveGame->PlayerStartTag = LevelGameInstanceSubsystem->GetDefaultPlayerStartTag(SaveGame->MapName);
+	SaveGame->PlayerLevel = LevelGameInstanceSubsystem->GetDefaultPlayerLevel(SaveGame->MapName);
 	return SaveGame;
 }
 
-void ULocalPlayerSaveGameSubsystem::InitializeSaveState(const UAuraSaveGame* SaveGame, const bool bIsTransient)
+void USaveGameSubsystem::InitializeSaveState(const UAuraSaveGame* SaveGame, const bool bIsTransient)
 {
 	InitializeSaveState(SaveGame->PlayerStartTag, SaveGame->SlotName, SaveGame->SlotIndex, bIsTransient);
 }
 
-void ULocalPlayerSaveGameSubsystem::InitializeSaveState(
+void USaveGameSubsystem::InitializeSaveState(
 	const FName& InPlayerStartTag,
 	const FString& InSlotName,
 	const int32 InSlotIndex,
@@ -89,15 +89,15 @@ void ULocalPlayerSaveGameSubsystem::InitializeSaveState(
 	CurrentSaveState.SaveState = bIsTransient
 		                             ? EAuraGameSaveState::Transient
 		                             : EAuraGameSaveState::SaveSlot;
-	ULevelGameInstanceSubsystem::Get(GetLocalPlayer())->SetCurrentPlayerStartTag(InPlayerStartTag);
+	ULevelGameInstanceSubsystem::Get(GetGameInstance()->GetWorld())->SetCurrentPlayerStartTag(InPlayerStartTag);
 }
 
-FName ULocalPlayerSaveGameSubsystem::GetPlayerStartTag() const
+FName USaveGameSubsystem::GetPlayerStartTag() const
 {
 	return CurrentSaveState.PlayerStartTag;
 }
 
-void ULocalPlayerSaveGameSubsystem::SaveSlotData(UAuraSaveGame* SaveGame) const
+void USaveGameSubsystem::SaveSlotData(UAuraSaveGame* SaveGame) const
 {
 	if (UGameplayStatics::DoesSaveGameExist(SaveGame->SlotName, SaveGame->SlotIndex))
 	{
@@ -106,13 +106,13 @@ void ULocalPlayerSaveGameSubsystem::SaveSlotData(UAuraSaveGame* SaveGame) const
 	UGameplayStatics::SaveGameToSlot(SaveGame, SaveGame->SlotName, SaveGame->SlotIndex);
 }
 
-void ULocalPlayerSaveGameSubsystem::SaveInGameProgressData(UAuraSaveGame* SaveGame)
+void USaveGameSubsystem::SaveInGameProgressData(UAuraSaveGame* SaveGame)
 {
 	CurrentSaveState.PlayerStartTag = SaveGame->PlayerStartTag;
 	UGameplayStatics::SaveGameToSlot(SaveGame, CurrentSaveState.SlotName, CurrentSaveState.SlotIndex);
 }
 
-UAuraSaveGame* ULocalPlayerSaveGameSubsystem::GetSaveSlotData(const FString& SlotName, const int32 SlotIndex) const
+UAuraSaveGame* USaveGameSubsystem::GetSaveSlotData(const FString& SlotName, const int32 SlotIndex) const
 {
 	UAuraSaveGame* SaveGameObject;
 	if (UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
@@ -126,7 +126,7 @@ UAuraSaveGame* ULocalPlayerSaveGameSubsystem::GetSaveSlotData(const FString& Slo
 	return SaveGameObject;
 }
 
-void ULocalPlayerSaveGameSubsystem::SaveWorldState(UWorld* World, const FString& DestinationMapAssetName) const
+void USaveGameSubsystem::SaveWorldState(UWorld* World, const FString& DestinationMapAssetName) const
 {
 	FString WorldName = World->GetMapName();
 	WorldName.RemoveFromStart(World->StreamingLevelsPrefix);
@@ -149,6 +149,10 @@ void ULocalPlayerSaveGameSubsystem::SaveWorldState(UWorld* World, const FString&
 			FSavedMap NewSavedMap;
 			NewSavedMap.MapAssetName = WorldName;
 			SaveData->AddSavedMap(NewSavedMap);
+		}
+		if (AAuraGameState* GameState = AAuraGameState::Get(World))
+		{
+			GameState->ToSaveData(SaveData);
 		}
 		FSavedMap SavedMap = SaveData->GetSavedMapByMapName(WorldName);
 		SavedMap.SavedActors.Empty();
@@ -174,7 +178,7 @@ void ULocalPlayerSaveGameSubsystem::SaveWorldState(UWorld* World, const FString&
 	}
 }
 
-void ULocalPlayerSaveGameSubsystem::LoadWorldState(UWorld* World) const
+void USaveGameSubsystem::LoadWorldState(UWorld* World) const
 {
 	FString WorldName = World->GetMapName();
 	WorldName.RemoveFromStart(World->StreamingLevelsPrefix);
@@ -182,6 +186,10 @@ void ULocalPlayerSaveGameSubsystem::LoadWorldState(UWorld* World) const
 	{
 		UAuraSaveGame* SaveData = GetSaveSlotData(CurrentSaveState.SlotName, CurrentSaveState.SlotIndex);
 		const FSavedMap& SavedMap = SaveData->GetSavedMapByMapName(WorldName);
+		if (AAuraGameState* GameState = AAuraGameState::Get(World))
+		{
+			GameState->FromSaveData(SaveData);
+		}
 		if (!SavedMap.IsValid())
 		{
 			UE_LOG(LogAura, Error, TEXT("[%s] Could not find saved map with name: %s"), *GetName(), *WorldName);
@@ -220,12 +228,12 @@ void ULocalPlayerSaveGameSubsystem::LoadWorldState(UWorld* World) const
 	}
 }
 
-void ULocalPlayerSaveGameSubsystem::DeleteSlot(const FString& SlotName, const int32 SlotIndex)
+void USaveGameSubsystem::DeleteSlot(const FString& SlotName, const int32 SlotIndex)
 {
 	UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
 }
 
-void ULocalPlayerSaveGameSubsystem::AutoSaveTransient()
+void USaveGameSubsystem::AutoSaveTransient()
 {
 	if (CurrentSaveState.SaveState == EAuraGameSaveState::Undefined)
 	{

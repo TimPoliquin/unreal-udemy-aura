@@ -32,7 +32,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
  * 
  */
 UCLASS()
-class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface, public IInventoryActorInterface, public ISavableInterface
+class AURA_API AAuraPlayerState : public APlayerState, public IAbilitySystemInterface, public ISavableInterface
 {
 	GENERATED_BODY()
 
@@ -42,7 +42,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UAttributeSet* GetAttributeSet() const;
-	virtual UPlayerInventoryComponent* GetInventoryComponent_Implementation() const override;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetCharacterLevel() const;
 	void AddToLevel(const int32 AddLevel);
@@ -72,8 +71,6 @@ protected:
 	TObjectPtr<UAuraAbilitySystemComponent> AbilitySystemComponent;
 	UPROPERTY(Replicated)
 	TObjectPtr<UAuraAttributeSet> AttributeSet;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
-	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;

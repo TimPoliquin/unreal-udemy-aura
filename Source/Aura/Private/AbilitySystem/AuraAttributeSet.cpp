@@ -14,7 +14,7 @@
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
-#include "Game/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGame.h"
 
 
 UAuraAttributeSet::UAuraAttributeSet()

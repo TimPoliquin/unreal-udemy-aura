@@ -13,7 +13,7 @@
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraBaseCharacter.h"
 #include "Engine/OverlapResult.h"
-#include "Game/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGame.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -772,20 +772,25 @@ FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
 	const int32 Level
 )
 {
-	UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		TargetActor
-	);
-	FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
-	EffectContextHandle.AddSourceObject(TargetActor);
-	const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
-		GameplayEffect,
-		Level,
-		EffectContextHandle
-	);
-	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
-		*EffectSpecHandle.Data.Get()
-	);
-	return ActiveEffectHandle;
+	))
+	{
+		FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
+		EffectContextHandle.AddSourceObject(TargetActor);
+		const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
+			GameplayEffect,
+			Level,
+			EffectContextHandle
+		);
+		const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
+			*EffectSpecHandle.Data.Get()
+		);
+		return ActiveEffectHandle;
+	}
+	UE_LOG(LogAura, Error, TEXT("[%s] Cannot apply basic gameplay effect - no AbilitySystem available on actor! [%s]"), *FString("UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect"),
+	       *TargetActor->GetName())
+	return FActiveGameplayEffectHandle();
 }
 
 FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffectWithMagnitude(

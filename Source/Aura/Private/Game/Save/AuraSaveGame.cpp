@@ -1,7 +1,7 @@
 ﻿// Copyright Alien Shores
 
 
-#include "Game/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGame.h"
 
 void UAuraSaveGame::AddSavedAbility(const FSavedAbility& SaveAbility)
 {

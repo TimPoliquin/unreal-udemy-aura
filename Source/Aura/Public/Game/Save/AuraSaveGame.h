@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "GameFramework/SaveGame.h"
 #include "Item/AuraItemTypes.h"
+#include "Player/Equipment/AuraEquipmentTypes.h"
 #include "AuraSaveGame.generated.h"
 
 class UGameplayAbility;

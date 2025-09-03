@@ -4,6 +4,7 @@
 #include "UI/ViewModel/MVVM_Inventory.h"
 
 #include "Character/AuraCharacter.h"
+#include "Game/AuraGameState.h"
 #include "UI/ViewModel/MVVM_InventoryItem.h"
 
 FString UMVVM_Inventory::GetInventoryName() const
@@ -57,18 +58,15 @@ UMVVM_InventoryItem* UMVVM_Inventory::CreateInventoryItemViewModel(const int32 R
 	return InventoryItem;
 }
 
-void UMVVM_Inventory::InitializeDependencies(AActor* PlayerActor)
+void UMVVM_Inventory::InitializeDependencies()
 {
-	if (AAuraCharacter* AuraCharacter = Cast<AAuraCharacter>(PlayerActor))
+	for (int32 Idx = 0; Idx < InventoryItems.Num(); ++Idx)
 	{
-		for (int32 Idx = 0; Idx < InventoryItems.Num(); ++Idx)
-		{
-			InventoryItems[Idx]->InitializeDependencies(AuraCharacter);
-		}
+		InventoryItems[Idx]->InitializeDependencies();
 	}
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = IInventoryActorInterface::GetInventoryComponent(PlayerActor))
+	if (UPlayerInventoryComponent* PlayerInventoryComponent = AAuraGameState::Get(GetWorld())->GetPlayerInventoryComponent())
 	{
-		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UMVVM_Inventory::OnPlayerInventoryChanged);
+		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddUniqueDynamic(this, &UMVVM_Inventory::OnPlayerInventoryChanged);
 		for (auto InventoryItem : PlayerInventoryComponent->GetInventory())
 		{
 			if (InventoryItem.IsValid())

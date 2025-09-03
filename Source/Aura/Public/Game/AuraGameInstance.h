@@ -8,7 +8,7 @@
 
 class UAuraAIDirectorGameInstanceSubsystem;
 class UAuraGameDataSubsystem;
-class ULocalPlayerSaveGameSubsystem;
+class USaveGameSubsystem;
 class ULevelGameInstanceSubsystem;
 /**
  * 
@@ -29,5 +29,5 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
 	TSubclassOf<ULevelGameInstanceSubsystem> LevelSubsystem;
 	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
-	TSubclassOf<ULocalPlayerSaveGameSubsystem> SaveGameSubsystem;
+	TSubclassOf<USaveGameSubsystem> SaveGameSubsystem;
 };

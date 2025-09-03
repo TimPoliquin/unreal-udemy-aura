@@ -11,6 +11,7 @@
 #include "Player/InventoryActorInterface.h"
 #include "AuraCharacter.generated.h"
 
+class UAuraPlayerEquipmentComponent;
 class UFishingComponentInterface;
 class UAuraFishingComponent;
 class UPlayerInventoryComponent;
@@ -98,18 +99,20 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
 	void LoadProgress(const UAuraSaveGame* SaveData);
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UAuraFishingComponent> FishingComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UAuraPlayerEquipmentComponent> EquipmentComponent;
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<UAuraCameraComponent> CameraComponent;
+	UPROPERTY(VisibleAnywhere, Category="Components")
+	TObjectPtr<USpringArmComponent> SpringArmComponent;
+	UPROPERTY(EditDefaultsOnly, Category="Components")
+	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
+	UPROPERTY(EditDefaultsOnly, Category="Components")
+	TObjectPtr<UNiagaraComponent> FishingStatusEffectNiagaraComponent;
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UAuraCameraComponent> CameraComponent;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USpringArmComponent> SpringArmComponent;
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UNiagaraComponent> FishingStatusEffectNiagaraComponent;
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USoundBase> LevelUpSound;
 	UPROPERTY(EditDefaultsOnly)

@@ -9,7 +9,7 @@
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGame.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"

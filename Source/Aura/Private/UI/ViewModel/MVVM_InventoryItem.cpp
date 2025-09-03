@@ -4,11 +4,9 @@
 #include "UI/ViewModel/MVVM_InventoryItem.h"
 
 #include "Item/AuraItemBlueprintLibrary.h"
-#include "Character/AuraCharacter.h"
 
-void UMVVM_InventoryItem::InitializeDependencies(AAuraCharacter* InPlayerActor)
+void UMVVM_InventoryItem::InitializeDependencies()
 {
-	PlayerActor = InPlayerActor;
 	SetIcon(DefaultEmptyIcon);
 }
 
@@ -108,10 +106,9 @@ void UMVVM_InventoryItem::Clear()
 
 void UMVVM_InventoryItem::UpdateFromInventoryItemTag()
 {
-	if (InventoryItemTag.IsValid() && PlayerActor.IsValid())
+	if (InventoryItemTag.IsValid())
 	{
-		const AActor* LocalPlayerActor = PlayerActor.Get();
-		const FAuraItemDefinition& ItemDef = UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(LocalPlayerActor, InventoryItemTag);
+		const FAuraItemDefinition& ItemDef = UAuraItemBlueprintLibrary::GetItemDefinitionByItemType(GetWorld(), InventoryItemTag);
 		SetInventoryItemName(ItemDef.ItemName);
 		SetIcon(ItemDef.ItemIcon);
 	}

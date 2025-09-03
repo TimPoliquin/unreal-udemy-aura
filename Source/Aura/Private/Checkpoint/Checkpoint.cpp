@@ -5,7 +5,7 @@
 
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
-#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
+#include "Game/Subsystem/SaveGameSubsystem.h"
 #include "Interaction/PlayerInterface.h"
 
 ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -58,9 +58,7 @@ void ACheckpoint::OnSphereOverlap(
 		bHasBeenActivated = true;
 		PlayActivatedEffect();
 		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);
-		if (const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
-			Cast<ULocalPlayer>(OtherActor->GetNetOwningPlayer())
-		))
+		if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
 		{
 			SaveGameSubsystem->SaveWorldState(GetWorld());
 		}

@@ -16,16 +16,18 @@
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Fishing/AuraFishingComponent.h"
-#include "Game/AuraSaveGame.h"
+#include "Game/AuraGameState.h"
+#include "Game/Save/AuraSaveGame.h"
 #include "Game/Subsystem/AuraAIDirectorGameInstanceSubsystem.h"
 #include "Game/Subsystem/LevelGameInstanceSubsystem.h"
-#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
+#include "Game/Subsystem/SaveGameSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUD.h"
 #include "Interaction/PlayerInterface.h"
+#include "Player/AuraPlayerEquipmentComponent.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -49,6 +51,7 @@ AAuraCharacter::AAuraCharacter()
 	CameraComponent = CreateDefaultSubobject<UAuraCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;
+	EquipmentComponent = CreateDefaultSubobject<UAuraPlayerEquipmentComponent>(TEXT("Equipment Component"));
 	FishingComponent = CreateDefaultSubobject<UAuraFishingComponent>(TEXT("Fishing Component"));
 	FishingStatusEffectNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Fishing Status Effect"));
 	FishingStatusEffectNiagaraComponent->SetupAttachment(GetRootComponent());
@@ -94,12 +97,14 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
-		if (const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
-			PlayerController->GetLocalPlayer()
-		))
+		if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
 		{
 			LoadProgress(SaveGameSubsystem->GetInGameSaveData());
 			SaveGameSubsystem->LoadWorldState(GetWorld());
+		}
+		else
+		{
+			UE_LOG(LogAura, Error, TEXT("[%s] Unable to load save data - no save game subsystem available!"), *GetName())
 		}
 	}
 }
@@ -122,6 +127,7 @@ void AAuraCharacter::LoadProgress(const UAuraSaveGame* SaveData)
 		{
 			AuraPlayerState->FromSaveData(SaveData);
 		}
+		EquipmentComponent->FromSaveData(SaveData);
 		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
 		{
 			TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
@@ -213,12 +219,8 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	AuraPlayerState->InitializeAbilityActorInfo();
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
-	if (UPlayerInventoryComponent* InventoryComponent = GetInventoryComponent(AuraPlayerState))
-	{
-		InventoryComponent->SetCharacterMesh(GetMesh());
-		InventoryComponent->InitializeEquipment();
-		FishingComponent->SetPlayerInventoryComponent(InventoryComponent);
-	}
+	EquipmentComponent->InitializeEquipment();
+	FishingComponent->SetPlayerEquipmentComponent(EquipmentComponent);
 	// Broadcast Ability System Setup
 	OnAbilitySystemReady(GetAuraAbilitySystemComponent());
 }
@@ -266,9 +268,7 @@ void AAuraCharacter::Die()
 	DeathTimerDelegate.BindLambda(
 		[this]()
 		{
-			if (ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
-				Cast<ULocalPlayer>(GetNetOwningPlayer())
-			))
+			if (USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
 			{
 				ULevelGameInstanceSubsystem* LevelSubsystem = ULevelGameInstanceSubsystem::Get(GetWorld());
 				LevelSubsystem->LoadMap(this, SaveGameSubsystem->GetInGameSaveData()->MapName);
@@ -285,12 +285,7 @@ void AAuraCharacter::Die()
 
 USkeletalMeshComponent* AAuraCharacter::GetWeapon_Implementation() const
 {
-	if (const UPlayerInventoryComponent* InventoryComponent = GetInventoryComponent(GetPlayerState()))
-	{
-		return InventoryComponent->GetWeapon();
-	}
-	UE_LOG(LogAura, Warning, TEXT("[%s] No inventory component available, returning null weapon"), *GetName())
-	return nullptr;
+	return EquipmentComponent->GetWeapon();
 }
 
 int32 AAuraCharacter::GetXP_Implementation()
@@ -400,8 +395,7 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 
 void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 {
-	const ULocalPlayer* Player = Cast<ULocalPlayer>(GetNetOwningPlayer());
-	ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(Player);
+	USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this);
 	UAuraSaveGame* SaveData = SaveGameSubsystem
 		                          ? SaveGameSubsystem->GetInGameSaveData()
 		                          : nullptr;
@@ -415,6 +409,7 @@ void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		{
 			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No player state!"))
 		}
+		EquipmentComponent->ToSaveData(SaveData);
 		SaveData->SaveSlotAttributeSource = FromDisk;
 		SaveData->PlayerStartTag = CheckpointTag;
 		SaveGameSubsystem->SaveInGameProgressData(SaveData);
@@ -463,7 +458,7 @@ void AAuraCharacter::ReturnCamera_Implementation(
 
 UPlayerInventoryComponent* AAuraCharacter::GetInventoryComponent_Implementation() const
 {
-	return GetInventoryComponent(GetPlayerState());
+	return AAuraGameState::Get(this)->GetPlayerInventoryComponent();
 }
 
 UAuraFishingComponent* AAuraCharacter::GetFishingComponent_Implementation() const

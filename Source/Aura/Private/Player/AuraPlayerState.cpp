@@ -6,9 +6,8 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
-#include "Game/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGame.h"
 #include "Net/UnrealNetwork.h"
-#include "Player/PlayerInventoryComponent.h"
 
 AAuraPlayerState::AAuraPlayerState()
 {
@@ -17,7 +16,6 @@ AAuraPlayerState::AAuraPlayerState()
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>(TEXT("AttributeSet"));
-	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("PlayerInventoryComponent"));
 }
 
 UAbilitySystemComponent* AAuraPlayerState::GetAbilitySystemComponent() const
@@ -37,11 +35,6 @@ void AAuraPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 UAttributeSet* AAuraPlayerState::GetAttributeSet() const
 {
 	return AttributeSet;
-}
-
-UPlayerInventoryComponent* AAuraPlayerState::GetInventoryComponent_Implementation() const
-{
-	return PlayerInventoryComponent;
 }
 
 int32 AAuraPlayerState::GetCharacterLevel() const
@@ -122,7 +115,6 @@ void AAuraPlayerState::FromSaveData(const UAuraSaveGame* SaveData)
 	SetSpellPoints(SaveData->SpellPoints);
 	AttributeSet->FromSaveData(SaveData);
 	AbilitySystemComponent->FromSaveData(SaveData);
-	PlayerInventoryComponent->FromSaveData(SaveData);
 }
 
 void AAuraPlayerState::ToSaveData(UAuraSaveGame* SaveData) const
@@ -133,7 +125,6 @@ void AAuraPlayerState::ToSaveData(UAuraSaveGame* SaveData) const
 	SaveData->SpellPoints = GetSpellPoints();
 	AttributeSet->ToSaveData(SaveData);
 	AbilitySystemComponent->ToSaveData(SaveData);
-	PlayerInventoryComponent->ToSaveData(SaveData);
 }
 
 void AAuraPlayerState::InitializeAbilityActorInfo()

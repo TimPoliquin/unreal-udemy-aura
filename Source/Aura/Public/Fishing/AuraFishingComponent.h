@@ -8,13 +8,15 @@
 #include "Components/ActorComponent.h"
 #include "Item/Equipment/AuraFishingBob.h"
 #include "Item/AuraItemTypes.h"
+#include "Player/Equipment/AuraEquipmentTypes.h"
 #include "AuraFishingComponent.generated.h"
 
 
+struct FAuraEquipmentDelegatePayload;
+class UAuraPlayerEquipmentComponent;
 struct FGameplayAbilitySpecHandle;
 class AAuraFishingBob;
 class AAuraFishingRod;
-class UPlayerInventoryComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFishingComponentEquipAnimationSignature);
 
@@ -43,7 +45,7 @@ class AURA_API UAuraFishingComponent : public UActorComponent
 
 public:
 	UAuraFishingComponent();
-	void SetPlayerInventoryComponent(UPlayerInventoryComponent* InPlayerInventoryComponent);
+	void SetPlayerEquipmentComponent(UAuraPlayerEquipmentComponent* InPlayerEquipmentComponent);
 	UFUNCTION(BlueprintCallable)
 	virtual void SetupForFishing(const FVector& InFishingDestination);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -85,9 +87,9 @@ private:
 	UFUNCTION()
 	void OnFishingBobStateChanged(EFishingBobState FishingBobState);
 	UFUNCTION()
-	void OnInventoryEquipAnimationComplete(EAuraEquipmentSlot EquipmentSlot, const FGameplayTag& EquippedItem);
+	void OnInventoryEquipAnimationComplete(const FAuraEquipmentDelegatePayload& Payload);
 	UPROPERTY()
-	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
+	TObjectPtr<UAuraPlayerEquipmentComponent> PlayerEquipmentComponent;
 	UPROPERTY()
 	TObjectPtr<AAuraFishingRod> FishingRod;
 	UPROPERTY()

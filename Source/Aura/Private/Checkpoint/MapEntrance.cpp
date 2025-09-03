@@ -3,7 +3,7 @@
 
 #include "Checkpoint/MapEntrance.h"
 
-#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
+#include "Game/Subsystem/SaveGameSubsystem.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -37,9 +37,7 @@ void AMapEntrance::OnSphereOverlap(
 	{
 		bHasBeenActivated = true;
 		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
-		if (const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(
-			Cast<ULocalPlayer>(OtherActor->GetNetOwningPlayer())
-		))
+		if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
 		{
 			SaveGameSubsystem->SaveWorldState(GetWorld());
 		}

@@ -4,7 +4,7 @@
 #include "UI/ViewModel/MVVM_LoadScreen.h"
 
 #include "Game/Subsystem/LevelGameInstanceSubsystem.h"
-#include "Game/Subsystem/LocalPlayerSaveGameSubsystem.h"
+#include "Game/Subsystem/SaveGameSubsystem.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 
 void UMVVM_LoadScreen::InitializeLoadSlots()
@@ -25,7 +25,7 @@ void UMVVM_LoadScreen::InitializeLoadSlots()
 
 void UMVVM_LoadScreen::NewSlotButtonPressed(const int32 SlotIndex, const FString& EnteredName)
 {
-	ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(GetLocalPlayer());
+	USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(LocalPlayer);
 	UMVVM_LoadSlot* LoadSlot = GetLoadSlotByIndex(SlotIndex);
 	FString PlayerName = EnteredName.IsEmpty()
 		                     ? FString::Printf(TEXT("Player %d"), SlotIndex + 1)
@@ -61,7 +61,7 @@ void UMVVM_LoadScreen::DeleteButtonPressed()
 {
 	if (IsValid(SelectedSlot))
 	{
-		ULocalPlayerSaveGameSubsystem::Get(GetLocalPlayer())->DeleteSlot(
+		USaveGameSubsystem::Get(GetLocalPlayer())->DeleteSlot(
 			SelectedSlot->GetLoadSlotName(),
 			SelectedSlot->GetSlotIndex()
 		);
@@ -84,7 +84,7 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 {
 	if (IsValid(SelectedSlot))
 	{
-		ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(GetLocalPlayer());
+		USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(GetLocalPlayer());
 		SaveGameSubsystem->InitializeSaveState(
 			SelectedSlot->GetPlayerStartTag(),
 			SelectedSlot->GetLoadSlotName(),
@@ -97,7 +97,7 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 
 void UMVVM_LoadScreen::LoadData()
 {
-	if (const ULocalPlayerSaveGameSubsystem* SaveGameSubsystem = ULocalPlayerSaveGameSubsystem::Get(GetLocalPlayer()))
+	if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(GetLocalPlayer()))
 	{
 		for (UMVVM_LoadSlot* LoadSlot : LoadSlots)
 		{

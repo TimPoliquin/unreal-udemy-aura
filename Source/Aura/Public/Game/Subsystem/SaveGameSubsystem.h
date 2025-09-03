@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Game/AuraSaveGame.h"
-#include "LocalPlayerSaveGameSubsystem.generated.h"
+#include "Game/Save/AuraSaveGame.h"
+#include "SaveGameSubsystem.generated.h"
 
 class USaveGame;
 class UAuraSaveGame;
@@ -36,7 +36,7 @@ struct FAuraCurrentSaveState
  * 
  */
 UCLASS(Abstract, Blueprintable)
-class AURA_API ULocalPlayerSaveGameSubsystem : public ULocalPlayerSubsystem
+class AURA_API USaveGameSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
@@ -62,7 +62,7 @@ public:
 	void LoadWorldState(UWorld* World) const;
 
 	static void DeleteSlot(const FString& SlotName, const int32 SlotIndex);
-	static ULocalPlayerSaveGameSubsystem* Get(const ULocalPlayer* LocalPlayer);
+	static USaveGameSubsystem* Get(const UObject* WorldContextObject);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Save Game")
