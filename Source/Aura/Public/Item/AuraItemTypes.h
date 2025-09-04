@@ -90,6 +90,14 @@ struct FAuraItemInventoryEntry
 		return ItemType.MatchesTagExact(Other.ItemType);
 	}
 
+	// Serialization function
+	friend FArchive& operator<<(FArchive& Ar, FAuraItemInventoryEntry& Struct)
+	{
+		Ar << Struct.ItemType;
+		Ar << Struct.ItemCount;
+		return Ar;
+	}
+
 	bool IsValid() const
 	{
 		return ItemType.IsValid();

@@ -7,15 +7,19 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AttributeInfo.h"
 #include "Player/AuraPlayerState.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
 	Super::BindCallbacksToDependencies();
 	check(AttributeInfo);
-	GetAuraPlayerState()->OnAttributePointsChangeDelegate.AddDynamic(
-		this,
-		&UAttributeMenuWidgetController::OnAttributePointsChanged
-	);
+	if (UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		ProgressionComponent->OnAttributePointsChangeDelegate.AddDynamic(
+			this,
+			&UAttributeMenuWidgetController::OnAttributePointsChanged
+		);
+	}
 	for (auto& Pair : GetAuraAttributeSet()->TagsToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
@@ -35,7 +39,10 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
-	OnAttributePointsChanged(GetAuraPlayerState()->GetAttributePoints());
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		OnAttributePointsChanged(ProgressionComponent->GetAttributePoints());
+	}
 }
 
 void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)

@@ -63,7 +63,7 @@ void UMVVM_LoadSlot::SetMapAssetName(const FString& InMapAssetName)
 	this->MapAssetName = InMapAssetName;
 }
 
-void UMVVM_LoadSlot::ToSaveGame(UAuraSaveGame* SaveGame) const
+void UMVVM_LoadSlot::ToSaveGame(UOLD_AuraSaveGame* SaveGame) const
 {
 	SaveGame->SlotIndex = GetSlotIndex();
 	SaveGame->SlotName = GetLoadSlotName();
@@ -75,7 +75,7 @@ void UMVVM_LoadSlot::ToSaveGame(UAuraSaveGame* SaveGame) const
 	SaveGame->PlayerLevel = GetPlayerLevel();
 }
 
-void UMVVM_LoadSlot::FromSaveGame(const UAuraSaveGame* SaveGame)
+void UMVVM_LoadSlot::FromSaveGame(const UOLD_AuraSaveGame* SaveGame)
 {
 	SetPlayerName(SaveGame->PlayerName);
 	SetPlayerLevel(SaveGame->PlayerLevel);

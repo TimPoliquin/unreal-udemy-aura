@@ -8,13 +8,12 @@
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerState.h"
-#include "Player/InventoryActorInterface.h"
 #include "AuraCharacter.generated.h"
 
 class UAuraPlayerEquipmentComponent;
 class UFishingComponentInterface;
 class UAuraFishingComponent;
-class UPlayerInventoryComponent;
+class UAuraInventoryComponent;
 class UAuraCameraComponent;
 class UAuraAbilitySystemComponent;
 class UAuraAttributeSet;
@@ -30,8 +29,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IInventoryActorInterface,
-                                public IFishingActorInterface
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IFishingActorInterface
 {
 	GENERATED_BODY()
 
@@ -86,10 +84,6 @@ public:
 		UCurveFloat* AnimationCurve
 	) override;
 
-	/** InventoryInterface Start */
-	virtual UPlayerInventoryComponent* GetInventoryComponent_Implementation() const override;
-	/** InventoryInterface End */
-
 	/** FishingActorInterface Start */
 	virtual UAuraFishingComponent* GetFishingComponent_Implementation() const override;
 	virtual void ShowFishingStatusEffect_Implementation(UNiagaraSystem* EffectSystem) override;
@@ -98,7 +92,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
-	void LoadProgress(const UAuraSaveGame* SaveData);
+	void LoadProgress(const UOLD_AuraSaveGame* SaveData);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UAuraFishingComponent> FishingComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
@@ -128,6 +122,8 @@ private:
 	void Multicast_LevelUpParticles() const;
 	UFUNCTION()
 	void OnCameraReturned();
+	UFUNCTION()
+	void OnLevelLoaded();
 
 	FVector DesiredCameraForwardVector;
 };

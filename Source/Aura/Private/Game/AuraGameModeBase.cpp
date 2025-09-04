@@ -4,7 +4,7 @@
 #include "Game/AuraGameModeBase.h"
 
 #include "Aura/AuraLogChannels.h"
-#include "Game/Subsystem/LevelGameInstanceSubsystem.h"
+#include "Game/Subsystem/AuraLevelManager.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -13,7 +13,7 @@ AActor* AAuraGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
 	if (const APlayerController* PlayerController = Cast<APlayerController>(Player))
 	{
-		const ULevelGameInstanceSubsystem* LevelSubsystem = ULevelGameInstanceSubsystem::Get(PlayerController);
+		const UAuraLevelManager* LevelSubsystem = UAuraLevelManager::Get(PlayerController);
 		const FName PlayerStartTag = LevelSubsystem
 			                             ? LevelSubsystem->GetCurrentPlayerStartTag(PlayerController, true)
 			                             : FName();

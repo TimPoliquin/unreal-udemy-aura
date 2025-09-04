@@ -5,6 +5,7 @@
 
 #include "Character/AuraCharacter.h"
 #include "Game/AuraGameState.h"
+#include "Player/AuraInventoryComponent.h"
 #include "UI/ViewModel/MVVM_InventoryItem.h"
 
 FString UMVVM_Inventory::GetInventoryName() const
@@ -64,7 +65,7 @@ void UMVVM_Inventory::InitializeDependencies()
 	{
 		InventoryItems[Idx]->InitializeDependencies();
 	}
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = AAuraGameState::Get(GetWorld())->GetPlayerInventoryComponent())
+	if (UAuraInventoryComponent* PlayerInventoryComponent = UAuraInventoryComponent::Get(GetWorld()))
 	{
 		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddUniqueDynamic(this, &UMVVM_Inventory::OnPlayerInventoryChanged);
 		for (auto InventoryItem : PlayerInventoryComponent->GetInventory())

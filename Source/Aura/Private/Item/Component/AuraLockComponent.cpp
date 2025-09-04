@@ -7,10 +7,10 @@
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelAssets/Switch/SwitchInterface.h"
-#include "Player/InventoryActorInterface.h"
+#include "Player/AuraInventoryComponent.h"
 
 
-class UPlayerInventoryComponent;
+class UAuraInventoryComponent;
 
 EAuraLockSFXPlaybackLocation FAuraLockSFXConfig::GetPlaybackLocation(const EAuraLockSFXPlaybackLocation OverridePlaybackLocation) const
 {
@@ -210,7 +210,7 @@ bool UAuraLockComponent::IsPreconditionMet_Custom_Implementation() const
 
 bool UAuraLockComponent::IsPreconditionMet_Key_Implementation(const AActor* Player) const
 {
-	if (const UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (const UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		return InventoryComponent->HasItemInInventory(KeyTag);
 	}
@@ -241,7 +241,7 @@ void UAuraLockComponent::Unlock_Implementation(bool bBroadcast)
 void UAuraLockComponent::TryUnlock_Key_Implementation(AActor* Player)
 {
 	bool bShouldUnlock = false;
-	if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		if (bConsumesKey)
 		{

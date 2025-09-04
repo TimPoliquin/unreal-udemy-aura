@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "LevelGameInstanceSubsystem.generated.h"
+#include "AuraLevelManager.generated.h"
+
+class UAuraLevelTransition;
+DECLARE_MULTICAST_DELEGATE(FAuraLevelManagerEventSignature);
 
 USTRUCT(BlueprintType)
 struct FAuraMapConfig
@@ -29,11 +32,13 @@ struct FAuraMapConfig
  * 
  */
 UCLASS(Abstract, Blueprintable)
-class AURA_API ULevelGameInstanceSubsystem : public UGameInstanceSubsystem
+class AURA_API UAuraLevelManager : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
+	static UAuraLevelManager* Get(const UObject* WorldContextObject);
+
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	TSoftObjectPtr<UWorld> GetMapFromMapDisplayName(const FString& MapDisplayName) const;
@@ -44,9 +49,11 @@ public:
 	FName GetDefaultPlayerStartTag(const FString& MapDisplayName) const;
 	int32 GetDefaultPlayerLevel(const FString& MapDisplayName) const;
 	FName GetCurrentPlayerStartTag(const UObject* WorldContextObject, const bool bFallbackToDefault) const;
-	void SetCurrentPlayerStartTag(const FName& InPlayerStartTag);
+	void TransitionLevel(const FString& MapAssetName, const FName& PlayerStartTag, const bool bAutoSave = true);
 
-	static ULevelGameInstanceSubsystem* Get(const UObject* WorldContextObject);
+	bool IsTransitioningLevels() const;
+
+	FAuraLevelManagerEventSignature OnLevelTransitionComplete;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Maps")
@@ -54,9 +61,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Maps")
 	TArray<FAuraMapConfig> MapConfigs = TArray<FAuraMapConfig>();
 
-	FName CurrentPlayerStartTag = FName();
-
 private:
 	FAuraMapConfig GetMapConfigByDisplayName(const FString& MapDisplayName) const;
 	FAuraMapConfig GetMapConfigByMapAssetName(const FString& MapAssetName) const;
+	UPROPERTY()
+	TObjectPtr<UAuraLevelTransition> LevelTransition;
 };

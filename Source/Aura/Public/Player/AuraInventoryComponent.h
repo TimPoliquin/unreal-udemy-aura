@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Interaction/SavableInterface.h"
 #include "Item/AuraItemTypes.h"
 #include "AuraInventoryEvents.h"
-#include "PlayerInventoryComponent.generated.h"
+#include "Game/Save/SaveableInterface.h"
+#include "AuraInventoryComponent.generated.h"
 
 class AAuraFishingRod;
 class UGameplayEffect;
@@ -16,17 +16,37 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryFullSignature, const FGa
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryItemCountChangedSignature, const FOnInventoryItemCountChangedPayload&, Payload);
 
+USTRUCT(BlueprintType)
+struct AURA_API FAuraInventoryComponentSaveData
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	int32 MaxItems = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	TArray<FAuraItemInventoryEntry> InventoryItems;
+};
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class AURA_API UPlayerInventoryComponent : public UActorComponent, public ISavableInterface
+class AURA_API UAuraInventoryComponent : public UActorComponent, public ISaveableInterface
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="PlayerInventoryComponent|Utils")
-	static UPlayerInventoryComponent* GetPlayerInventoryComponent(const AActor* InActor);
+	static UAuraInventoryComponent* Get(const UObject* InObject);
 
-	UPlayerInventoryComponent();
+	UAuraInventoryComponent();
+
+	/** Start ISaveableInterface **/
+	virtual TArray<uint8> SaveData_Implementation() override;
+	virtual bool LoadData_Implementation(const TArray<uint8>& Data) override;
+	virtual bool ShouldSave_Implementation() const override;
+	virtual bool ShouldLoadTransform_Implementation() const override { return false; }
+	virtual bool ShouldAutoSpawn_Implementation() const override { return false; }
+	virtual FString GetSaveID_Implementation() const override;
+	/** Start ISaveableInterface **/
+
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasItemInInventory(const FGameplayTag& ItemType) const;
@@ -42,10 +62,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryFullSignature OnInventoryFullDelegate;
 
-	/** ISavableInterface start **/
-	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
-	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
-	/** ISavableInterface end **/
 	TArray<FAuraItemInventoryEntry> GetInventory() const;
 
 protected:
@@ -55,5 +71,8 @@ protected:
 	TArray<FAuraItemInventoryEntry> Inventory;
 
 private:
+	FString SaveID;
 	bool UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory);
+	TArray<uint8> SerializeComponentData() const;
+	bool DeserializeComponentData(const TArray<uint8>& Data);
 };

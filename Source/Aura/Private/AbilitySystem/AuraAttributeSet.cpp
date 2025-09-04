@@ -14,7 +14,7 @@
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 
 
 UAuraAttributeSet::UAuraAttributeSet()
@@ -131,11 +131,11 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 }
 
-void UAuraAttributeSet::FromSaveData(const UAuraSaveGame* SaveData)
+void UAuraAttributeSet::FromSaveData(const UOLD_AuraSaveGame* SaveData)
 {
 }
 
-void UAuraAttributeSet::ToSaveData(UAuraSaveGame* SaveData) const
+void UAuraAttributeSet::ToSaveData(UOLD_AuraSaveGame* SaveData) const
 {
 	SaveData->Strength = GetStrength();
 	SaveData->Intelligence = GetIntelligence();

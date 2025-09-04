@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Game/Save/SaveableInterface.h"
 #include "GameFramework/PlayerStart.h"
 #include "Interaction/HighlightInterface.h"
 #include "Interaction/SaveInterface.h"
@@ -13,7 +14,7 @@ class USphereComponent;
  * 
  */
 UCLASS()
-class AURA_API ACheckpoint : public APlayerStart, public ISaveInterface, public IHighlightInterface
+class AURA_API ACheckpoint : public APlayerStart, public ISaveableInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 
@@ -23,8 +24,7 @@ public:
 	/**
 	 * Save Interface
 	 */
-	FORCEINLINE virtual bool ShouldLoadTransform_Implementation() const override { return false; }
-	virtual void LoadActor_Implementation() override;
+	virtual void PostLoad_Implementation() override;
 	/**
 	 *Save Interface End
 	 */

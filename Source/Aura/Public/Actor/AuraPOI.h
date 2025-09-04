@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AuraEffectActor.h"
 #include "AuraInteractionInterface.h"
+#include "Game/Save/SaveableInterface.h"
 #include "GameFramework/Actor.h"
 #include "Interaction/SaveInterface.h"
 #include "AuraPOI.generated.h"
@@ -14,7 +15,7 @@ class USphereComponent;
 class UWidgetComponent;
 
 UCLASS()
-class AURA_API AAuraPOI : public AAuraEffectActor, public IAuraInteractionInterface, public ISaveInterface
+class AURA_API AAuraPOI : public AAuraEffectActor, public IAuraInteractionInterface, public ISaveableInterface
 {
 	GENERATED_BODY()
 
@@ -25,10 +26,9 @@ protected:
 	virtual void BeginPlay() override;
 	void InitializeState();
 
-	/** Start ISavableInterface **/
-	virtual void LoadActor_Implementation() override;
-	virtual bool ShouldLoadTransform_Implementation() const override { return false; }
-	/** End ISavableInterface **/
+	/** Start ISaveableInterface **/
+	virtual void PostLoad_Implementation() override;
+	/** End ISaveableInterface **/
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UWidgetComponent> POIWidget;

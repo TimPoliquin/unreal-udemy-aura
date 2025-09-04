@@ -6,29 +6,34 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGameBlueprintFunctionLibrary.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 #include "GameFramework/Character.h"
 #include "Item/AuraItemBlueprintLibrary.h"
 #include "Item/Equipment/AuraEquipmentBase.h"
 #include "Item/Equipment/AuraFishingRod.h"
 #include "Tags/AuraGameplayTags.h"
 
-
 UAuraPlayerEquipmentComponent::UAuraPlayerEquipmentComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SaveID = UAuraSaveGameBlueprintFunctionLibrary::GenerateSaveID(this);
+	SetIsReplicatedByDefault(true);
 }
 
-void UAuraPlayerEquipmentComponent::FromSaveData(const UAuraSaveGame* SaveData)
+TArray<uint8> UAuraPlayerEquipmentComponent::SaveData_Implementation()
 {
-	EquipmentUseMode = SaveData->SavedInventory.EquipmentUseMode;
-	EquipmentSlots = SaveData->SavedInventory.EquipmentSlots;
+	return SerializeComponentData();
 }
 
-void UAuraPlayerEquipmentComponent::ToSaveData(UAuraSaveGame* SaveData) const
+bool UAuraPlayerEquipmentComponent::LoadData_Implementation(const TArray<uint8>& Data)
 {
-	SaveData->SavedInventory.EquipmentUseMode = EquipmentUseMode;
-	SaveData->SavedInventory.EquipmentSlots = EquipmentSlots;
+	return DeserializeComponentData(Data);
+}
+
+FString UAuraPlayerEquipmentComponent::GetSaveID_Implementation() const
+{
+	return SaveID;
 }
 
 void UAuraPlayerEquipmentComponent::InitializeEquipment()
@@ -267,4 +272,44 @@ AAuraEquipmentBase* UAuraPlayerEquipmentComponent::SpawnEquipment(const EAuraEqu
 		SocketName
 	);
 	return Equipment;
+}
+
+TArray<uint8> UAuraPlayerEquipmentComponent::SerializeComponentData() const
+{
+	TArray<uint8> Data;
+	FMemoryWriter Writer(Data);
+
+	// Create save data struct
+	FAuraPlayerEquipmentComponentSaveData SaveData;
+	SaveData.EquipmentUseMode = EquipmentUseMode;
+	SaveData.EquipmentSlots = EquipmentSlots;
+
+	// Serialize the struct
+	Writer << SaveData.EquipmentUseMode;
+	Writer << SaveData.EquipmentSlots;
+
+	return Data;
+}
+
+bool UAuraPlayerEquipmentComponent::DeserializeComponentData(const TArray<uint8>& Data)
+{
+	if (Data.Num() == 0)
+	{
+		return false;
+	}
+
+	FMemoryReader Reader(Data);
+
+	try
+	{
+		Reader << EquipmentUseMode;
+		Reader << EquipmentSlots;
+
+		return true;
+	}
+	catch (...)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s:%s] Failed to deserialize equipment data"), *GetOwner()->GetName(), *GetName());
+		return false;
+	}
 }

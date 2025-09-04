@@ -8,7 +8,7 @@
 #include "AuraAbilitySystemTypes.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
-class UAuraSaveGame;
+class UOLD_AuraSaveGame;
 class UAuraAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*Asset Tags*/)
@@ -87,8 +87,8 @@ public:
 
 	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FAuraAbilityDescription& OutDescription);
 
-	void FromSaveData(const UAuraSaveGame* SaveData);
-	void ToSaveData(UAuraSaveGame* SaveData);
+	void FromSaveData(const UOLD_AuraSaveGame* SaveData);
+	void ToSaveData(UOLD_AuraSaveGame* SaveData);
 
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
 	FAbilityEquippedSignature OnAbilityEquippedDelegate;

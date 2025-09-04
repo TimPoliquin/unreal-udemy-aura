@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraSpawnEventPayloadDefinitions.h"
+#include "Game/Save/SaveableInterface.h"
 #include "GameFramework/Actor.h"
 #include "Interaction/SaveInterface.h"
 #include "AuraEnemySpawnVolume.generated.h"
@@ -15,7 +16,7 @@ class UBoxComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAuraEnemySpawnVolumeAllEnemiesDefeatedSignature);
 
 UCLASS()
-class AURA_API AAuraEnemySpawnVolume : public AActor, public ISaveInterface
+class AURA_API AAuraEnemySpawnVolume : public AActor, public ISaveableInterface
 {
 	GENERATED_BODY()
 
@@ -23,10 +24,9 @@ public:
 	AAuraEnemySpawnVolume();
 	void SetEnabled(const bool bInEnabled);
 
-	/** Save Interface **/
-	virtual void LoadActor_Implementation() override;
-	/** Save Interface End**/
-
+	/** Start ISaveableInterface **/
+	virtual void PostLoad_Implementation() override;
+	/** End ISaveableInterface **/
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnAuraEnemySpawnVolumeAllEnemiesDefeatedSignature OnAllEnemiesDefeated;
 

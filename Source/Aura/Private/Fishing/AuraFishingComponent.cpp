@@ -11,7 +11,7 @@
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Item/Equipment/AuraFishingRod.h"
 #include "Player/AuraPlayerEquipmentComponent.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 
 
@@ -50,7 +50,7 @@ void UAuraFishingComponent::SetupForFishing(const FVector& InFishingDestination)
 
 bool UAuraFishingComponent::HasFishingRod() const
 {
-	if (const UPlayerInventoryComponent* PlayerInventoryComponent = AAuraGameState::Get(GetOwner())->GetPlayerInventoryComponent())
+	if (const UAuraInventoryComponent* PlayerInventoryComponent = UAuraInventoryComponent::Get(GetOwner()))
 	{
 		return PlayerInventoryComponent->HasItemInInventory(FAuraGameplayTags::Get().Item_Type_Equipment_FishingRod);
 	}

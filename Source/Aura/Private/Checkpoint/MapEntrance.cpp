@@ -3,7 +3,9 @@
 
 #include "Checkpoint/MapEntrance.h"
 
-#include "Game/Subsystem/SaveGameSubsystem.h"
+#include "Game/Save/AuraSaveGameManager.h"
+#include "Game/Subsystem/AuraLevelManager.h"
+#include "Game/Subsystem/Old_SaveGameManager.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -14,10 +16,6 @@ AMapEntrance::AMapEntrance(const FObjectInitializer& ObjectInitializer) : Super(
 	bDisableAfterActivation = false;
 }
 
-void AMapEntrance::LoadActor_Implementation()
-{
-	// Do nothing
-}
 
 void AMapEntrance::BeginPlay()
 {
@@ -36,11 +34,9 @@ void AMapEntrance::OnSphereOverlap(
 	if (IsValid(OtherActor) && OtherActor->Implements<UPlayerInterface>())
 	{
 		bHasBeenActivated = true;
-		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
-		if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
+		if (UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this))
 		{
-			SaveGameSubsystem->SaveWorldState(GetWorld());
+			LevelManager->TransitionLevel(DestinationMap.GetAssetName(), DestinationPlayerStartTag, true);
 		}
-		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);
 	}
 }

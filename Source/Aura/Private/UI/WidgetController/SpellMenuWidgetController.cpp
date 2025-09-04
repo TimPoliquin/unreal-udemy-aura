@@ -9,12 +9,16 @@
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Player/AuraPlayerState.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 #include "Tags/AuraGameplayTags.h"
 
 void USpellMenuWidgetController::BroadcastInitialValues()
 {
 	BroadcastAbilityInfo();
-	OnSpellPointsChanged(GetAuraPlayerState()->GetSpellPoints());
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		OnSpellPointsChanged(ProgressionComponent->GetSpellPoints());
+	}
 }
 
 
@@ -29,15 +33,22 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 		this,
 		&USpellMenuWidgetController::OnAbilityEquipped
 	);
-	GetAuraPlayerState()->OnSpellPointsChangeDelegate.AddDynamic(
-		this,
-		&USpellMenuWidgetController::OnSpellPointsChanged
-	);
+	if (UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		ProgressionComponent->OnSpellPointsChangeDelegate.AddDynamic(
+			this,
+			&USpellMenuWidgetController::OnSpellPointsChanged
+		);
+	}
 }
 
 int32 USpellMenuWidgetController::GetAvailableSpellPoints()
 {
-	return GetAuraPlayerState()->GetSpellPoints();
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		return ProgressionComponent->GetSpellPoints();
+	}
+	return -1;
 }
 
 FGameplayTag USpellMenuWidgetController::GetAbilityStatusTag(const FGameplayTag AbilityTag)

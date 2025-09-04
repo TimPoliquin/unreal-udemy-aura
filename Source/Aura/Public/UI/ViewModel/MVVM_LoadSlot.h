@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 #include "MVVM_LoadSlot.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSetWidgetSwitcherIndexSignature, const int32, WidgetSwitcherIndex);
@@ -60,8 +60,8 @@ public:
 	void SetPlayerStartTag(const FName& InPlayerStartTag);
 	FString GetMapAssetName() const;
 	void SetMapAssetName(const FString& InMapAssetName);
-	void ToSaveGame(UAuraSaveGame* SaveGame) const;
-	void FromSaveGame(const UAuraSaveGame* SaveGame);
+	void ToSaveGame(UOLD_AuraSaveGame* SaveGame) const;
+	void FromSaveGame(const UOLD_AuraSaveGame* SaveGame);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))

@@ -11,8 +11,7 @@
 #include "Item/Effect/SpawnEffectInterface.h"
 #include "Item/Pickup/AuraTreasurePickup.h"
 #include "Item/Pickup/TieredItemInterface.h"
-#include "Player/InventoryActorInterface.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 
@@ -49,13 +48,10 @@ void AAuraTreasureChestActor::HandleInitialState()
 	}
 }
 
-void AAuraTreasureChestActor::LoadActor_Implementation()
+void AAuraTreasureChestActor::PostLoad_Implementation()
 {
-	Super::LoadActor_Implementation();
-	if (HasActorBegunPlay())
-	{
-		HandleInitialState();
-	}
+	Super::PostLoad_Implementation();
+	HandleInitialState();
 }
 
 void AAuraTreasureChestActor::BeginPlay()
@@ -133,15 +129,15 @@ FTransform AAuraTreasureChestActor::GetRewardInitialSpawnLocation_Implementation
 
 void AAuraTreasureChestActor::GrantRewards_DirectToInventory_Implementation(AActor* Player)
 {
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		for (const FAuraLootDefinition& LootDefinition : LootDefinitions)
 		{
-			PlayerInventoryComponent->AddToInventory(LootDefinition.ItemTag);
+			InventoryComponent->AddToInventory(LootDefinition.ItemTag);
 		}
 		if (GoldAmount > 0.0)
 		{
-			PlayerInventoryComponent->AddToInventory(FAuraGameplayTags::Get().Item_Type_Treasure, GoldAmount);
+			InventoryComponent->AddToInventory(FAuraGameplayTags::Get().Item_Type_Treasure, GoldAmount);
 		}
 	}
 }

@@ -3,197 +3,51 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
+#include "AuraSaveGameTypes.h"
 #include "GameFramework/SaveGame.h"
-#include "Item/AuraItemTypes.h"
-#include "Player/Equipment/AuraEquipmentTypes.h"
 #include "AuraSaveGame.generated.h"
-
-class UGameplayAbility;
-
-UENUM(BlueprintType)
-enum ESaveSlotStatus
-{
-	Vacant,
-	EnterName,
-	Taken
-};
-
-UENUM(BlueprintType)
-enum ESaveSlotAttributeSource
-{
-	FromDefault,
-	FromDisk
-};
-
-UENUM(BlueprintType)
-enum ESavedAbilityState
-{
-	GiveAbility,
-	GiveAbilityAndActivate
-};
-
-USTRUCT(BlueprintType)
-struct FSavedActor
-{
-	GENERATED_BODY()
-	UPROPERTY()
-	FName ActorName = NAME_None;
-	UPROPERTY()
-	FTransform Transform = FTransform::Identity;
-	// Serialized variables from the actor - as marked with SaveGame specifier
-	UPROPERTY()
-	TArray<uint8> Bytes;
-
-	bool operator==(const FSavedActor& Other) const
-	{
-		return ActorName.IsEqual(Other.ActorName);
-	}
-};
-
-USTRUCT(BlueprintType)
-struct FSavedMap
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	FString MapAssetName = FString();
-	UPROPERTY()
-	TArray<FSavedActor> SavedActors;
-
-	bool IsValid() const
-	{
-		return !MapAssetName.IsEmpty();
-	}
-
-	bool operator==(const FSavedMap& Other) const
-	{
-		return MapAssetName.Equals(Other.MapAssetName);
-	}
-
-	void FillActorsByName(TMap<FName, FSavedActor>& InActorMap) const
-	{
-		for (auto Actor : SavedActors)
-		{
-			InActorMap.Add(Actor.ActorName, Actor);
-		}
-	}
-};
-
-USTRUCT(BlueprintType)
-struct FSavedAbility
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Class Defaults")
-	TSubclassOf<UGameplayAbility> GameplayAbilityClass;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilityTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilityTypeTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilityStatusTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilitySlotTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 AbilityLevel = 1;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TEnumAsByte<ESavedAbilityState> AbilityState = GiveAbility;
-
-	FString ToString() const
-	{
-		return FString::Printf(
-			TEXT(
-				"Ability Tag: [%s] \n"
-				"Ability Type: [%s] \n"
-				"Ability Status: [%s] \n"
-				"Ability Slot: [%s] \n"
-			),
-			*AbilityTag.ToString(),
-			*AbilityTypeTag.ToString(),
-			*AbilityStatusTag.ToString(),
-			*AbilitySlotTag.ToString()
-		);
-	}
-
-	bool operator==(const FSavedAbility& Right) const
-	{
-		return AbilityTag.MatchesTagExact(Right.AbilityTag);
-	}
-};
-
-USTRUCT(BlueprintType)
-struct FSavedInventory
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 MaxItems = 25;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<FAuraItemInventoryEntry> Inventory;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
-};
 
 /**
  * 
  */
-UCLASS(Abstract, Blueprintable)
+UCLASS()
 class AURA_API UAuraSaveGame : public USaveGame
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-	FString SlotName = FString();
-	UPROPERTY()
-	int32 SlotIndex = 0;
+	static const FString DEFAULT_SAVE_SLOT_NAME;
 
-	UPROPERTY()
-	FString PlayerName = FString("Default_Name");
-	UPROPERTY()
-	FString MapName = FString("Default_Map_Name");
-	UPROPERTY()
-	FString MapAssetName = FString("Default_Map_Asset_Name");
-	UPROPERTY()
-	FName PlayerStartTag = FName("Default_Player_Start");
-	UPROPERTY()
-	TEnumAsByte<ESaveSlotStatus> SaveSlotStatus = Vacant;
-	UPROPERTY()
-	TEnumAsByte<ESaveSlotAttributeSource> SaveSlotAttributeSource = FromDefault;
+	UAuraSaveGame();
 
-	/* Player Data */
-	UPROPERTY()
-	int32 PlayerLevel = 0;
-	UPROPERTY()
-	int32 PlayerXP = 0;
-	UPROPERTY()
-	int32 AttributePoints = 0;
-	UPROPERTY()
-	int32 SpellPoints = 0;
-	/* Player Attributes */
-	UPROPERTY()
-	float Strength = 0.f;
-	UPROPERTY()
-	float Intelligence = 0.f;
-	UPROPERTY()
-	float Resilience = 0.f;
-	UPROPERTY()
-	float Vigor = 0.f;
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	int32 SaveVersion;
 
-	UPROPERTY()
-	TArray<FSavedAbility> SavedAbilities;
-	UPROPERTY()
-	FSavedInventory SavedInventory;
-	UPROPERTY()
-	TArray<FSavedMap> SavedMaps;
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	FString SaveSlotName;
 
-	void AddSavedAbility(const FSavedAbility& SaveAbility);
-	void AddSavedMap(const FSavedMap& SaveMap);
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	FMetaSaveData MetaData;
 
-	FSavedMap GetSavedMapByMapName(const FString& InMapAssetName);
-	bool HasMap(const FString& InMapAssetName);
-	void ReplaceSavedMap(const FString& InMapAssetName, const FSavedMap& SavedMap);
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	FGlobalSaveData GlobalData;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	TArray<FWorldSaveData> WorldsData;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	bool bIsAutoSave = false;
+
+	// Utility functions
+	UFUNCTION(BlueprintCallable, Category = "Save Data")
+	bool FindWorldSaveData(FString WorldName, FWorldSaveData& WorldSaveData);
+	UFUNCTION(BlueprintCallable, Category = "Save Data")
+	void GetOrCreateWorldSaveData(FString WorldName, FWorldSaveData& WorldSaveData);
+	UFUNCTION(BlueprintCallable, Category = "Save Data")
+	void SetActorsData(const FString& WorldPathName, TArray<FActorSaveData> ActorsSaveData);
+	UFUNCTION(BlueprintCallable, Category = "Save Data")
+	void ClearAllData();
+
+private:
+	static constexpr int32 CURRENT_SAVE_VERSION = 1;
 };

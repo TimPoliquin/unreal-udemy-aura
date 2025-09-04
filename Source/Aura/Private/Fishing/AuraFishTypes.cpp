@@ -1,12 +1,11 @@
 ﻿#include "Fishing/AuraFishTypes.h"
 
 #include "Fishing/AuraFishCatch.h"
-#include "Player/InventoryActorInterface.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
 
 void UAuraFishCatch::AddToPlayerInventory(AActor* Player)
 {
-	if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		InventoryComponent->AddToInventory(FishType);
 	}

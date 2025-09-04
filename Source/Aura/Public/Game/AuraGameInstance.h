@@ -6,10 +6,10 @@
 #include "Engine/GameInstance.h"
 #include "AuraGameInstance.generated.h"
 
+class UAuraSaveGameManager;
 class UAuraAIDirectorGameInstanceSubsystem;
 class UAuraGameDataSubsystem;
-class USaveGameSubsystem;
-class ULevelGameInstanceSubsystem;
+class UAuraLevelManager;
 /**
  * 
  */
@@ -27,7 +27,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
 	TSubclassOf<UAuraGameDataSubsystem> CharacterSubsystem;
 	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
-	TSubclassOf<ULevelGameInstanceSubsystem> LevelSubsystem;
+	TSubclassOf<UAuraLevelManager> LevelSubsystem;
 	UPROPERTY(EditDefaultsOnly, Category = "Subsystem")
-	TSubclassOf<USaveGameSubsystem> SaveGameSubsystem;
+	TSubclassOf<UAuraSaveGameManager> SaveGameSubsystem;
 };

@@ -1,28 +1,52 @@
 ﻿// Copyright Alien Shores
 
 
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/AuraGameState.h"
+#include "Game/Save/AuraSaveGameBlueprintFunctionLibrary.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 
-UPlayerInventoryComponent* UPlayerInventoryComponent::GetPlayerInventoryComponent(const AActor* InActor)
+UAuraInventoryComponent* UAuraInventoryComponent::Get(const UObject* InObject)
 {
-	if (IsValid(InActor))
+	if (const AAuraGameState* GameState = AAuraGameState::Get(InObject))
 	{
-		return InActor->FindComponentByClass<UPlayerInventoryComponent>();
+		return GameState->GetInventoryComponent();
 	}
 	return nullptr;
 }
 
-UPlayerInventoryComponent::UPlayerInventoryComponent()
+UAuraInventoryComponent::UAuraInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SaveID = UAuraSaveGameBlueprintFunctionLibrary::GenerateSaveID(this);
+	SetIsReplicatedByDefault(true);
 }
 
-bool UPlayerInventoryComponent::HasItemInInventory(const FGameplayTag& ItemType) const
+TArray<uint8> UAuraInventoryComponent::SaveData_Implementation()
+{
+	return SerializeComponentData();
+}
+
+bool UAuraInventoryComponent::LoadData_Implementation(const TArray<uint8>& Data)
+{
+	return DeserializeComponentData(Data);
+}
+
+bool UAuraInventoryComponent::ShouldSave_Implementation() const
+{
+	return true;
+}
+
+FString UAuraInventoryComponent::GetSaveID_Implementation() const
+{
+	return SaveID;
+}
+
+bool UAuraInventoryComponent::HasItemInInventory(const FGameplayTag& ItemType) const
 {
 	return Inventory.ContainsByPredicate(
 		[ItemType](const FAuraItemInventoryEntry& Entry)
@@ -32,7 +56,7 @@ bool UPlayerInventoryComponent::HasItemInInventory(const FGameplayTag& ItemType)
 	);
 }
 
-int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, const int32 Count)
+int32 UAuraInventoryComponent::AddToInventory(const FGameplayTag& ItemType, const int32 Count)
 {
 	const FAuraItemDefinition ItemDefinition = UAuraGameDataSubsystem::Get(GetOwner())->FindItemDefinitionByItemTag(ItemType);
 	FAuraItemInventoryEntry* ItemEntry = Inventory.FindByPredicate(
@@ -78,34 +102,22 @@ int32 UPlayerInventoryComponent::AddToInventory(const FGameplayTag& ItemType, co
 	return CountToAdd;
 }
 
-bool UPlayerInventoryComponent::UseConsumable(const FGameplayTag& ItemType)
+bool UAuraInventoryComponent::UseConsumable(const FGameplayTag& ItemType)
 {
 	return UseItem(ItemType, EAuraItemCategory::Consumable);
 }
 
-bool UPlayerInventoryComponent::UseKey(const FGameplayTag& ItemType)
+bool UAuraInventoryComponent::UseKey(const FGameplayTag& ItemType)
 {
 	return UseItem(ItemType, EAuraItemCategory::Key);
 }
 
-void UPlayerInventoryComponent::FromSaveData(const UAuraSaveGame* SaveData)
-{
-	MaxItems = SaveData->SavedInventory.MaxItems;
-	Inventory = SaveData->SavedInventory.Inventory;
-}
-
-void UPlayerInventoryComponent::ToSaveData(UAuraSaveGame* SaveData) const
-{
-	SaveData->SavedInventory.MaxItems = MaxItems;
-	SaveData->SavedInventory.Inventory = Inventory;
-}
-
-TArray<FAuraItemInventoryEntry> UPlayerInventoryComponent::GetInventory() const
+TArray<FAuraItemInventoryEntry> UAuraInventoryComponent::GetInventory() const
 {
 	return Inventory;
 }
 
-bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory)
+bool UAuraInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAuraItemCategory& ItemCategory)
 {
 	const FAuraItemDefinition ItemDefinition = UAuraGameDataSubsystem::Get(GetOwner())->FindItemDefinitionByItemTag(ItemTag);
 	if (!ItemDefinition.IsValid())
@@ -152,4 +164,44 @@ bool UPlayerInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAura
 		NewValue
 	));
 	return true;
+}
+
+TArray<uint8> UAuraInventoryComponent::SerializeComponentData() const
+{
+	TArray<uint8> Data;
+	FMemoryWriter Writer(Data);
+
+	// Create save data struct
+	FAuraInventoryComponentSaveData SaveData;
+	SaveData.MaxItems = MaxItems;
+	SaveData.InventoryItems = Inventory;
+
+	// Serialize the struct
+	Writer << SaveData.MaxItems;
+	Writer << SaveData.InventoryItems;
+
+	return Data;
+}
+
+bool UAuraInventoryComponent::DeserializeComponentData(const TArray<uint8>& Data)
+{
+	if (Data.Num() == 0)
+	{
+		return false;
+	}
+
+	FMemoryReader Reader(Data);
+
+	try
+	{
+		Reader << MaxItems;
+		Reader << Inventory;
+
+		return true;
+	}
+	catch (...)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s:%s] Failed to deserialize data"), *GetOwner()->GetName(), *GetName());
+		return false;
+	}
 }

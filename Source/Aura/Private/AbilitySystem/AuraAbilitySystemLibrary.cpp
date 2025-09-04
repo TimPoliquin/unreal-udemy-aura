@@ -13,7 +13,7 @@
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraBaseCharacter.h"
 #include "Engine/OverlapResult.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -105,7 +105,7 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
 	const UObject* WorldContextObject,
 	UAbilitySystemComponent* AbilitySystemComponent,
-	const UAuraSaveGame* SaveData,
+	const UOLD_AuraSaveGame* SaveData,
 	const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
 )
 {

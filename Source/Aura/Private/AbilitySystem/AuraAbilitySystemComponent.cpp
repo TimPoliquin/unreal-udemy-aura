@@ -9,7 +9,7 @@
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
@@ -254,7 +254,7 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(
 	return false;
 }
 
-void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
+void UAuraAbilitySystemComponent::FromSaveData(const UOLD_AuraSaveGame* SaveData)
 {
 	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	for (const FSavedAbility& SavedAbility : SaveData->SavedAbilities)
@@ -284,7 +284,7 @@ void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
 	OnAbilitiesGivenDelegate.Broadcast();
 }
 
-void UAuraAbilitySystemComponent::ToSaveData(UAuraSaveGame* SaveData)
+void UAuraAbilitySystemComponent::ToSaveData(UOLD_AuraSaveGame* SaveData)
 {
 	if (!GetAvatarActor()->HasAuthority())
 	{

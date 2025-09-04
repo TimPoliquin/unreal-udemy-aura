@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
 #include "Item/AuraItemTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "AuraGameDataSubsystem.generated.h"
 
+class ULevelUpInfo;
 class UFishInfo;
 class UAuraTreasureConfig;
 class UAuraItemInfo;
@@ -50,16 +52,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FGameplayTag GetDefaultItemUseMessageTag() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UFishInfo* GetFishInfo() const
-	{
-		return FishInfo;
-	}
+	UFishInfo* GetFishInfo() const { return FishInfo; }
+
+	float GetXPToNextLevelPercentage(float XP) const;
+	int32 FindLevelByXP(const int32 InXP) const;
+	FAuraLevelUpRewards GetLevelUpRewards(int32 int32) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Character Class Defaults")
 	TObjectPtr<UCharacterClassInfo> CharacterClassInfo;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Class Defaults")
 	int32 DefaultPlayerLevel = 1;
+	UPROPERTY(EditDefaultsOnly, Category="Character Class Defaults")
+	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ability Info")
 	TObjectPtr<UAbilityInfo> AbilityInfo;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ability Info")

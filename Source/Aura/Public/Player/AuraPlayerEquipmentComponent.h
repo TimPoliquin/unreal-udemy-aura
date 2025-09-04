@@ -5,11 +5,23 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Equipment/AuraEquipmentEvents.h"
-#include "Interaction/SavableInterface.h"
+#include "Game/Save/SaveableInterface.h"
 #include "Item/AuraItemTypes.h"
 #include "AuraPlayerEquipmentComponent.generated.h"
 
 class AAuraFishingRod;
+class AAuraEquipmentBase;
+
+USTRUCT(BlueprintType)
+struct AURA_API FAuraPlayerEquipmentComponentSaveData
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, Category="Save Data")
+	EAuraEquipmentUseMode EquipmentUseMode = EAuraEquipmentUseMode::None;
+	UPROPERTY(BlueprintReadWrite, Category="Save Data")
+	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
+};
+
 DECLARE_MULTICAST_DELEGATE(FOnEquipmentUseModeChangeSignature)
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
@@ -20,20 +32,23 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	EquippedItem
 );
 
-class AAuraEquipmentBase;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class AURA_API UAuraPlayerEquipmentComponent : public UActorComponent, public ISavableInterface
+class AURA_API UAuraPlayerEquipmentComponent : public UActorComponent, public ISaveableInterface
 {
 	GENERATED_BODY()
 
 public:
 	UAuraPlayerEquipmentComponent();
 
-	/** Start ISavableInterface **/
-	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
-	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
-	/** End ISavableInterface **/
+	/** Start ISaveableInterface **/
+	virtual TArray<uint8> SaveData_Implementation() override;
+	virtual bool LoadData_Implementation(const TArray<uint8>& Data) override;
+	virtual bool ShouldSave_Implementation() const override { return true; }
+	virtual bool ShouldLoadTransform_Implementation() const override { return false; }
+	virtual bool ShouldAutoSpawn_Implementation() const override { return false; }
+	virtual FString GetSaveID_Implementation() const override;
+	/** End ISaveableInterface **/
 
 	FOnEquipmentUseModeChangeSignature OnUseWeapon;
 	FOnEquipmentUseModeChangeSignature OnUseTool;
@@ -82,6 +97,8 @@ protected:
 	TMap<EAuraEquipmentSlot, FGameplayTag> EquipmentSlots;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inventory|Equipment")
 	TMap<EAuraEquipmentSlot, FName> EquipmentSocketNames;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Debug")
+	FString SaveID;
 
 private:
 	USkeletalMeshComponent* GetCharacterMesh() const;
@@ -91,4 +108,7 @@ private:
 	TObjectPtr<AAuraEquipmentBase> Tool;
 
 	AAuraEquipmentBase* SpawnEquipment(const EAuraEquipmentSlot& Slot);
+
+	TArray<uint8> SerializeComponentData() const;
+	bool DeserializeComponentData(const TArray<uint8>& Data);
 };

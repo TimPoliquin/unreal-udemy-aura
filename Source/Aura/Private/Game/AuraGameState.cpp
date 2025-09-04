@@ -4,17 +4,19 @@
 #include "Game/AuraGameState.h"
 
 #include "Kismet/GameplayStatics.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 
 AAuraGameState::AAuraGameState()
 {
-	PlayerInventoryComponent = CreateDefaultSubobject<UPlayerInventoryComponent>(TEXT("PlayerInventoryComponent"));
+	SetNetUpdateFrequency(100.f);
+	InventoryComponent = CreateDefaultSubobject<UAuraInventoryComponent>(TEXT("PlayerInventoryComponent"));
+	ProgressionComponent = CreateDefaultSubobject<UAuraProgressionComponent>(TEXT("ProgressionComponent"));
 }
 
 void AAuraGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	// nothing directly needed here.
 }
 
 AAuraGameState* AAuraGameState::Get(const UObject* WorldContextObject)
@@ -26,17 +28,12 @@ AAuraGameState* AAuraGameState::Get(const UObject* WorldContextObject)
 	return nullptr;
 }
 
-UPlayerInventoryComponent* AAuraGameState::GetPlayerInventoryComponent() const
+UAuraInventoryComponent* AAuraGameState::GetInventoryComponent() const
 {
-	return PlayerInventoryComponent;
+	return InventoryComponent;
 }
 
-void AAuraGameState::FromSaveData(const UAuraSaveGame* SaveData)
+UAuraProgressionComponent* AAuraGameState::GetProgressionComponent() const
 {
-	PlayerInventoryComponent->FromSaveData(SaveData);
-}
-
-void AAuraGameState::ToSaveData(UAuraSaveGame* SaveData) const
-{
-	PlayerInventoryComponent->ToSaveData(SaveData);
+	return ProgressionComponent;
 }

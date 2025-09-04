@@ -26,7 +26,7 @@
 #include "UI/Widget/InteractionWidgetInterface.h"
 
 
-class UPlayerInventoryComponent;
+class UAuraInventoryComponent;
 // Sets default values
 AAuraFishingPOI::AAuraFishingPOI()
 {

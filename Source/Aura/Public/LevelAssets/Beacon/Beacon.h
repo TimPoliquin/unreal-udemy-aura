@@ -33,7 +33,7 @@ public:
 	/** End IHighlightInterface */
 	/** Start ISaveInterface */
 	FORCEINLINE virtual bool ShouldLoadTransform_Implementation() const override { return false; }
-	virtual void LoadActor_Implementation() override;
+	virtual void PostLoad_Implementation() override;
 	/** End ISaveInterface */
 	/** Start ISwitchInterface */
 	virtual FOnSwitchStatusChangedSignature& GetOnSwitchActivatedDelegate() override { return OnBeaconActivated; };

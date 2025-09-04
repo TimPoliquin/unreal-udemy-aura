@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
-#include "Interaction/SavableInterface.h"
 #include "AuraGameState.generated.h"
 
-class UPlayerInventoryComponent;
+class UAuraProgressionComponent;
+class UAuraInventoryComponent;
 /**
  * 
  */
 UCLASS(Abstract, Blueprintable)
-class AURA_API AAuraGameState : public AGameStateBase, public ISavableInterface
+class AURA_API AAuraGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 
@@ -23,14 +23,13 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UPlayerInventoryComponent* GetPlayerInventoryComponent() const;
-
-	/** Start ISavableInterface **/
-	virtual void FromSaveData(const UAuraSaveGame* SaveData) override;
-	virtual void ToSaveData(UAuraSaveGame* SaveData) const override;
-	/** End ISavableInterface **/
+	UAuraInventoryComponent* GetInventoryComponent() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UAuraProgressionComponent* GetProgressionComponent() const;
 
 protected:
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Replicated)
-	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Replicated, Category="Components")
+	TObjectPtr<UAuraInventoryComponent> InventoryComponent;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Replicated, Category="Components")
+	TObjectPtr<UAuraProgressionComponent> ProgressionComponent;
 };

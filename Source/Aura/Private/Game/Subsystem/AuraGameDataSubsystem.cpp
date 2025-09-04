@@ -3,6 +3,7 @@
 
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 
+#include "AbilitySystem/Data/LevelUpInfo.h"
 #include "Item/Data/AuraItemInfo.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -40,6 +41,25 @@ FGameplayTag UAuraGameDataSubsystem::GetDefaultItemPickupMessageTag() const
 FGameplayTag UAuraGameDataSubsystem::GetDefaultItemUseMessageTag() const
 {
 	return DefaultItemUsedMessageTag;
+}
+
+
+float UAuraGameDataSubsystem::GetXPToNextLevelPercentage(const float XP) const
+{
+	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on UAuraGameDataSubsystem - this must be set in the Blueprint"))
+	return LevelUpInfo->GetLevelProgressPercentage(XP);
+}
+
+int32 UAuraGameDataSubsystem::FindLevelByXP(const int32 InXP) const
+{
+	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on UAuraGameDataSubsystem - this must be set in the Blueprint"))
+	return LevelUpInfo->FindLevelByXP(InXP);
+}
+
+FAuraLevelUpRewards UAuraGameDataSubsystem::GetLevelUpRewards(int32 CurrentLevel) const
+{
+	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on UAuraGameDataSubsystem - this must be set in the Blueprint"))
+	return LevelUpInfo->GetRewardsByLevel(CurrentLevel);
 }
 
 void UAuraGameDataSubsystem::InitializeItemDefinitions()

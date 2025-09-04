@@ -10,7 +10,8 @@
 #include "Aura/AuraLogChannels.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Player/AuraPlayerState.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 #include "Tags/AuraGameplayTags.h"
 
 void UOverlayWidgetController::BroadcastInitialValues()
@@ -32,12 +33,15 @@ void UOverlayWidgetController::BroadcastInitialValues()
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	Super::BindCallbacksToDependencies();
-	GetAuraPlayerState()->OnXPChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerXPChange);
-	GetAuraPlayerState()->OnLevelInitializedDelegate.AddDynamic(
-		this,
-		&UOverlayWidgetController::OnPlayerLevelInitialized
-	);
-	GetAuraPlayerState()->OnLevelChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerLevelChange);
+	if (UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		ProgressionComponent->OnXPChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerXPChange);
+		ProgressionComponent->OnLevelInitializedDelegate.AddDynamic(
+			this,
+			&UOverlayWidgetController::OnPlayerLevelInitialized
+		);
+		ProgressionComponent->OnLevelChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerLevelChange);
+	}
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetHealthAttribute())
 	                      .AddLambda(
 		                      [this](const FOnAttributeChangeData& Data)
@@ -88,7 +92,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		FAuraGameplayTags::Get().Player_HUD_Hide,
 		EGameplayTagEventType::NewOrRemoved
 	).AddUObject(this, &UOverlayWidgetController::OnPlayerHideHUDTagChanged);
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = UPlayerInventoryComponent::GetPlayerInventoryComponent(GetAuraPlayerState()))
+	if (UAuraInventoryComponent* PlayerInventoryComponent = UAuraInventoryComponent::Get(GetAuraPlayerState()))
 	{
 		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryChanged);
 		PlayerInventoryComponent->OnInventoryFullDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerInventoryFull);
@@ -97,7 +101,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 
 void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)
 {
-	OnXPPercentageChanged.Broadcast(GetAuraPlayerState()->GetXPToNextLevelPercentage());
+	OnXPPercentageChanged.Broadcast(UAuraGameDataSubsystem::Get(GetAuraPlayerState())->GetXPToNextLevelPercentage(XP));\
 }
 
 void UOverlayWidgetController::OnPlayerLevelInitialized(int32 NewValue)

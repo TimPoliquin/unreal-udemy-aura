@@ -43,17 +43,17 @@ void AAuraPOI::BeginPlay()
 	InitializeState();
 }
 
-void AAuraPOI::LoadActor_Implementation()
-{
-	InitializeState();
-}
-
 void AAuraPOI::InitializeState()
 {
-	if (bDisabled && HasActorBegunPlay())
+	if (bDisabled)
 	{
 		DisablePOI();
 	}
+}
+
+void AAuraPOI::PostLoad_Implementation()
+{
+	InitializeState();
 }
 
 void AAuraPOI::OnBeginOverlap(

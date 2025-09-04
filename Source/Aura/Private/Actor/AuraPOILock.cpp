@@ -7,8 +7,7 @@
 #include "Aura/Aura.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/InventoryActorInterface.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
 
 
 AAuraPOILock::AAuraPOILock()
@@ -30,6 +29,18 @@ void AAuraPOILock::HighlightActor_Implementation()
 void AAuraPOILock::UnHighlightActor_Implementation()
 {
 	LockMeshComponent->SetRenderCustomDepth(false);
+}
+
+void AAuraPOILock::PostLoad_Implementation()
+{
+	if (bUnlocked)
+	{
+		DisablePOI();
+		for (AActor* Gate : Gates)
+		{
+			IAuraLockedInterface::Unlock(Gate);
+		}
+	}
 }
 
 void AAuraPOILock::BeginPlay()
@@ -57,7 +68,7 @@ bool AAuraPOILock::IsPreconditionMet_Implementation(AActor* Player) const
 	{
 		return false;
 	}
-	if (const UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (const UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		return InventoryComponent->HasItemInInventory(KeyTag);
 	}
@@ -75,7 +86,7 @@ void AAuraPOILock::Unlock(AActor* Player)
 	{
 		return;
 	}
-	if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		if (InventoryComponent->UseKey(KeyTag))
 		{

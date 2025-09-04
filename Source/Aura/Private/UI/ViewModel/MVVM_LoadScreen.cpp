@@ -3,8 +3,8 @@
 
 #include "UI/ViewModel/MVVM_LoadScreen.h"
 
-#include "Game/Subsystem/LevelGameInstanceSubsystem.h"
-#include "Game/Subsystem/SaveGameSubsystem.h"
+#include "Game/Subsystem/AuraLevelManager.h"
+#include "Game/Subsystem/Old_SaveGameManager.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 
 void UMVVM_LoadScreen::InitializeLoadSlots()
@@ -25,12 +25,12 @@ void UMVVM_LoadScreen::InitializeLoadSlots()
 
 void UMVVM_LoadScreen::NewSlotButtonPressed(const int32 SlotIndex, const FString& EnteredName)
 {
-	USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(LocalPlayer);
+	UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(LocalPlayer);
 	UMVVM_LoadSlot* LoadSlot = GetLoadSlotByIndex(SlotIndex);
 	FString PlayerName = EnteredName.IsEmpty()
 		                     ? FString::Printf(TEXT("Player %d"), SlotIndex + 1)
 		                     : EnteredName;
-	UAuraSaveGame* SaveGame = SaveGameSubsystem->CreateDefaultSaveData(SlotIndex, LoadSlot->GetLoadSlotName());
+	UOLD_AuraSaveGame* SaveGame = SaveGameSubsystem->CreateDefaultSaveData(SlotIndex, LoadSlot->GetLoadSlotName());
 	SaveGame->PlayerName = PlayerName;
 	SaveGameSubsystem->SaveSlotData(SaveGame);
 	SaveGameSubsystem->InitializeSaveState(SaveGame, false);
@@ -61,7 +61,7 @@ void UMVVM_LoadScreen::DeleteButtonPressed()
 {
 	if (IsValid(SelectedSlot))
 	{
-		USaveGameSubsystem::Get(GetLocalPlayer())->DeleteSlot(
+		UOld_SaveGameManager::Get(GetLocalPlayer())->DeleteSlot(
 			SelectedSlot->GetLoadSlotName(),
 			SelectedSlot->GetSlotIndex()
 		);
@@ -84,20 +84,21 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 {
 	if (IsValid(SelectedSlot))
 	{
-		USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(GetLocalPlayer());
+		UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(GetLocalPlayer());
 		SaveGameSubsystem->InitializeSaveState(
 			SelectedSlot->GetPlayerStartTag(),
 			SelectedSlot->GetLoadSlotName(),
 			SelectedSlot->GetSlotIndex(),
 			false
 		);
-		ULevelGameInstanceSubsystem::Get(GetLocalPlayer())->LoadMap(GetLocalPlayer(), SelectedSlot->GetMapName());
+
+		UAuraLevelManager::Get(GetLocalPlayer())->TransitionLevel(SelectedSlot->GetMapAssetName(), SelectedSlot->GetPlayerStartTag(), false);
 	}
 }
 
 void UMVVM_LoadScreen::LoadData()
 {
-	if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(GetLocalPlayer()))
+	if (const UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(GetLocalPlayer()))
 	{
 		for (UMVVM_LoadSlot* LoadSlot : LoadSlots)
 		{

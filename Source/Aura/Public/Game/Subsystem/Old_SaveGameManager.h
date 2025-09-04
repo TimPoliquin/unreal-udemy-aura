@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Game/Save/AuraSaveGame.h"
-#include "SaveGameSubsystem.generated.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
+#include "Old_SaveGameManager.generated.h"
 
 class USaveGame;
-class UAuraSaveGame;
+class UOLD_AuraSaveGame;
 class UMVVM_LoadSlot;
 
 UENUM()
@@ -36,16 +36,16 @@ struct FAuraCurrentSaveState
  * 
  */
 UCLASS(Abstract, Blueprintable)
-class AURA_API USaveGameSubsystem : public UGameInstanceSubsystem
+class AURA_API UOld_SaveGameManager : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
-	UAuraSaveGame* GetInGameSaveData() const;
-	UAuraSaveGame* CreateDefaultSaveData(const int32 SlotIndex, const FString& SlotName) const;
-	void InitializeSaveState(const UAuraSaveGame* SaveGame, bool bIsTransient);
+	UOLD_AuraSaveGame* GetInGameSaveData() const;
+	UOLD_AuraSaveGame* CreateDefaultSaveData(const int32 SlotIndex, const FString& SlotName) const;
+	void InitializeSaveState(const UOLD_AuraSaveGame* SaveGame, bool bIsTransient);
 	void InitializeSaveState(
 		const FName& InPlayerStartTag,
 		const FString& InSlotName,
@@ -55,14 +55,14 @@ public:
 	FName GetPlayerStartTag() const;
 
 	UFUNCTION()
-	void SaveSlotData(UAuraSaveGame* SaveGame) const;
-	void SaveInGameProgressData(UAuraSaveGame* SaveGame);
-	UAuraSaveGame* GetSaveSlotData(const FString& SlotName, const int32 SlotIndex) const;
+	void SaveSlotData(UOLD_AuraSaveGame* SaveGame) const;
+	void SaveInGameProgressData(UOLD_AuraSaveGame* SaveGame);
+	UOLD_AuraSaveGame* GetSaveSlotData(const FString& SlotName, const int32 SlotIndex) const;
 	void SaveWorldState(UWorld* World, const FString& DestinationMapAssetName = FString("")) const;
 	void LoadWorldState(UWorld* World) const;
 
 	static void DeleteSlot(const FString& SlotName, const int32 SlotIndex);
-	static USaveGameSubsystem* Get(const UObject* WorldContextObject);
+	static UOld_SaveGameManager* Get(const UObject* WorldContextObject);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="Save Game")

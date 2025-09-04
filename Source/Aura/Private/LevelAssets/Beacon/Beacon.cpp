@@ -19,16 +19,6 @@ ABeacon::ABeacon()
 	BeaconMesh->MarkRenderStateDirty();
 }
 
-void ABeacon::LoadActor_Implementation()
-{
-	Super::LoadActor_Implementation();
-	if (bIsSwitchActive && HasActorBegunPlay())
-	{
-		ActivateBeacon(true);
-	}
-}
-
-
 void ABeacon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -55,6 +45,15 @@ void ABeacon::HighlightActor_Implementation()
 void ABeacon::UnHighlightActor_Implementation()
 {
 	BeaconMesh->SetRenderCustomDepth(false);
+}
+
+void ABeacon::PostLoad_Implementation()
+{
+	Super::PostLoad_Implementation();
+	if (bIsSwitchActive)
+	{
+		ActivateBeacon(true);
+	}
 }
 
 void ABeacon::BroadcastOnBeaconActivated()

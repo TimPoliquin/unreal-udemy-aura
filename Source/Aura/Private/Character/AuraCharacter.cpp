@@ -16,18 +16,17 @@
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Fishing/AuraFishingComponent.h"
-#include "Game/AuraGameState.h"
-#include "Game/Save/AuraSaveGame.h"
+#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Game/Subsystem/AuraAIDirectorGameInstanceSubsystem.h"
-#include "Game/Subsystem/LevelGameInstanceSubsystem.h"
-#include "Game/Subsystem/SaveGameSubsystem.h"
+#include "Game/Subsystem/AuraLevelManager.h"
+#include "Game/Subsystem/Old_SaveGameManager.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Player/PlayerInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "UI/HUD/AuraHUD.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerEquipmentComponent.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 
 
 AAuraCharacter::AAuraCharacter()
@@ -94,23 +93,20 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 	// Init ability actor info for the server
 	InitializeAbilityActorInfo();
-	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
+	if (UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this); LevelManager->IsTransitioningLevels())
 	{
-		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
-		if (const USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
+		LevelManager->OnLevelTransitionComplete.AddWeakLambda(this, [&]()
 		{
-			LoadProgress(SaveGameSubsystem->GetInGameSaveData());
-			SaveGameSubsystem->LoadWorldState(GetWorld());
-		}
-		else
-		{
-			UE_LOG(LogAura, Error, TEXT("[%s] Unable to load save data - no save game subsystem available!"), *GetName())
-		}
+			OnLevelLoaded();
+		});
+	}
+	else
+	{
+		OnLevelLoaded();
 	}
 }
 
-
-void AAuraCharacter::LoadProgress(const UAuraSaveGame* SaveData)
+void AAuraCharacter::LoadProgress(const UOLD_AuraSaveGame* SaveData)
 {
 	if (!SaveData)
 	{
@@ -123,11 +119,10 @@ void AAuraCharacter::LoadProgress(const UAuraSaveGame* SaveData)
 		AddCharacterAbilities();
 		break;
 	case FromDisk:
-		if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
-		{
-			AuraPlayerState->FromSaveData(SaveData);
-		}
-		EquipmentComponent->FromSaveData(SaveData);
+		// if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
+		// {
+		// 	AuraPlayerState->FromSaveData(SaveData);
+		// }
 		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
 		{
 			TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
@@ -247,11 +242,25 @@ void AAuraCharacter::OnCameraReturned()
 	CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
 }
 
+void AAuraCharacter::OnLevelLoaded()
+{
+	if (UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this))
+	{
+		LevelManager->OnLevelTransitionComplete.RemoveAll(this);
+	}
+	if (APlayerController* PlayerController = Cast<AAuraPlayerController>(GetController()))
+	{
+		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
+	}
+	InitializeDefaultAttributes();
+	AddCharacterAbilities();
+}
+
 int32 AAuraCharacter::GetCharacterLevel_Implementation() const
 {
-	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	return AuraPlayerState->GetCharacterLevel();
+	const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to get character level"), *GetName());
+	return ProgressionComponent->GetCharacterLevel();
 }
 
 TArray<FName> AAuraCharacter::GetTargetTagsToIgnore_Implementation() const
@@ -268,9 +277,9 @@ void AAuraCharacter::Die()
 	DeathTimerDelegate.BindLambda(
 		[this]()
 		{
-			if (USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this))
+			if (UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(this))
 			{
-				ULevelGameInstanceSubsystem* LevelSubsystem = ULevelGameInstanceSubsystem::Get(GetWorld());
+				UAuraLevelManager* LevelSubsystem = UAuraLevelManager::Get(GetWorld());
 				LevelSubsystem->LoadMap(this, SaveGameSubsystem->GetInGameSaveData()->MapName);
 			}
 			else
@@ -290,16 +299,16 @@ USkeletalMeshComponent* AAuraCharacter::GetWeapon_Implementation() const
 
 int32 AAuraCharacter::GetXP_Implementation()
 {
-	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	return AuraPlayerState->GetXP();
+	const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to get xp"), *GetName());
+	return ProgressionComponent->GetXP();
 }
 
 void AAuraCharacter::AddToXP_Implementation(int32 InXP)
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	AuraPlayerState->AddToXP(InXP);
+	UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to add xp"), *GetName());
+	return ProgressionComponent->AddToXP(InXP);
 }
 
 void AAuraCharacter::LevelUp_Implementation()
@@ -325,16 +334,16 @@ void AAuraCharacter::Multicast_LevelUpParticles_Implementation() const
 
 int32 AAuraCharacter::FindLevelForXP_Implementation(const int32 InXP) const
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	return AuraPlayerState->FindLevelByXP(InXP);
+	const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to FindLevelByXP"), *GetName());
+	return ProgressionComponent->FindLevelByXP(InXP);
 }
 
 FAuraLevelUpRewards AAuraCharacter::GetLevelUpRewards_Implementation(const int32 InLevel) const
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	return AuraPlayerState->GetLevelUpRewards(InLevel);
+	const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to GetLevelUpRewards"), *GetName());
+	return ProgressionComponent->GetLevelUpRewards(InLevel);
 }
 
 void AAuraCharacter::ApplyLevelUpRewards_Implementation(
@@ -342,39 +351,39 @@ void AAuraCharacter::ApplyLevelUpRewards_Implementation(
 	const FAuraLevelUpRewards& InLevelUpRewards
 )
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	AuraPlayerState->AddAttributePoints(InLevelUpRewards.AttributePoints);
-	AuraPlayerState->AddSpellPoints(InLevelUpRewards.SpellPoints);
-	AuraPlayerState->AddToLevel(LevelIncrement);
+	UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to ApplyLevelUpRewards"), *GetName());
+	ProgressionComponent->AddAttributePoints(InLevelUpRewards.AttributePoints);
+	ProgressionComponent->AddSpellPoints(InLevelUpRewards.SpellPoints);
+	ProgressionComponent->AddToLevel(LevelIncrement);
 }
 
 int32 AAuraCharacter::GetAttributePoints_Implementation() const
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	return AuraPlayerState->GetAttributePoints();
+	const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to GetAttributePoints"), *GetName());
+	return ProgressionComponent->GetAttributePoints();
 }
 
 int32 AAuraCharacter::GetSpellPoints_Implementation() const
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	return AuraPlayerState->GetSpellPoints();
+	const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to GetSpellPoints"), *GetName());
+	return ProgressionComponent->GetSpellPoints();
 }
 
 void AAuraCharacter::SpendAttributePoints_Implementation(int32 SpentPoints)
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	AuraPlayerState->AddAttributePoints(-1 * SpentPoints);
+	UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to AddAttributePoints"), *GetName());
+	return ProgressionComponent->AddAttributePoints(-1 * SpentPoints);
 }
 
 void AAuraCharacter::SpendSpellPoints_Implementation(const int32 SpentPoints)
 {
-	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
-	check(AuraPlayerState);
-	AuraPlayerState->AddSpellPoints(-1 * SpentPoints);
+	UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this);
+	checkf(ProgressionComponent, TEXT("[%s] No access to progression component while trying to AddSpellPoints"), *GetName());
+	return ProgressionComponent->AddSpellPoints(-1 * SpentPoints);
 }
 
 void AAuraCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
@@ -395,21 +404,20 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 
 void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 {
-	USaveGameSubsystem* SaveGameSubsystem = USaveGameSubsystem::Get(this);
-	UAuraSaveGame* SaveData = SaveGameSubsystem
-		                          ? SaveGameSubsystem->GetInGameSaveData()
-		                          : nullptr;
+	UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(this);
+	UOLD_AuraSaveGame* SaveData = SaveGameSubsystem
+		                              ? SaveGameSubsystem->GetInGameSaveData()
+		                              : nullptr;
 	if (SaveData)
 	{
-		if (const AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
-		{
-			AuraPlayerState->ToSaveData(SaveData);
-		}
-		else
-		{
-			UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No player state!"))
-		}
-		EquipmentComponent->ToSaveData(SaveData);
+		// if (const AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
+		// {
+		// 	AuraPlayerState->ToSaveData(SaveData);
+		// }
+		// else
+		// {
+		// 	UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No player state!"))
+		// }
 		SaveData->SaveSlotAttributeSource = FromDisk;
 		SaveData->PlayerStartTag = CheckpointTag;
 		SaveGameSubsystem->SaveInGameProgressData(SaveData);
@@ -454,11 +462,6 @@ void AAuraCharacter::ReturnCamera_Implementation(
 		AnimationCurve,
 		&OnCameraReturnDelegate
 	);
-}
-
-UPlayerInventoryComponent* AAuraCharacter::GetInventoryComponent_Implementation() const
-{
-	return AAuraGameState::Get(this)->GetPlayerInventoryComponent();
 }
 
 UAuraFishingComponent* AAuraCharacter::GetFishingComponent_Implementation() const

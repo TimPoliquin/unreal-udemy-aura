@@ -3,45 +3,55 @@
 
 #include "Game/Save/AuraSaveGame.h"
 
-void UAuraSaveGame::AddSavedAbility(const FSavedAbility& SaveAbility)
+#include "Aura/AuraLogChannels.h"
+
+const FString UAuraSaveGame::DEFAULT_SAVE_SLOT_NAME = FString("Default");
+
+UAuraSaveGame::UAuraSaveGame()
 {
-	SavedAbilities.AddUnique(SaveAbility);
+	SaveVersion = CURRENT_SAVE_VERSION;
+	SaveSlotName = DEFAULT_SAVE_SLOT_NAME;
 }
 
-void UAuraSaveGame::AddSavedMap(const FSavedMap& SaveMap)
+bool UAuraSaveGame::FindWorldSaveData(const FString WorldName, FWorldSaveData& WorldSaveData)
 {
-	SavedMaps.AddUnique(SaveMap);
-}
-
-FSavedMap UAuraSaveGame::GetSavedMapByMapName(const FString& InMapAssetName)
-{
-	for (const FSavedMap& SavedMap : SavedMaps)
+	for (const FWorldSaveData& CurrentWorldSaveData : WorldsData)
 	{
-		if (SavedMap.MapAssetName.Equals(InMapAssetName))
+		if (CurrentWorldSaveData.WorldName == WorldName)
 		{
-			return SavedMap;
-		}
-	}
-	return FSavedMap();
-}
-
-bool UAuraSaveGame::HasMap(const FString& InMapAssetName)
-{
-	for (const FSavedMap& SavedMap : SavedMaps)
-	{
-		if (SavedMap.MapAssetName.Equals(InMapAssetName))
-		{
+			WorldSaveData = CurrentWorldSaveData;
 			return true;
 		}
 	}
 	return false;
 }
 
-void UAuraSaveGame::ReplaceSavedMap(const FString& InMapAssetName, const FSavedMap& SavedMap)
+void UAuraSaveGame::GetOrCreateWorldSaveData(const FString WorldName, FWorldSaveData& WorldSaveData)
 {
-	SavedMaps.RemoveAll([InMapAssetName](const FSavedMap& Map)
+	if (!FindWorldSaveData(WorldName, WorldSaveData))
 	{
-		return Map.MapAssetName.Equals(InMapAssetName);
-	});
-	SavedMaps.AddUnique(SavedMap);
+		WorldSaveData.WorldName = WorldName;
+		WorldsData.Add(WorldSaveData);
+	}
+}
+
+void UAuraSaveGame::SetActorsData(const FString& WorldPathName, TArray<FActorSaveData> ActorsSaveData)
+{
+	for (FWorldSaveData& WorldSaveData : WorldsData)
+	{
+		if (WorldSaveData.WorldName == WorldPathName)
+		{
+			WorldSaveData.ActorsData = ActorsSaveData;
+			return;
+		}
+	}
+	UE_LOG(LogAura, Warning, TEXT("[%s] No world save data found for world: %s"), *GetName(), *WorldPathName);
+}
+
+void UAuraSaveGame::ClearAllData()
+{
+	MetaData = FMetaSaveData();
+	GlobalData = FGlobalSaveData();
+	WorldsData.Empty();
+	bIsAutoSave = false;
 }
