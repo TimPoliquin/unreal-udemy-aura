@@ -7,6 +7,7 @@
 #include "Game/Save/AuraSaveGameBlueprintFunctionLibrary.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Net/UnrealNetwork.h"
+#include "Tags/AuraGameplayTags.h"
 
 
 UAuraProgressionComponent* UAuraProgressionComponent::Get(const UObject* WorldContextObject)
@@ -59,13 +60,14 @@ FString UAuraProgressionComponent::GetSaveID_Implementation() const
 void UAuraProgressionComponent::InitializeLevel(const int32 InLevel)
 {
 	Level = InLevel;
-	OnLevelInitializedDelegate.Broadcast(Level);
+	OnLevelInitializedDelegate.Broadcast(FAuraIntAttributeChangedPayload::CreateBroadcastPayload(FAuraGameplayTags::Get().Attributes_Progression_Level, InLevel));
 }
 
 void UAuraProgressionComponent::SetLevel(const int32 NewLevel)
 {
+	const int PreviousLevel = Level;
 	Level = NewLevel;
-	OnLevelChangeDelegate.Broadcast(Level);
+	OnLevelInitializedDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_Level, PreviousLevel, NewLevel));
 }
 
 void UAuraProgressionComponent::AddToLevel(const int32 AddLevel)
@@ -123,40 +125,43 @@ FAuraLevelUpRewards UAuraProgressionComponent::GetLevelUpRewards(const int32 InL
 
 void UAuraProgressionComponent::SetSpellPoints(const int32 InSpellPoints)
 {
+	const int32 PreviousSpellPoints = SpellPoints;
 	SpellPoints = InSpellPoints;
-	OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
+	OnSpellPointsChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_SpellPoints, PreviousSpellPoints, InSpellPoints));
 }
 
 void UAuraProgressionComponent::SetAttributePoints(const int32 InAttributePoints)
 {
+	const int32 PreviousAttributePoints = AttributePoints;
 	AttributePoints = InAttributePoints;
-	OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
+	OnAttributePointsChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_AttributePoints, PreviousAttributePoints, InAttributePoints));
 }
 
 void UAuraProgressionComponent::SetXP(const int32 InXP)
 {
+	const int32 PreviousXP = XP;
 	XP = InXP;
-	OnXPChangeDelegate.Broadcast(XP);
+	OnXPChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_XP, PreviousXP, InXP));
 }
 
 void UAuraProgressionComponent::OnRep_Level(int32 OldLevel) const
 {
-	OnLevelChangeDelegate.Broadcast(Level);
+	OnLevelChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_Level, OldLevel, Level));
 }
 
 void UAuraProgressionComponent::OnRep_XP(int32 OldXP) const
 {
-	OnXPChangeDelegate.Broadcast(XP);
+	OnXPChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_XP, OldXP, XP));
 }
 
 void UAuraProgressionComponent::OnRep_AttributePoints(int32 InAttributePoints) const
 {
-	OnAttributePointsChangeDelegate.Broadcast(AttributePoints);
+	OnAttributePointsChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_AttributePoints, InAttributePoints, AttributePoints));
 }
 
 void UAuraProgressionComponent::OnRep_SpellPoints(int32 InSpellPoints) const
 {
-	OnSpellPointsChangeDelegate.Broadcast(SpellPoints);
+	OnSpellPointsChangeDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_SpellPoints, InSpellPoints, SpellPoints));
 }
 
 TArray<uint8> UAuraProgressionComponent::SerializeActorComponent()

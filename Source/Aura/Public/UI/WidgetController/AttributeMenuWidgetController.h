@@ -40,5 +40,5 @@ protected:
 private:
 	void BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const;
 	UFUNCTION()
-	void OnAttributePointsChanged(int32 InPoints);
+	void OnAttributePointsChanged(const FAuraIntAttributeChangedPayload& Payload);
 };

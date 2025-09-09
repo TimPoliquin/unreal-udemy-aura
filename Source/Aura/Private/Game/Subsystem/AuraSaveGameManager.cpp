@@ -8,10 +8,10 @@
 #include "Game/AuraGameInstance.h"
 #include "Game/AuraGameState.h"
 #include "Game/Save/AuraSaveGame.h"
-#include "Game/Save/AuraSaveGameBlueprintFunctionLibrary.h"
 #include "Game/Save/SaveableInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerController.h"
+#include "Player/AuraPlayerState.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 UAuraSaveGameManager* UAuraSaveGameManager::Get(const UObject* WorldContextObject)
@@ -229,10 +229,15 @@ void UAuraSaveGameManager::SaveGlobalData(UAuraSaveGame* SaveGame)
 	SaveGame->GlobalData.GameStateSaveData = GameStateSaveData;
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
-		const AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(Iterator->Get());
-		// TODO - save global data -- this includes data from things player information
+		if (const AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(Iterator->Get()))
+		{
+			FActorSaveData PlayerSaveData;
+			SaveActorData(PlayerController->GetPlayerState<AAuraPlayerState>(), PlayerSaveData);
+			SaveGame->GlobalData.AddPlayerSaveData(PlayerSaveData);
+		}
 	}
 }
+
 
 void UAuraSaveGameManager::SaveWorldData(UAuraSaveGame* SaveData, FWorldSaveData& WorldSaveData)
 {
@@ -347,7 +352,7 @@ void UAuraSaveGameManager::LoadMetaData(const UAuraSaveGame* SaveData)
 	// TODO - Is there actually any value in loading meta data?
 }
 
-void UAuraSaveGameManager::LoadGlobalData(const UAuraSaveGame* SaveData)
+void UAuraSaveGameManager::LoadGlobalData(UAuraSaveGame* SaveData)
 {
 	if (!SaveData || !GetWorld())
 	{
@@ -357,8 +362,24 @@ void UAuraSaveGameManager::LoadGlobalData(const UAuraSaveGame* SaveData)
 	{
 		LoadActor(GameState, SaveData->GlobalData.GameStateSaveData);
 	}
-	// TODO - load player-specific data
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		if (const AAuraPlayerController* PlayerController = Cast<AAuraPlayerController>(Iterator->Get()))
+		{
+			const AAuraPlayerState* PlayerState = PlayerController->GetPlayerState<AAuraPlayerState>();
+			const FActorSaveData& ActorSaveData = SaveData->GlobalData.GetPlayerSaveData(PlayerState);
+			if (ActorSaveData.IsValid())
+			{
+				LoadActor(PlayerController->GetPlayerState<AAuraPlayerState>(), ActorSaveData);
+			}
+			else
+			{
+				UE_LOG(LogAura, Warning, TEXT("[%s] No saved data for player: %s"), *GetName(), *PlayerState->GetName());
+			}
+		}
+	}
 }
+
 
 void UAuraSaveGameManager::LoadWorldData(const UAuraSaveGame* SaveData, const FWorldSaveData& WorldSaveData)
 {

@@ -3,6 +3,7 @@
 
 #include "UI/ViewModel/MVVM_Inventory.h"
 
+#include "Aura/AuraLogChannels.h"
 #include "Character/AuraCharacter.h"
 #include "Game/AuraGameState.h"
 #include "Player/AuraInventoryComponent.h"
@@ -104,6 +105,11 @@ void UMVVM_Inventory::OnPlayerInventoryChanged(const FOnInventoryItemCountChange
 		{
 			return InventoryItem->GetInventoryItemTag().MatchesTagExact(Payload.ItemType);
 		});
+		if (!ItemModel)
+		{
+			UE_LOG(LogAura, Error, TEXT("[%s] No matching inventory item model found! ItemType: %s"), *GetName(), *Payload.ItemType.ToString());
+			return;
+		}
 		if (Payload.NewValue <= 0)
 		{
 			ItemModel->Clear();

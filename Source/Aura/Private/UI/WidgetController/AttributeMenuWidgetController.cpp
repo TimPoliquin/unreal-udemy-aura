@@ -8,6 +8,7 @@
 #include "AbilitySystem/Data/AttributeInfo.h"
 #include "Player/AuraPlayerState.h"
 #include "Player/Progression/AuraProgressionComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
@@ -41,7 +42,7 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 	}
 	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
 	{
-		OnAttributePointsChanged(ProgressionComponent->GetAttributePoints());
+		OnAttributePointsChanged(FAuraIntAttributeChangedPayload::CreateBroadcastPayload(FAuraGameplayTags::Get().Attributes_Progression_AttributePoints, ProgressionComponent->GetAttributePoints()));
 	}
 }
 
@@ -60,7 +61,7 @@ void UAttributeMenuWidgetController::BroadcastAttributeInfo(
 	AttributeInfoDelegate.Broadcast(Info);
 }
 
-void UAttributeMenuWidgetController::OnAttributePointsChanged(int32 InPoints)
+void UAttributeMenuWidgetController::OnAttributePointsChanged(const FAuraIntAttributeChangedPayload& Payload)
 {
-	OnAttributePointsChangedDelegate.Broadcast(InPoints);
+	OnAttributePointsChangedDelegate.Broadcast(Payload);
 }

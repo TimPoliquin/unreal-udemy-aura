@@ -50,6 +50,11 @@ struct FAuraGameplayTags
 	FGameplayTag Attributes_Meta_IncomingRefresh;
 	/** Passive Attributes **/
 	FGameplayTag Attributes_Passive_Protection;
+	/** Progression Attributes **/
+	FGameplayTag Attributes_Progression_Level;
+	FGameplayTag Attributes_Progression_XP;
+	FGameplayTag Attributes_Progression_SpellPoints;
+	FGameplayTag Attributes_Progression_AttributePoints;
 
 	/** Input Tags **/
 	FGameplayTag InputTag;

@@ -18,6 +18,7 @@
 #include "Actor/Spawn/TrackableInterface.h"
 #include "Item/Pickup/AuraTreasurePickup.h"
 #include "Item/Pickup/TieredItemInterface.h"
+#include "Tags/AuraGameplayTags.h"
 
 
 AAuraEnemy::AAuraEnemy()
@@ -42,6 +43,7 @@ AAuraEnemy::AAuraEnemy()
 
 void AAuraEnemy::InitializeAttributeDelegates()
 {
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	if (UAuraUserWidget* HealthBarWidget = Cast<UAuraUserWidget>(HealthWidget->GetUserWidgetObject()))
 	{
 		HealthBarWidget->SetWidgetController(this);
@@ -50,20 +52,20 @@ void AAuraEnemy::InitializeAttributeDelegates()
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).
 		                        AddLambda(
-			                        [this](const FOnAttributeChangeData& Data)
+			                        [&](const FOnAttributeChangeData& Data)
 			                        {
-				                        OnHealthChanged.Broadcast(Data.NewValue);
+				                        OnHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Vital_Health, Data.OldValue, Data.NewValue));
 			                        }
 		                        );
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute()).
 		                        AddLambda(
-			                        [this](const FOnAttributeChangeData& Data)
+			                        [&](const FOnAttributeChangeData& Data)
 			                        {
-				                        OnMaxHealthChanged.Broadcast(Data.NewValue);
+				                        OnMaxHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Secondary_MaxHealth, Data.OldValue, Data.NewValue));
 			                        }
 		                        );
-		OnHealthChanged.Broadcast(AuraAttributeSet->GetHealth());
-		OnMaxHealthChanged.Broadcast(AuraAttributeSet->GetMaxHealth());
+		OnHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(GameplayTags.Attributes_Vital_Health, AuraAttributeSet->GetHealth()));
+		OnMaxHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(GameplayTags.Attributes_Secondary_MaxHealth, AuraAttributeSet->GetMaxHealth()));
 	}
 }
 

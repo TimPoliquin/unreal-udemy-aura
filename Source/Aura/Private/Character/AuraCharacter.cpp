@@ -106,46 +106,41 @@ void AAuraCharacter::PossessedBy(AController* NewController)
 	}
 }
 
-void AAuraCharacter::LoadProgress(const UOLD_AuraSaveGame* SaveData)
-{
-	if (!SaveData)
-	{
-		return;
-	}
-	switch (SaveData->SaveSlotAttributeSource)
-	{
-	case FromDefault:
-		InitializeDefaultAttributes();
-		AddCharacterAbilities();
-		break;
-	case FromDisk:
-		// if (AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
-		// {
-		// 	AuraPlayerState->FromSaveData(SaveData);
-		// }
-		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
-		{
-			TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
-			InitializeEffects.Add(DefaultSecondaryAttributes);
-			InitializeEffects.Add(InitializeVitalAttributes);
-			UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
-				this,
-				AuraAbilitySystemComponent,
-				SaveData,
-				InitializeEffects
-			);
-			AuraAbilitySystemComponent->FromSaveData(SaveData);
-		}
-		break;
-	default:
-		UE_LOG(
-			LogAura,
-			Warning,
-			TEXT("Unexpected SaveData->SaveSlotAttributeSource: [%d]"),
-			SaveData->SaveSlotAttributeSource.GetValue()
-		);
-	}
-}
+// void AAuraCharacter::LoadProgress(const UOLD_AuraSaveGame* SaveData)
+// {
+// 	if (!SaveData)
+// 	{
+// 		return;
+// 	}
+// 	switch (SaveData->SaveSlotAttributeSource)
+// 	{
+// 	case FromDefault:
+// 		InitializeDefaultAttributes();
+// 		AddCharacterAbilities();
+// 		break;
+// 	case FromDisk:
+// 		if (UAuraAbilitySystemComponent* AuraAbilitySystemComponent = GetAuraAbilitySystemComponent())
+// 		{
+// 			TArray<TSubclassOf<UGameplayEffect>> InitializeEffects;
+// 			InitializeEffects.Add(DefaultSecondaryAttributes);
+// 			InitializeEffects.Add(InitializeVitalAttributes);
+// 			UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
+// 				this,
+// 				AuraAbilitySystemComponent,
+// 				SaveData,
+// 				InitializeEffects
+// 			);
+// 		}
+// 		break;
+// 	default:
+// 		UE_LOG(
+// 			LogAura,
+// 			Warning,
+// 			TEXT("Unexpected SaveData->SaveSlotAttributeSource: [%d]"),
+// 			SaveData->SaveSlotAttributeSource.GetValue()
+// 		);
+// 	}
+// }
 
 void AAuraCharacter::OnRep_PlayerState()
 {
@@ -399,28 +394,6 @@ void AAuraCharacter::HideMagicCircle_Implementation()
 	if (AAuraPlayerController* AuraPlayerController = Cast<AAuraPlayerController>(GetController()))
 	{
 		AuraPlayerController->HideMagicCircle();
-	}
-}
-
-void AAuraCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
-{
-	UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(this);
-	UOLD_AuraSaveGame* SaveData = SaveGameSubsystem
-		                              ? SaveGameSubsystem->GetInGameSaveData()
-		                              : nullptr;
-	if (SaveData)
-	{
-		// if (const AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
-		// {
-		// 	AuraPlayerState->ToSaveData(SaveData);
-		// }
-		// else
-		// {
-		// 	UE_LOG(LogAura, Error, TEXT("SAVE ERROR: No player state!"))
-		// }
-		SaveData->SaveSlotAttributeSource = FromDisk;
-		SaveData->PlayerStartTag = CheckpointTag;
-		SaveGameSubsystem->SaveInGameProgressData(SaveData);
 	}
 }
 

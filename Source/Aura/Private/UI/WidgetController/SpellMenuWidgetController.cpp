@@ -14,10 +14,20 @@
 
 void USpellMenuWidgetController::BroadcastInitialValues()
 {
-	BroadcastAbilityInfo();
+	if (GetAuraAbilitySystemComponent()->HasFiredOnAbilitiesGivenDelegate())
+	{
+		BroadcastAbilityInfo();
+	}
+	else
+	{
+		GetAuraAbilitySystemComponent()->OnAbilitiesGivenDelegate.AddLambda([this]()
+		{
+			BroadcastAbilityInfo();
+		});
+	}
 	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
 	{
-		OnSpellPointsChanged(ProgressionComponent->GetSpellPoints());
+		OnSpellPointsChanged(FAuraIntAttributeChangedPayload::CreateBroadcastPayload(FAuraGameplayTags::Get().Attributes_Progression_SpellPoints, ProgressionComponent->GetSpellPoints()));
 	}
 }
 
@@ -136,9 +146,9 @@ void USpellMenuWidgetController::UnbindAll_Implementation(const UObject* BoundOb
 }
 
 
-void USpellMenuWidgetController::OnSpellPointsChanged(const int32 SpellPoints)
+void USpellMenuWidgetController::OnSpellPointsChanged(const FAuraIntAttributeChangedPayload& Payload)
 {
-	OnSpellMenuSpellPointsChangedDelegate.Broadcast(SpellPoints);
+	OnSpellMenuSpellPointsChangedDelegate.Broadcast(Payload);
 }
 
 void USpellMenuWidgetController::OnPlayerLevelChanged(
@@ -155,7 +165,7 @@ void USpellMenuWidgetController::OnPlayerLevelChanged(
 			AbilityInfoDelegate.Broadcast(Info);
 		}
 	}
-	OnSpellMenuPlayerLevelChangedDelegate.Broadcast(Level);
+	OnSpellMenuPlayerLevelChangedDelegate.Broadcast(FAuraIntAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_Level, Level, Level));
 }
 
 void USpellMenuWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload)

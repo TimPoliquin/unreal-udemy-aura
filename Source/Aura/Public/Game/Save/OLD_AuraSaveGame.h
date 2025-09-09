@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AuraSaveGameTypes.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/SaveGame.h"
 #include "Item/AuraItemTypes.h"
@@ -24,13 +25,6 @@ enum ESaveSlotAttributeSource
 {
 	FromDefault,
 	FromDisk
-};
-
-UENUM(BlueprintType)
-enum ESavedAbilityState
-{
-	GiveAbility,
-	GiveAbilityAndActivate
 };
 
 USTRUCT(BlueprintType)
@@ -80,47 +74,6 @@ struct FSavedMap
 	}
 };
 
-USTRUCT(BlueprintType)
-struct FSavedAbility
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Class Defaults")
-	TSubclassOf<UGameplayAbility> GameplayAbilityClass;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilityTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilityTypeTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilityStatusTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag AbilitySlotTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	int32 AbilityLevel = 1;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TEnumAsByte<ESavedAbilityState> AbilityState = GiveAbility;
-
-	FString ToString() const
-	{
-		return FString::Printf(
-			TEXT(
-				"Ability Tag: [%s] \n"
-				"Ability Type: [%s] \n"
-				"Ability Status: [%s] \n"
-				"Ability Slot: [%s] \n"
-			),
-			*AbilityTag.ToString(),
-			*AbilityTypeTag.ToString(),
-			*AbilityStatusTag.ToString(),
-			*AbilitySlotTag.ToString()
-		);
-	}
-
-	bool operator==(const FSavedAbility& Right) const
-	{
-		return AbilityTag.MatchesTagExact(Right.AbilityTag);
-	}
-};
 
 USTRUCT(BlueprintType)
 struct FSavedInventory

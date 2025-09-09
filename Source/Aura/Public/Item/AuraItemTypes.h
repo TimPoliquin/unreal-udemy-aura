@@ -93,7 +93,8 @@ struct FAuraItemInventoryEntry
 	// Serialization function
 	friend FArchive& operator<<(FArchive& Ar, FAuraItemInventoryEntry& Struct)
 	{
-		Ar << Struct.ItemType;
+		bool OutSuccess;
+		Struct.ItemType.NetSerialize(Ar, nullptr, OutSuccess);
 		Ar << Struct.ItemCount;
 		return Ar;
 	}

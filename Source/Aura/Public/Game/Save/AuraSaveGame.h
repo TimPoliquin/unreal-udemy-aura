@@ -32,6 +32,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	FGlobalSaveData GlobalData;
 
+
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	TArray<FWorldSaveData> WorldsData;
 

@@ -79,7 +79,7 @@ protected:
 	void SaveGameData(UAuraSaveGame* CurrentSaveData);
 
 	void LoadMetaData(const UAuraSaveGame* SaveData);
-	void LoadGlobalData(const UAuraSaveGame* SaveData);
+	void LoadGlobalData(UAuraSaveGame* SaveData);
 	void LoadWorldData(const UAuraSaveGame* SaveData, const FWorldSaveData& WorldSaveData);
 	void LoadActorsData(const UAuraSaveGame* SaveData, const FWorldSaveData& WorldSaveData);
 	void LoadActor(AActor* TargetActor, const FActorSaveData& ActorData);

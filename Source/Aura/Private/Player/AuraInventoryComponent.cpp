@@ -95,7 +95,7 @@ int32 UAuraInventoryComponent::AddToInventory(const FGameplayTag& ItemType, cons
 		Inventory.Add(*ItemEntry);
 	}
 	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
-		ItemEntry->ItemType,
+		ItemType,
 		OldValue,
 		NewValue
 	));
@@ -159,7 +159,7 @@ bool UAuraInventoryComponent::UseItem(const FGameplayTag& ItemTag, const EAuraIt
 		});
 	}
 	OnInventoryItemCountChangedDelegate.Broadcast(FOnInventoryItemCountChangedPayload(
-		ItemEntry->ItemType,
+		ItemTag,
 		OldValue,
 		NewValue
 	));

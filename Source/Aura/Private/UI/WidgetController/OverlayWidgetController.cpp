@@ -16,10 +16,17 @@
 
 void UOverlayWidgetController::BroadcastInitialValues()
 {
-	OnHealthChanged.Broadcast(GetAuraAttributeSet()->GetHealth());
-	OnMaxMaxHealthChanged.Broadcast(GetAuraAttributeSet()->GetMaxHealth());
-	OnManaChanged.Broadcast(GetAuraAttributeSet()->GetMana());
-	OnMaxManaChanged.Broadcast(GetAuraAttributeSet()->GetMaxMana());
+	const FAuraGameplayTags& AuraGameplayTags = FAuraGameplayTags::Get();
+	OnHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(AuraGameplayTags.Attributes_Vital_Health, GetAuraAttributeSet()->GetHealth()));
+	OnMaxMaxHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(AuraGameplayTags.Attributes_Secondary_MaxHealth, GetAuraAttributeSet()->GetMaxHealth()));
+	OnManaChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(AuraGameplayTags.Attributes_Vital_Mana, GetAuraAttributeSet()->GetMana()));
+	OnMaxManaChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(AuraGameplayTags.Attributes_Secondary_MaxMana, GetAuraAttributeSet()->GetMaxMana()));
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		const float NewPercentage = UAuraGameDataSubsystem::Get(GetAuraPlayerState())->GetXPToNextLevelPercentage(ProgressionComponent->GetXP());
+		OnXPPercentageChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(AuraGameplayTags.Attributes_Progression_XP, NewPercentage));
+		OnPlayerLevelChangedDelegate.Broadcast(FAuraIntAttributeChangedPayload::CreateBroadcastPayload(AuraGameplayTags.Attributes_Progression_Level, ProgressionComponent->GetCharacterLevel()));
+	}
 	if (GetAuraAbilitySystemComponent()->HasFiredOnAbilitiesGivenDelegate())
 	{
 		BroadcastAbilityInfo();
@@ -33,6 +40,7 @@ void UOverlayWidgetController::BroadcastInitialValues()
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	Super::BindCallbacksToDependencies();
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	if (UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
 	{
 		ProgressionComponent->OnXPChangeDelegate.AddDynamic(this, &UOverlayWidgetController::OnPlayerXPChange);
@@ -44,31 +52,31 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	}
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetHealthAttribute())
 	                      .AddLambda(
-		                      [this](const FOnAttributeChangeData& Data)
+		                      [&](const FOnAttributeChangeData& Data)
 		                      {
-			                      OnHealthChanged.Broadcast(Data.NewValue);
+			                      OnHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Vital_Health, Data.OldValue, Data.NewValue));
 		                      }
 	                      );
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxHealthAttribute())
 	                      .AddLambda(
-		                      [this](const FOnAttributeChangeData& Data)
+		                      [&](const FOnAttributeChangeData& Data)
 		                      {
-			                      OnMaxMaxHealthChanged.Broadcast(Data.NewValue);
+			                      OnMaxMaxHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Secondary_MaxHealth, Data.OldValue, Data.NewValue));
 		                      }
 	                      );
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetManaAttribute())
 	                      .AddLambda(
-		                      [this](const FOnAttributeChangeData& Data)
+		                      [&](const FOnAttributeChangeData& Data)
 		                      {
-			                      OnManaChanged.Broadcast(Data.NewValue);
+			                      OnManaChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Vital_Mana, Data.OldValue, Data.NewValue));
 		                      }
 	                      );
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxManaAttribute())
 	                      .AddLambda(
-		                      [this](const FOnAttributeChangeData& Data)
+		                      [&](const FOnAttributeChangeData& Data)
 		                      {
-			                      OnMaxManaChanged.Broadcast(Data.NewValue);
+			                      OnMaxManaChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Secondary_MaxMana, Data.OldValue, Data.NewValue));
 		                      }
 	                      );
 	GetAuraAbilitySystemComponent()->OnEffectAssetTagsDelegate.AddLambda(
@@ -99,19 +107,26 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	}
 }
 
-void UOverlayWidgetController::OnPlayerXPChange(const int32 XP)
+bool UOverlayWidgetController::IsBroadcastPayload(const FAuraIntAttributeChangedPayload& Payload)
 {
-	OnXPPercentageChanged.Broadcast(UAuraGameDataSubsystem::Get(GetAuraPlayerState())->GetXPToNextLevelPercentage(XP));\
+	return !Payload.IsChanged();
 }
 
-void UOverlayWidgetController::OnPlayerLevelInitialized(int32 NewValue)
+void UOverlayWidgetController::OnPlayerXPChange(const FAuraIntAttributeChangedPayload& Payload)
 {
-	OnPlayerLevelInitializedDelegate.Broadcast(NewValue);
+	const float OldPercentage = UAuraGameDataSubsystem::Get(GetAuraPlayerState())->GetXPToNextLevelPercentage(Payload.OldValue);
+	const float NewPercentage = UAuraGameDataSubsystem::Get(GetAuraPlayerState())->GetXPToNextLevelPercentage(Payload.NewValue);
+	OnXPPercentageChanged.Broadcast(FAuraFloatAttributeChangedPayload(FAuraGameplayTags::Get().Attributes_Progression_XP, OldPercentage, NewPercentage));
 }
 
-void UOverlayWidgetController::OnPlayerLevelChange(const int32 InLevel)
+void UOverlayWidgetController::OnPlayerLevelInitialized(const FAuraIntAttributeChangedPayload& Payload)
 {
-	OnPlayerLevelChangedDelegate.Broadcast(InLevel);
+	OnPlayerLevelInitializedDelegate.Broadcast(Payload);
+}
+
+void UOverlayWidgetController::OnPlayerLevelChange(const FAuraIntAttributeChangedPayload& Payload)
+{
+	OnPlayerLevelChangedDelegate.Broadcast(Payload);
 }
 
 void UOverlayWidgetController::OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload)

@@ -1,6 +1,11 @@
 ﻿#pragma once
-
+#include "GameplayTagContainer.h"
+#include "Abilities/GameplayAbility.h"
+#include "Aura/AuraLogChannels.h"
+#include "Player/AuraPlayerState.h"
 #include "AuraSaveGameTypes.generated.h"
+
+class UGameplayAbility;
 
 USTRUCT(BlueprintType)
 struct AURA_API FComponentSaveData
@@ -120,4 +125,81 @@ struct AURA_API FGlobalSaveData
 	FActorSaveData GameStateSaveData;
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	TArray<FActorSaveData> PlayerSaveData;
+	FActorSaveData GetPlayerSaveData(const AAuraPlayerState* PlayerState);
+	void AddPlayerSaveData(const FActorSaveData& ActorSaveData);
+};
+
+UENUM(BlueprintType)
+enum class ESavedAbilityState : uint8
+{
+	GiveAbility,
+	GiveAbilityAndActivate
+};
+
+USTRUCT(BlueprintType)
+struct FSavedAbility
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Class Defaults")
+	TSubclassOf<UGameplayAbility> GameplayAbilityClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag AbilityTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag AbilityTypeTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag AbilityStatusTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag AbilitySlotTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 AbilityLevel = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	ESavedAbilityState AbilityState = ESavedAbilityState::GiveAbility;
+
+	FString ToString() const
+	{
+		return FString::Printf(
+			TEXT(
+				"Ability Tag: [%s] \n"
+				"Ability Type: [%s] \n"
+				"Ability Status: [%s] \n"
+				"Ability Slot: [%s] \n"
+			),
+			*AbilityTag.ToString(),
+			*AbilityTypeTag.ToString(),
+			*AbilityStatusTag.ToString(),
+			*AbilitySlotTag.ToString()
+		);
+	}
+
+	// Serialization function
+	friend FArchive& operator<<(FArchive& Ar, FSavedAbility& Struct)
+	{
+		bool SerializeSuccess;
+		FString ClassPathName = Struct.GameplayAbilityClass->GetPathName();
+		Ar << ClassPathName;
+		Struct.AbilityTag.NetSerialize(Ar, nullptr, SerializeSuccess);
+		Struct.AbilityTypeTag.NetSerialize(Ar, nullptr, SerializeSuccess);
+		Struct.AbilityStatusTag.NetSerialize(Ar, nullptr, SerializeSuccess);
+		Struct.AbilitySlotTag.NetSerialize(Ar, nullptr, SerializeSuccess);
+		Ar << Struct.AbilityLevel;
+		Ar << Struct.AbilityState;
+		if (!Struct.GameplayAbilityClass && !ClassPathName.IsEmpty())
+		{
+			if (UClass* AbilityClass = StaticLoadClass(UGameplayAbility::StaticClass(), nullptr, *ClassPathName))
+			{
+				Struct.GameplayAbilityClass = AbilityClass;
+			}
+			else
+			{
+				UE_LOG(LogAura, Error, TEXT("[%s] Failed to load ability class by path: %s"), *Struct.AbilityTag.ToString(), *ClassPathName);
+			}
+		}
+		return Ar;
+	}
+
+	bool operator==(const FSavedAbility& Right) const
+	{
+		return AbilityTag.MatchesTagExact(Right.AbilityTag);
+	}
 };

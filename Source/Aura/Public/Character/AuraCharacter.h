@@ -68,7 +68,6 @@ public:
 	virtual void SpendSpellPoints_Implementation(int32 SpentPoints) override;
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() override;
-	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
 	virtual void MoveCameraToPoint_Implementation(
 		const FVector& Destination,
 		const FVector& Direction,
@@ -92,7 +91,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
-	void LoadProgress(const UOLD_AuraSaveGame* SaveData);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UAuraFishingComponent> FishingComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
