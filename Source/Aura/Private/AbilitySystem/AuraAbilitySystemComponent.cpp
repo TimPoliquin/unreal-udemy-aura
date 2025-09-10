@@ -107,7 +107,7 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGa
 			// TODO Cancel and reactivate the ability if it is passive
 		}
 		ClientUpdateAbilityStatus(
-			ICombatInterface::GetCharacterLevel(GetAvatarActor()),
+			IAuraAbilitySystemInterface::GetCharacterLevel(GetAvatarActor()),
 			FAbilityTagStatus::CreateArray(
 				AbilityTag,
 				UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec),
@@ -263,6 +263,11 @@ TArray<uint8> UAuraAbilitySystemComponent::SaveData_Implementation()
 bool UAuraAbilitySystemComponent::LoadData_Implementation(const TArray<uint8>& Data)
 {
 	return DeserializeActorComponent(Data);
+}
+
+bool UAuraAbilitySystemComponent::ShouldSave_Implementation() const
+{
+	return bShouldSave;
 }
 
 void UAuraAbilitySystemComponent::BeginPlay()

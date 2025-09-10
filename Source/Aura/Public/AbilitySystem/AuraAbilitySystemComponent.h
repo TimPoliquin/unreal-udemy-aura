@@ -98,11 +98,12 @@ public:
 	/** Start ISaveableInterface **/
 	virtual TArray<uint8> SaveData_Implementation() override;
 	virtual bool LoadData_Implementation(const TArray<uint8>& Data) override;
-	virtual bool ShouldSave_Implementation() const override { return true; }
+	virtual bool ShouldSave_Implementation() const override;
 	virtual bool ShouldAutoSpawn_Implementation() const override { return false; }
 	virtual bool ShouldLoadTransform_Implementation() const override { return false; }
 	/** End ISaveableInterface **/
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Save Game")
+	bool bShouldSave = false;
 
 protected:
 	virtual void BeginPlay() override;

@@ -55,8 +55,6 @@ class AURA_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	UFUNCTION(BlueprintNativeEvent)
-	int32 GetCharacterLevel() const;
 	virtual void Die() = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -100,12 +98,6 @@ public:
 	/**
 	 * 
 	 * @param Actor 
-	 * @return Get the level of the actor if it implements ICombatInterface. -1 otherwise.
-	 */
-	static int32 GetCharacterLevel(const UObject* Actor);
-	/**
-	 * 
-	 * @param Actor 
 	 * @return true if the provided actor implements ICombatInterface and is alive (not dead).
 	 */
 	static bool IsAlive(const UObject* Actor);
@@ -129,5 +121,4 @@ public:
 	static USkeletalMeshComponent* GetWeapon(const UObject* Actor);
 	static FGameplayTag GetHitReactAbilityTagByDamageType(const UObject* Actor, const FGameplayTag& DamageTypeTag);
 	static bool IsHitReacting(const UObject* Actor);
-	static bool IsAbilitySystemReady(AActor* Actor);
 };

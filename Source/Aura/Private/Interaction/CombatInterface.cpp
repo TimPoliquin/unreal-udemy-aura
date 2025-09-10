@@ -3,21 +3,8 @@
 
 #include "Interaction/CombatInterface.h"
 
-#include "AnimationCompression.h"
-#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "Tags/AuraGameplayTags.h"
-#include "Utils/ArrayUtils.h"
-
-
-int32 ICombatInterface::GetCharacterLevel(const UObject* Actor)
-{
-	if (Actor && Actor->Implements<UCombatInterface>())
-	{
-		return Execute_GetCharacterLevel(Actor);
-	}
-	return 0;
-}
 
 bool ICombatInterface::IsAlive(const UObject* Actor)
 {
@@ -124,15 +111,6 @@ bool ICombatInterface::IsHitReacting(const UObject* Actor)
 	if (Actor && Actor->Implements<UCombatInterface>())
 	{
 		return Execute_IsHitReacting(Actor);
-	}
-	return false;
-}
-
-bool ICombatInterface::IsAbilitySystemReady(AActor* Actor)
-{
-	if (UAuraAbilitySystemComponent* AbilitySystemComponent = UAuraAbilitySystemLibrary::GetAuraAbilitySystemComponent(Actor))
-	{
-		return AbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate();
 	}
 	return false;
 }

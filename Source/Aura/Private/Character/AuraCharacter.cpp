@@ -10,7 +10,7 @@
 #include "Player/AuraPlayerState.h"
 #include "NiagaraComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
-#include "AbilitySystem/AuraAbilitySystemLibrary.h"
+#include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura/AuraLogChannels.h"
 #include "Camera/AuraCameraComponent.h"
@@ -86,6 +86,15 @@ void AAuraCharacter::Tick(float DeltaTime)
 void AAuraCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+UAuraAttributeSet* AAuraCharacter::GetAuraAttributeSet() const
+{
+	if (const AAuraPlayerState* AuraPlayerState = GetAuraPlayerState())
+	{
+		return AuraPlayerState->GetAuraAttributeSet();
+	}
+	return nullptr;
 }
 
 void AAuraCharacter::PossessedBy(AController* NewController)
@@ -207,8 +216,7 @@ void AAuraCharacter::InitializeAbilityActorInfo()
 	AAuraPlayerState* AuraPlayerState = GetAuraPlayerState();
 	check(AuraPlayerState);
 	AuraPlayerState->InitializeAbilityActorInfo();
-	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
-	AttributeSet = AuraPlayerState->GetAttributeSet();
+	AbilitySystemComponent = AuraPlayerState->GetAuraAbilitySystemComponent();
 	EquipmentComponent->InitializeEquipment();
 	FishingComponent->SetPlayerEquipmentComponent(EquipmentComponent);
 	// Broadcast Ability System Setup
@@ -227,7 +235,7 @@ void AAuraCharacter::InitializePlayerControllerHUD(
 			InPlayerController,
 			InPlayerState,
 			AbilitySystemComponent,
-			AttributeSet
+			GetAuraAttributeSet()
 		);
 	}
 }
@@ -247,7 +255,6 @@ void AAuraCharacter::OnLevelLoaded()
 	{
 		InitializePlayerControllerHUD(PlayerController, GetPlayerState());
 	}
-	InitializeDefaultAttributes();
 	AddCharacterAbilities();
 }
 

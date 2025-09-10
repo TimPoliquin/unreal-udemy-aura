@@ -16,7 +16,7 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 	check(AttributeInfo);
 	if (UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
 	{
-		ProgressionComponent->OnAttributePointsChangeDelegate.AddDynamic(
+		ProgressionComponent->OnAttributePointsChangeDelegate.AddUniqueDynamic(
 			this,
 			&UAttributeMenuWidgetController::OnAttributePointsChanged
 		);

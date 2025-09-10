@@ -37,6 +37,7 @@ public:
 	AAuraCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual UAuraAttributeSet* GetAuraAttributeSet() const override;
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -46,8 +47,10 @@ public:
 	AAuraPlayerState* GetAuraPlayerState() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent() const;
-	// ICombatInterface
+	/** Start IAuraAbilitySystemInterface **/
 	virtual int32 GetCharacterLevel_Implementation() const override;
+	/** End IAuraAbilitySystemInterface **/
+	// ICombatInterface
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
 	virtual void Die() override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
@@ -103,12 +106,12 @@ protected:
 	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
 	UPROPERTY(EditDefaultsOnly, Category="Components")
 	TObjectPtr<UNiagaraComponent> FishingStatusEffectNiagaraComponent;
-
-private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USoundBase> LevelUpSound;
 	UPROPERTY(EditDefaultsOnly)
 	float DeathTime = 5.f;
+
+private:
 	UPROPERTY()
 	FTimerHandle DeathTimer;
 	FOnCameraMoveFinishedSignature OnCameraReturnDelegate;

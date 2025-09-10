@@ -255,7 +255,7 @@ bool UAuraAbilitySystemLibrary::IsInstantEffect(const FGameplayEffectSpecHandle&
 
 int UAuraAbilitySystemLibrary::GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent)
 {
-	return ICombatInterface::GetCharacterLevel(AbilitySystemComponent->GetAvatarActor());
+	return IAuraAbilitySystemInterface::GetCharacterLevel(AbilitySystemComponent->GetAvatarActor());
 }
 
 FGameplayTag UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
@@ -609,7 +609,7 @@ bool UAuraAbilitySystemLibrary::GetWidgetControllerParams(
 	{
 		AAuraPlayerState* PlayerState = PlayerController->GetPlayerState<AAuraPlayerState>();
 		UAbilitySystemComponent* AbilitySystemComponent = PlayerState->GetAbilitySystemComponent();
-		UAttributeSet* AttributeSet = PlayerState->GetAttributeSet();
+		UAttributeSet* AttributeSet = PlayerState->GetAuraAttributeSet();
 		FWidgetControllerParams.PlayerController = PlayerController;
 		FWidgetControllerParams.PlayerState = PlayerState;
 		FWidgetControllerParams.AbilitySystemComponent = AbilitySystemComponent;
@@ -772,6 +772,11 @@ FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
 	const int32 Level
 )
 {
+	if (!IsValid(TargetActor) || !IsValid(GameplayEffect))
+	{
+		UE_LOG(LogAura, Warning, TEXT("Requested to apply effect to either invalid actor or effect!"));
+		return FActiveGameplayEffectHandle();
+	}
 	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		TargetActor
 	))
