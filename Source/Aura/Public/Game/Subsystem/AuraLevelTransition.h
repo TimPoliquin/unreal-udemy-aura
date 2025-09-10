@@ -24,6 +24,7 @@ public:
 
 private:
 	FString SaveSlot = FString("");
+	int32 SlotIndex = 0;
 	FName DestinationPlayerStartTag = NAME_None;
 	bool bShouldLoad = false;
 };

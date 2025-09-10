@@ -4,12 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
-#include "Game/Save/OLD_AuraSaveGame.h"
 #include "MVVM_LoadSlot.generated.h"
 
+class UAuraSaveGame;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSetWidgetSwitcherIndexSignature, const int32, WidgetSwitcherIndex);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEnableSelectSlotButtonSignature, const bool, bEnable);
+
+UENUM(BlueprintType)
+enum ESaveSlotStatus
+{
+	Vacant,
+	EnterName,
+	Taken
+};
 
 /**
  * 
@@ -60,8 +68,7 @@ public:
 	void SetPlayerStartTag(const FName& InPlayerStartTag);
 	FString GetMapAssetName() const;
 	void SetMapAssetName(const FString& InMapAssetName);
-	void ToSaveGame(UOLD_AuraSaveGame* SaveGame) const;
-	void FromSaveGame(const UOLD_AuraSaveGame* SaveGame);
+	void FromSaveGame(const UAuraSaveGame* SaveGame);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, FieldNotify, Setter, Getter, meta=(AllowPrivateAccess="true"))

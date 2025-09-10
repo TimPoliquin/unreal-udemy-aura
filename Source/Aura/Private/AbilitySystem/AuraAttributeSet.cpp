@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemInterface.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
@@ -14,7 +15,6 @@
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
-#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Player/Progression/AuraProgressionComponent.h"
 
 

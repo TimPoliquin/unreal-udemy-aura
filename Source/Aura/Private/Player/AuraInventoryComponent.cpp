@@ -7,7 +7,6 @@
 #include "Aura/AuraLogChannels.h"
 #include "Game/AuraGameState.h"
 #include "Game/Save/AuraSaveGameBlueprintFunctionLibrary.h"
-#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Game/Subsystem/AuraGameDataSubsystem.h"
 
 UAuraInventoryComponent* UAuraInventoryComponent::Get(const UObject* InObject)

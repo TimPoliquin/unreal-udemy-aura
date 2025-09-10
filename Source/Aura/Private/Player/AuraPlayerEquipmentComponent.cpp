@@ -7,7 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "Aura/AuraLogChannels.h"
 #include "Game/Save/AuraSaveGameBlueprintFunctionLibrary.h"
-#include "Game/Save/OLD_AuraSaveGame.h"
 #include "GameFramework/Character.h"
 #include "Item/AuraItemBlueprintLibrary.h"
 #include "Item/Equipment/AuraEquipmentBase.h"

@@ -10,7 +10,6 @@
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Game/Save/AuraSaveGameTypes.h"
-#include "Game/Save/OLD_AuraSaveGame.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"

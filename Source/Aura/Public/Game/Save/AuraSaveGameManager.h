@@ -37,28 +37,33 @@ public:
 	virtual void Deinitialize() override;
 
 	// Save/Load functions
+	UFUNCTION(BlueprintCallable)
+	TArray<FString> GetAllSaveGameSlotNames() const;
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	FString AutoSave_LevelTransition(const FAuraSaveGameParams& SaveParams);
-
+	UFUNCTION(BlueprintCallable, Category = "Save System")
+	UAuraSaveGame* CreateNewGame(const FString& PlayerName);
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	void SaveGame(const FAuraSaveGameParams& SaveParams);
 	UFUNCTION(BlueprintCallable, Category = "Save System")
-	void LoadGame(const FString& SlotName);
+	void LoadGame(const FString& SlotName, int32 SlotIndex);
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	void LoadMostRecentGame();
 
 	void ApplySaveGame(UAuraSaveGame* LoadedData);
-	void ApplySaveGame(const FString& SaveSlot);
+	void ApplySaveGame(const FString& SaveSlot, int32 SlotIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Save System")
-	bool DoesSaveGameExist(const FString& SlotName = "Default") const;
+	bool DoesSaveGameExist(const FString& SlotName, const int32 SlotIndex) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	void DeleteSaveGame(const FString& SlotName = "Default");
 
 	// Utility functions
 	FString GetCurrentSaveSlotName() const;
-	FString GetAutoSaveSlotName() const;
+	UAuraSaveGame* LoadSaveGameData(const FString& SlotName, const int32 SlotIndex);
+	int32 GetAutoSaveSlotIndex() const { return AutoSaveSlotIndex; }
+
 
 	// Events
 	UPROPERTY(BlueprintAssignable, Category = "Save System")
@@ -92,8 +97,10 @@ protected:
 	AActor* LoadActorData(const FActorSaveData& ActorData);
 	void LoadComponentData(UActorComponent* Component, const FComponentSaveData& ComponentData);
 
+	UPROPERTY(EditDefaultsOnly)
+	int32 AutoSaveSlotIndex = 1;
+
 private:
-	UAuraSaveGame* LoadSaveGameData(const FString& SlotName);
 	// Current save data
 	FString CurrentSaveSlotName;
 	bool bIsMostRecentSaveAutoSave = false;

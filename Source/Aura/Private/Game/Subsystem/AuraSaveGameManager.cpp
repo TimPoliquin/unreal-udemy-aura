@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 UAuraSaveGameManager* UAuraSaveGameManager::Get(const UObject* WorldContextObject)
@@ -36,8 +37,7 @@ void UAuraSaveGameManager::Initialize(FSubsystemCollectionBase& Collection)
 	if (bAllowDefaultSave)
 	{
 		CurrentSaveSlotName = UAuraSaveGame::DEFAULT_SAVE_SLOT_NAME;
-		UGameplayStatics::DeleteGameInSlot(CurrentSaveSlotName, 0);
-		UGameplayStatics::DeleteGameInSlot(GetAutoSaveSlotName(), 0);
+		DeleteSaveGame(CurrentSaveSlotName);
 	}
 #endif
 }
@@ -47,12 +47,34 @@ void UAuraSaveGameManager::Deinitialize()
 #if WITH_EDITOR
 	if (CurrentSaveSlotName == UAuraSaveGame::DEFAULT_SAVE_SLOT_NAME)
 	{
-		UGameplayStatics::DeleteGameInSlot(CurrentSaveSlotName, 0);
-		UGameplayStatics::DeleteGameInSlot(GetAutoSaveSlotName(), 0);
+		DeleteSaveGame(CurrentSaveSlotName);
 	}
 #endif
 	CurrentSaveSlotName = FString("");
 	Super::Deinitialize();
+}
+
+TArray<FString> UAuraSaveGameManager::GetAllSaveGameSlotNames() const
+{
+	TArray<FString> SaveSlots;
+
+	// Get the save directory
+	const FString SaveDirectory = FPaths::ProjectSavedDir() + TEXT("SaveGames/");
+
+	// File extension for save files
+	const FString FileExtension = TEXT(".sav");
+
+	// Find all files with the .sav extension in the save directory
+	IFileManager& FileManager = IFileManager::Get();
+	FileManager.FindFiles(SaveSlots, *SaveDirectory, *FileExtension);
+
+	// Remove the file extensions to get just the slot names
+	for (FString& Slot : SaveSlots)
+	{
+		Slot = FPaths::GetBaseFilename(Slot);
+	}
+
+	return SaveSlots;
 }
 
 FString UAuraSaveGameManager::AutoSave_LevelTransition(const FAuraSaveGameParams& SaveParams)
@@ -64,10 +86,9 @@ FString UAuraSaveGameManager::AutoSave_LevelTransition(const FAuraSaveGameParams
 		return FString("");
 	}
 	UAuraSaveGame* CurrentSaveData;
-	FString AutoSaveName = GetAutoSaveSlotName();
-	if (DoesSaveGameExist(AutoSaveName))
+	if (DoesSaveGameExist(CurrentSaveSlotName, AutoSaveSlotIndex))
 	{
-		CurrentSaveData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(AutoSaveName, 0));
+		CurrentSaveData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, AutoSaveSlotIndex));
 	}
 	else
 	{
@@ -76,9 +97,30 @@ FString UAuraSaveGameManager::AutoSave_LevelTransition(const FAuraSaveGameParams
 	CurrentSaveData->bIsAutoSave = true;
 	CurrentSaveData->MetaData.MapAssetName = SaveParams.DestinationMapName;
 	CurrentSaveData->MetaData.PlayerStartTag = SaveParams.DestinationPlayerStartTag;
-	CurrentSaveData->SaveSlotName = AutoSaveName;
+	CurrentSaveData->SaveSlotName = CurrentSaveSlotName;
 	SaveGameData(CurrentSaveData);
 	return CurrentSaveData->SaveSlotName;
+}
+
+UAuraSaveGame* UAuraSaveGameManager::CreateNewGame(const FString& PlayerName)
+{
+	if (DoesSaveGameExist(PlayerName, 0))
+	{
+		DeleteSaveGame(PlayerName);
+	}
+	const UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this);
+	UAuraSaveGame* NewGame = Cast<UAuraSaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGameClass));
+	NewGame->SaveSlotName = PlayerName;
+	NewGame->MetaData.PlayerName = PlayerName;
+	NewGame->MetaData.MapAssetName = LevelManager->GetDefaultMapAssetName();
+	NewGame->MetaData.MapDisplayName = LevelManager->GetDefaultMapName();
+	NewGame->MetaData.PlayerStartTag = LevelManager->GetDefaultPlayerStartTag(NewGame->MetaData.MapAssetName);
+	NewGame->MetaData.PlayerLevel = LevelManager->GetDefaultPlayerLevel(NewGame->MetaData.MapAssetName);
+
+	// Perform the actual save
+	UGameplayStatics::SaveGameToSlot(NewGame, NewGame->SaveSlotName, 0);
+
+	return NewGame;
 }
 
 void UAuraSaveGameManager::SaveGame(const FAuraSaveGameParams& SaveParams)
@@ -90,7 +132,7 @@ void UAuraSaveGameManager::SaveGame(const FAuraSaveGameParams& SaveParams)
 		return;
 	}
 	UAuraSaveGame* CurrentSaveData;
-	if (DoesSaveGameExist(CurrentSaveSlotName))
+	if (DoesSaveGameExist(CurrentSaveSlotName, 0))
 	{
 		CurrentSaveData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, 0));
 	}
@@ -109,9 +151,9 @@ void UAuraSaveGameManager::SaveGame(const FAuraSaveGameParams& SaveParams)
 	SaveGameData(CurrentSaveData);
 }
 
-void UAuraSaveGameManager::LoadGame(const FString& SlotName)
+void UAuraSaveGameManager::LoadGame(const FString& SlotName, const int32 SlotIndex)
 {
-	if (UAuraSaveGame* SaveGame = LoadSaveGameData(SlotName))
+	if (UAuraSaveGame* SaveGame = LoadSaveGameData(SlotName, SlotIndex))
 	{
 		FAuraLevelTransitionParams LevelTransitionParams;
 		LevelTransitionParams.MapAssetName = SaveGame->MetaData.MapAssetName;
@@ -129,11 +171,11 @@ void UAuraSaveGameManager::LoadMostRecentGame()
 {
 	if (bIsMostRecentSaveAutoSave)
 	{
-		LoadGame(GetAutoSaveSlotName());
+		LoadGame(CurrentSaveSlotName, AutoSaveSlotIndex);
 	}
 	else
 	{
-		LoadGame(CurrentSaveSlotName);
+		LoadGame(CurrentSaveSlotName, 0);
 	}
 }
 
@@ -195,9 +237,9 @@ void UAuraSaveGameManager::ApplySaveGame(UAuraSaveGame* LoadedData)
 	UE_LOG(LogTemp, Log, TEXT("Game loaded successfully from slot: %s"), *LoadedData->SaveSlotName);
 }
 
-void UAuraSaveGameManager::ApplySaveGame(const FString& SaveSlot)
+void UAuraSaveGameManager::ApplySaveGame(const FString& SaveSlot, const int32 SlotIndex)
 {
-	if (UAuraSaveGame* SaveGame = LoadSaveGameData(SaveSlot))
+	if (UAuraSaveGame* SaveGame = LoadSaveGameData(SaveSlot, SlotIndex))
 	{
 		ApplySaveGame(SaveGame);
 	}
@@ -207,14 +249,15 @@ void UAuraSaveGameManager::ApplySaveGame(const FString& SaveSlot)
 	}
 }
 
-bool UAuraSaveGameManager::DoesSaveGameExist(const FString& SlotName) const
+bool UAuraSaveGameManager::DoesSaveGameExist(const FString& SlotName, const int32 SlotIndex) const
 {
-	return UGameplayStatics::DoesSaveGameExist(SlotName, 0);
+	return UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex);
 }
 
 void UAuraSaveGameManager::DeleteSaveGame(const FString& SlotName)
 {
 	UGameplayStatics::DeleteGameInSlot(SlotName, 0);
+	UGameplayStatics::DeleteGameInSlot(SlotName, 1);
 }
 
 FString UAuraSaveGameManager::GetCurrentSaveSlotName() const
@@ -224,7 +267,7 @@ FString UAuraSaveGameManager::GetCurrentSaveSlotName() const
 
 UAuraSaveGame* UAuraSaveGameManager::GetCurrentPrimarySaveGame() const
 {
-	if (!CurrentSaveSlotName.IsEmpty() && DoesSaveGameExist(CurrentSaveSlotName))
+	if (!CurrentSaveSlotName.IsEmpty() && DoesSaveGameExist(CurrentSaveSlotName, 0))
 	{
 		return Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, 0));
 	}
@@ -233,10 +276,9 @@ UAuraSaveGame* UAuraSaveGameManager::GetCurrentPrimarySaveGame() const
 
 UAuraSaveGame* UAuraSaveGameManager::GetCurrentAutoSaveGame() const
 {
-	const FString AutoSaveName = GetAutoSaveSlotName();
-	if (!CurrentSaveSlotName.IsEmpty() && DoesSaveGameExist(AutoSaveName))
+	if (!CurrentSaveSlotName.IsEmpty() && DoesSaveGameExist(CurrentSaveSlotName, AutoSaveSlotIndex))
 	{
-		return Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(AutoSaveName, 0));
+		return Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, AutoSaveSlotIndex));
 	}
 	return nullptr;
 }
@@ -251,6 +293,7 @@ void UAuraSaveGameManager::SaveGlobalData(UAuraSaveGame* SaveGame)
 	AAuraGameState* GameState = AAuraGameState::Get(GetWorld());
 	FActorSaveData GameStateSaveData;
 	SaveActorData(GameState, GameStateSaveData);
+	SaveGame->MetaData.PlayerLevel = GameState->GetProgressionComponent()->GetCharacterLevel();
 	SaveGame->GlobalData.GameStateSaveData = GameStateSaveData;
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
@@ -530,16 +573,16 @@ void UAuraSaveGameManager::LoadComponentData(UActorComponent* Component, const F
 	}
 }
 
-UAuraSaveGame* UAuraSaveGameManager::LoadSaveGameData(const FString& SlotName)
+UAuraSaveGame* UAuraSaveGameManager::LoadSaveGameData(const FString& SlotName, const int32 SlotIndex)
 {
-	if (!UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	if (!UGameplayStatics::DoesSaveGameExist(SlotName, SlotIndex))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Save game does not exist in slot: %s"), *SlotName);
 		OnLoadCompleted.Broadcast(false);
 		return nullptr;
 	}
 
-	UAuraSaveGame* LoadedData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+	UAuraSaveGame* LoadedData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, SlotIndex));
 	if (!LoadedData)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load game from slot: %s"), *SlotName);
@@ -553,9 +596,4 @@ UAuraSaveGame* UAuraSaveGameManager::LoadSaveGameData(const FString& SlotName)
 		bIsMostRecentSaveAutoSave = false;
 	}
 	return LoadedData;
-}
-
-FString UAuraSaveGameManager::GetAutoSaveSlotName() const
-{
-	return FString::Printf(TEXT("%s__AutoSave"), *CurrentSaveSlotName);
 }

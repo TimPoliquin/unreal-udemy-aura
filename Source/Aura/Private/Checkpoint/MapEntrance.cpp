@@ -5,10 +5,7 @@
 
 #include "Game/Save/AuraSaveGameManager.h"
 #include "Game/Subsystem/AuraLevelManager.h"
-#include "Game/Subsystem/Old_SaveGameManager.h"
 #include "Interaction/PlayerInterface.h"
-#include "Kismet/GameplayStatics.h"
-
 
 AMapEntrance::AMapEntrance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -36,8 +33,10 @@ void AMapEntrance::OnSphereOverlap(
 		bHasBeenActivated = true;
 		if (UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this))
 		{
+			const UAuraSaveGameManager* SaveGameManager = UAuraSaveGameManager::Get(this);
 			FAuraLevelTransitionParams Params;
-			Params.SaveSlot = UAuraSaveGameManager::Get(this)->GetAutoSaveSlotName();
+			Params.SaveSlot = SaveGameManager->GetCurrentSaveSlotName();
+			Params.SlotIndex = SaveGameManager->GetAutoSaveSlotIndex();
 			Params.bShouldSave = true;
 			Params.bShouldLoad = true;
 			Params.MapAssetName = DestinationMap.GetAssetName();

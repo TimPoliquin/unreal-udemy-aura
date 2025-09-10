@@ -75,14 +75,14 @@ FString UAuraLevelManager::GetDefaultMapAssetName() const
 	return GetMapFromMapDisplayName(DefaultMapName).ToSoftObjectPath().GetAssetName();
 }
 
-FName UAuraLevelManager::GetDefaultPlayerStartTag(const FString& MapDisplayName) const
+FName UAuraLevelManager::GetDefaultPlayerStartTag(const FString& MapAssetName) const
 {
-	return GetMapConfigByDisplayName(MapDisplayName).DefaultPlayerStartTag;
+	return GetMapConfigByMapAssetName(MapAssetName).DefaultPlayerStartTag;
 }
 
-int32 UAuraLevelManager::GetDefaultPlayerLevel(const FString& MapDisplayName) const
+int32 UAuraLevelManager::GetDefaultPlayerLevel(const FString& MapAssetName) const
 {
-	return GetMapConfigByDisplayName(MapDisplayName).DefaultPlayerLevel;
+	return GetMapConfigByMapAssetName(MapAssetName).DefaultPlayerLevel;
 }
 
 FName UAuraLevelManager::GetCurrentPlayerStartTag(

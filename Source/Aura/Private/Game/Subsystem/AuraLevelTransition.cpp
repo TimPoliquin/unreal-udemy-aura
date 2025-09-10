@@ -15,7 +15,7 @@ void UAuraLevelTransition::Initialize(const FAuraLevelTransitionParams& Params)
 	{
 		if (bShouldLoad)
 		{
-			UAuraSaveGameManager::Get(World)->ApplySaveGame(SaveSlot);
+			UAuraSaveGameManager::Get(World)->ApplySaveGame(SaveSlot, SlotIndex);
 		}
 		OnComplete.Broadcast(World);
 	});

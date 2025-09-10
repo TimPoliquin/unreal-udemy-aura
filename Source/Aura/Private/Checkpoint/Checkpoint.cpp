@@ -6,7 +6,6 @@
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
 #include "Game/Save/AuraSaveGameManager.h"
-#include "Game/Subsystem/Old_SaveGameManager.h"
 #include "Interaction/PlayerInterface.h"
 
 ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)

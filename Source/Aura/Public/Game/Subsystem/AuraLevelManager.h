@@ -39,6 +39,8 @@ struct AURA_API FAuraLevelTransitionParams
 	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
 	FString SaveSlot = FString("");
 	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
+	int32 SlotIndex = 0;
+	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
 	bool bShouldSave = false;
 	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
 	bool bShouldLoad = false;
@@ -73,8 +75,8 @@ public:
 
 	FString GetDefaultMapName() const;
 	FString GetDefaultMapAssetName() const;
-	FName GetDefaultPlayerStartTag(const FString& MapDisplayName) const;
-	int32 GetDefaultPlayerLevel(const FString& MapDisplayName) const;
+	FName GetDefaultPlayerStartTag(const FString& MapAssetName) const;
+	int32 GetDefaultPlayerLevel(const FString& MapAssetName) const;
 	FName GetCurrentPlayerStartTag(const UObject* WorldContextObject, const bool bFallbackToDefault) const;
 	void TransitionLevel(const FAuraLevelTransitionParams& Params);
 

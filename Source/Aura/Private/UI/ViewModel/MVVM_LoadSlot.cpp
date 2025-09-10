@@ -3,6 +3,8 @@
 
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 
+#include "Game/Save/AuraSaveGame.h"
+
 void UMVVM_LoadSlot::ShowEnterName()
 {
 	SetWidgetSwitcherIndexDelegate.Broadcast(1);
@@ -63,25 +65,17 @@ void UMVVM_LoadSlot::SetMapAssetName(const FString& InMapAssetName)
 	this->MapAssetName = InMapAssetName;
 }
 
-void UMVVM_LoadSlot::ToSaveGame(UOLD_AuraSaveGame* SaveGame) const
+void UMVVM_LoadSlot::FromSaveGame(const UAuraSaveGame* SaveGame)
 {
-	SaveGame->SlotIndex = GetSlotIndex();
-	SaveGame->SlotName = GetLoadSlotName();
-	SaveGame->PlayerName = GetPlayerName();
-	SaveGame->MapAssetName = GetMapAssetName();
-	SaveGame->MapName = GetMapName();
-	SaveGame->SaveSlotStatus = GetLoadSlotStatus();
-	SaveGame->PlayerStartTag = GetPlayerStartTag();
-	SaveGame->PlayerLevel = GetPlayerLevel();
-}
-
-void UMVVM_LoadSlot::FromSaveGame(const UOLD_AuraSaveGame* SaveGame)
-{
-	SetPlayerName(SaveGame->PlayerName);
-	SetPlayerLevel(SaveGame->PlayerLevel);
-	SetMapName(SaveGame->MapName);
-	SetLoadSlotStatus(SaveGame->SaveSlotStatus);
-	SetPlayerStartTag(SaveGame->PlayerStartTag);
+	if (SaveGame)
+	{
+		SetLoadSlotName(SaveGame->SaveSlotName);
+		SetPlayerName(SaveGame->MetaData.PlayerName);
+		SetPlayerLevel(SaveGame->MetaData.PlayerLevel);
+		SetMapName(SaveGame->MetaData.MapDisplayName);
+		SetLoadSlotStatus(Taken);
+		SetPlayerStartTag(SaveGame->MetaData.PlayerStartTag);
+	}
 	InitializeSlot();
 }
 

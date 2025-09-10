@@ -106,7 +106,9 @@ struct AURA_API FMetaSaveData
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	FString MapDisplayName;
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
-	FName PlayerStartTag;
+	FName PlayerStartTag = NAME_None;
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	int32 PlayerLevel = 0;
 
 	FMetaSaveData()
 	{
@@ -115,6 +117,7 @@ struct AURA_API FMetaSaveData
 		MapAssetName = "";
 		MapDisplayName = "";
 		PlayerStartTag = "";
+		PlayerLevel = 0;
 	}
 };
 
