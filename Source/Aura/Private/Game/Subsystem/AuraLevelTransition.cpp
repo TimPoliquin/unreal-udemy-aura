@@ -3,11 +3,20 @@
 
 #include "Game/Subsystem/AuraLevelTransition.h"
 
-void UAuraLevelTransition::Initialize(const FName& InDestinationPlayerStartTag)
+#include "Game/Save/AuraSaveGameManager.h"
+#include "Game/Subsystem/AuraLevelManager.h"
+
+void UAuraLevelTransition::Initialize(const FAuraLevelTransitionParams& Params)
 {
-	DestinationPlayerStartTag = InDestinationPlayerStartTag;
+	DestinationPlayerStartTag = Params.PlayerStartTag;
+	bShouldLoad = Params.ShouldLoad();
+	SaveSlot = Params.SaveSlot;
 	FCoreUObjectDelegates::PostLoadMapWithWorld.AddWeakLambda(this, [this](UWorld* World)
 	{
+		if (bShouldLoad)
+		{
+			UAuraSaveGameManager::Get(World)->ApplySaveGame(SaveSlot);
+		}
 		OnComplete.Broadcast(World);
 	});
 }

@@ -26,6 +26,11 @@ struct AURA_API FComponentSaveData
 		ComponentName = "";
 		ComponentClass = "";
 	}
+
+	bool IsValid() const
+	{
+		return !ComponentName.IsEmpty() && !ComponentClass.IsEmpty() && ComponentData.Num() > 0;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -34,13 +39,13 @@ struct AURA_API FActorSaveData
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
-	FString ActorName;
+	FString ActorName = "";
 
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
-	FString ActorClass;
+	FString ActorClass = "";
 
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
-	FTransform ActorTransform;
+	FTransform ActorTransform = FTransform::Identity;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	bool bShouldAutoSpawn = false;
@@ -50,13 +55,6 @@ struct AURA_API FActorSaveData
 
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	TArray<FComponentSaveData> ComponentsData;
-
-	FActorSaveData()
-	{
-		ActorName = "";
-		ActorClass = "";
-		ActorTransform = FTransform::Identity;
-	}
 
 	bool IsValid() const
 	{
@@ -104,7 +102,9 @@ struct AURA_API FMetaSaveData
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	FDateTime SaveTimestamp;
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
-	FString MapName;
+	FString MapAssetName;
+	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
+	FString MapDisplayName;
 	UPROPERTY(BlueprintReadWrite, Category = "Save Data")
 	FName PlayerStartTag;
 
@@ -112,7 +112,8 @@ struct AURA_API FMetaSaveData
 	{
 		PlayerName = "";
 		SaveTimestamp = FDateTime::Now();
-		MapName = "";
+		MapAssetName = "";
+		MapDisplayName = "";
 		PlayerStartTag = "";
 	}
 };

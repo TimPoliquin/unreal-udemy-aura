@@ -4,7 +4,7 @@ FActorSaveData FGlobalSaveData::GetPlayerSaveData(const AAuraPlayerState* Player
 {
 	FActorSaveData* Match = PlayerSaveData.FindByPredicate([PlayerState](const FActorSaveData& SaveData)
 	{
-		return SaveData.ActorName.Equals(PlayerState->GetName());
+		return SaveData.IsValid() && SaveData.ActorName.Equals(PlayerState->GetName());
 	});
 	if (Match)
 	{

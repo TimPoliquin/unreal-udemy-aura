@@ -38,21 +38,27 @@ public:
 
 	// Save/Load functions
 	UFUNCTION(BlueprintCallable, Category = "Save System")
-	void AutoSave_LevelTransition(const FAuraSaveGameParams& SaveParams);
-	UFUNCTION(BlueprintCallable, Category = "Save System")
-	void AutoLoad_LevelTransition();
+	FString AutoSave_LevelTransition(const FAuraSaveGameParams& SaveParams);
 
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	void SaveGame(const FAuraSaveGameParams& SaveParams);
-
 	UFUNCTION(BlueprintCallable, Category = "Save System")
-	void LoadGame(const FString& SlotName = "Default");
+	void LoadGame(const FString& SlotName);
+	UFUNCTION(BlueprintCallable, Category = "Save System")
+	void LoadMostRecentGame();
+
+	void ApplySaveGame(UAuraSaveGame* LoadedData);
+	void ApplySaveGame(const FString& SaveSlot);
 
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	bool DoesSaveGameExist(const FString& SlotName = "Default") const;
 
 	UFUNCTION(BlueprintCallable, Category = "Save System")
 	void DeleteSaveGame(const FString& SlotName = "Default");
+
+	// Utility functions
+	FString GetCurrentSaveSlotName() const;
+	FString GetAutoSaveSlotName() const;
 
 	// Events
 	UPROPERTY(BlueprintAssignable, Category = "Save System")
@@ -87,11 +93,8 @@ protected:
 	void LoadComponentData(UActorComponent* Component, const FComponentSaveData& ComponentData);
 
 private:
+	UAuraSaveGame* LoadSaveGameData(const FString& SlotName);
 	// Current save data
 	FString CurrentSaveSlotName;
 	bool bIsMostRecentSaveAutoSave = false;
-	// Utility functions
-	FString GetAutoSaveName() const;
-	UFUNCTION()
-	void OnLevelLoadComplete(UWorld* World);
 };

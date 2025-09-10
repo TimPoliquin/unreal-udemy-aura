@@ -3,7 +3,7 @@
 
 #include "UI/ViewModel/MVVM_LoadScreen.h"
 
-#include "Game/Subsystem/AuraLevelManager.h"
+#include "Game/Save/AuraSaveGameManager.h"
 #include "Game/Subsystem/Old_SaveGameManager.h"
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 
@@ -84,15 +84,7 @@ void UMVVM_LoadScreen::PlayButtonPressed()
 {
 	if (IsValid(SelectedSlot))
 	{
-		UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(GetLocalPlayer());
-		SaveGameSubsystem->InitializeSaveState(
-			SelectedSlot->GetPlayerStartTag(),
-			SelectedSlot->GetLoadSlotName(),
-			SelectedSlot->GetSlotIndex(),
-			false
-		);
-
-		UAuraLevelManager::Get(GetLocalPlayer())->TransitionLevel(SelectedSlot->GetMapAssetName(), SelectedSlot->GetPlayerStartTag(), false);
+		UAuraSaveGameManager::Get(GetLocalPlayer())->LoadGame(SelectedSlot->GetLoadSlotName());
 	}
 }
 

@@ -28,6 +28,32 @@ struct FAuraMapConfig
 	}
 };
 
+USTRUCT(BLueprintType)
+struct AURA_API FAuraLevelTransitionParams
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite)
+	FString MapAssetName = FString("");
+	UPROPERTY(BlueprintReadWrite)
+	FName PlayerStartTag = NAME_None;
+	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
+	FString SaveSlot = FString("");
+	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
+	bool bShouldSave = false;
+	UPROPERTY(BlueprintReadWrite, Category="AutoSave")
+	bool bShouldLoad = false;
+
+	bool ShouldSave() const
+	{
+		return bShouldSave && !SaveSlot.IsEmpty();
+	}
+
+	bool ShouldLoad() const
+	{
+		return bShouldLoad && !SaveSlot.IsEmpty();
+	}
+};
+
 /**
  * 
  */
@@ -43,13 +69,14 @@ public:
 	virtual void Deinitialize() override;
 	TSoftObjectPtr<UWorld> GetMapFromMapDisplayName(const FString& MapDisplayName) const;
 	FString GetMapNameFromMapAssetName(const FString& MapAssetName) const;
-	void LoadMap(const UObject* WorldContextObject, const FString& MapDisplayName) const;
+	void LoadMap(const UObject* WorldContextObject, const FString& MapAssetName) const;
+
 	FString GetDefaultMapName() const;
 	FString GetDefaultMapAssetName() const;
 	FName GetDefaultPlayerStartTag(const FString& MapDisplayName) const;
 	int32 GetDefaultPlayerLevel(const FString& MapDisplayName) const;
 	FName GetCurrentPlayerStartTag(const UObject* WorldContextObject, const bool bFallbackToDefault) const;
-	void TransitionLevel(const FString& MapAssetName, const FName& PlayerStartTag, const bool bAutoSave = true);
+	void TransitionLevel(const FAuraLevelTransitionParams& Params);
 
 	bool IsTransitioningLevels() const;
 

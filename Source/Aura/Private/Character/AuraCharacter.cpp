@@ -16,6 +16,7 @@
 #include "Camera/AuraCameraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Fishing/AuraFishingComponent.h"
+#include "Game/Save/AuraSaveGameManager.h"
 #include "Game/Save/OLD_AuraSaveGame.h"
 #include "Game/Subsystem/AuraAIDirectorGameInstanceSubsystem.h"
 #include "Game/Subsystem/AuraLevelManager.h"
@@ -279,14 +280,9 @@ void AAuraCharacter::Die()
 	DeathTimerDelegate.BindLambda(
 		[this]()
 		{
-			if (UOld_SaveGameManager* SaveGameSubsystem = UOld_SaveGameManager::Get(this))
+			if (UAuraSaveGameManager* SaveGameManager = UAuraSaveGameManager::Get(this))
 			{
-				UAuraLevelManager* LevelSubsystem = UAuraLevelManager::Get(GetWorld());
-				LevelSubsystem->LoadMap(this, SaveGameSubsystem->GetInGameSaveData()->MapName);
-			}
-			else
-			{
-				UE_LOG(LogAura, Error, TEXT("[%s] Failed to get local player from aura character"), *GetName())
+				SaveGameManager->LoadMostRecentGame();
 			}
 		}
 	);

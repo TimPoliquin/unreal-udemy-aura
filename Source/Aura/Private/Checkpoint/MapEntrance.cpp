@@ -36,7 +36,13 @@ void AMapEntrance::OnSphereOverlap(
 		bHasBeenActivated = true;
 		if (UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this))
 		{
-			LevelManager->TransitionLevel(DestinationMap.GetAssetName(), DestinationPlayerStartTag, true);
+			FAuraLevelTransitionParams Params;
+			Params.SaveSlot = UAuraSaveGameManager::Get(this)->GetAutoSaveSlotName();
+			Params.bShouldSave = true;
+			Params.bShouldLoad = true;
+			Params.MapAssetName = DestinationMap.GetAssetName();
+			Params.PlayerStartTag = DestinationPlayerStartTag;
+			LevelManager->TransitionLevel(Params);
 		}
 	}
 }

@@ -102,64 +102,6 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 	}
 }
 
-void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
-	const UObject* WorldContextObject,
-	UAbilitySystemComponent* AbilitySystemComponent,
-	const UOLD_AuraSaveGame* SaveData,
-	const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
-)
-{
-	const UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
-	if (!CharacterClassInfo)
-	{
-		UE_LOG(
-			LogAura,
-			Error,
-			TEXT("Unable to initialize default attributes from save data - character class info is undefined")
-		);
-		return;
-	}
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	const AActor* SourceAvatarActor = AbilitySystemComponent->GetAvatarActor();
-	FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
-	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
-		CharacterClassInfo->PrimaryAttributes_SetByCaller,
-		1.f,
-		EffectContextHandle
-	);
-	// primary attributes
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Strength,
-		SaveData->Strength
-	);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Intelligence,
-		SaveData->Intelligence
-	);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Resilience,
-		SaveData->Resilience
-	);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Vigor,
-		SaveData->Vigor
-	);
-	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
-	for (auto Effect : InitializeEffects)
-	{
-		ApplyGameplayEffectSpec(
-			AbilitySystemComponent,
-			AbilitySystemComponent,
-			Effect,
-			1.f
-		);
-	}
-}
-
 void UAuraAbilitySystemLibrary::GrantStartupAbilities(
 	const UObject* WorldContextObject,
 	UAbilitySystemComponent* AbilitySystemComponent,

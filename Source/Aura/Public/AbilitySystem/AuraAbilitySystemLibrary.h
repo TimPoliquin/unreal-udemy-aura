@@ -72,14 +72,6 @@ public:
 		UAbilitySystemComponent* AbilitySystemComponent
 	);
 
-	UFUNCTION(BlueprintCallable, Category= "AuraAbilitySystemLibrary|CharacterClassDefaults")
-	static void InitializeDefaultAttributesFromSaveData(
-		const UObject* WorldContextObject,
-		UAbilitySystemComponent* AbilitySystemComponent,
-		const UOLD_AuraSaveGame* SaveData,
-		const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
-	);
-
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")
 	static void GrantStartupAbilities(
 		const UObject* WorldContextObject,

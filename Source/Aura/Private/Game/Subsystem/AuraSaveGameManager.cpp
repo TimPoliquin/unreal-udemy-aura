@@ -9,6 +9,7 @@
 #include "Game/AuraGameState.h"
 #include "Game/Save/AuraSaveGame.h"
 #include "Game/Save/SaveableInterface.h"
+#include "Game/Subsystem/AuraLevelManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerController.h"
 #include "Player/AuraPlayerState.h"
@@ -36,7 +37,7 @@ void UAuraSaveGameManager::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		CurrentSaveSlotName = UAuraSaveGame::DEFAULT_SAVE_SLOT_NAME;
 		UGameplayStatics::DeleteGameInSlot(CurrentSaveSlotName, 0);
-		UGameplayStatics::DeleteGameInSlot(GetAutoSaveName(), 0);
+		UGameplayStatics::DeleteGameInSlot(GetAutoSaveSlotName(), 0);
 	}
 #endif
 }
@@ -47,23 +48,23 @@ void UAuraSaveGameManager::Deinitialize()
 	if (CurrentSaveSlotName == UAuraSaveGame::DEFAULT_SAVE_SLOT_NAME)
 	{
 		UGameplayStatics::DeleteGameInSlot(CurrentSaveSlotName, 0);
-		UGameplayStatics::DeleteGameInSlot(GetAutoSaveName(), 0);
+		UGameplayStatics::DeleteGameInSlot(GetAutoSaveSlotName(), 0);
 	}
 #endif
 	CurrentSaveSlotName = FString("");
 	Super::Deinitialize();
 }
 
-void UAuraSaveGameManager::AutoSave_LevelTransition(const FAuraSaveGameParams& SaveParams)
+FString UAuraSaveGameManager::AutoSave_LevelTransition(const FAuraSaveGameParams& SaveParams)
 {
 	if (CurrentSaveSlotName.IsEmpty())
 	{
 		UE_LOG(LogAura, Error, TEXT("[%s] Attempted to save game, but CurrentSaveSlotName is empty!"), *GetName())
 		OnSaveCompleted.Broadcast(false);
-		return;
+		return FString("");
 	}
 	UAuraSaveGame* CurrentSaveData;
-	FString AutoSaveName = GetAutoSaveName();
+	FString AutoSaveName = GetAutoSaveSlotName();
 	if (DoesSaveGameExist(AutoSaveName))
 	{
 		CurrentSaveData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(AutoSaveName, 0));
@@ -73,10 +74,11 @@ void UAuraSaveGameManager::AutoSave_LevelTransition(const FAuraSaveGameParams& S
 		CurrentSaveData = Cast<UAuraSaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGameClass));
 	}
 	CurrentSaveData->bIsAutoSave = true;
-	CurrentSaveData->MetaData.MapName = SaveParams.DestinationMapName;
+	CurrentSaveData->MetaData.MapAssetName = SaveParams.DestinationMapName;
 	CurrentSaveData->MetaData.PlayerStartTag = SaveParams.DestinationPlayerStartTag;
 	CurrentSaveData->SaveSlotName = AutoSaveName;
 	SaveGameData(CurrentSaveData);
+	return CurrentSaveData->SaveSlotName;
 }
 
 void UAuraSaveGameManager::SaveGame(const FAuraSaveGameParams& SaveParams)
@@ -97,10 +99,42 @@ void UAuraSaveGameManager::SaveGame(const FAuraSaveGameParams& SaveParams)
 		CurrentSaveData = Cast<UAuraSaveGame>(UGameplayStatics::CreateSaveGameObject(SaveGameClass));
 	}
 	CurrentSaveData->bIsAutoSave = false;
-	CurrentSaveData->MetaData.MapName = SaveParams.DestinationMapName;
+	CurrentSaveData->MetaData.MapAssetName = SaveParams.DestinationMapName;
+	if (const UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this))
+	{
+		CurrentSaveData->MetaData.MapDisplayName = LevelManager->GetMapNameFromMapAssetName(SaveParams.DestinationMapName);
+	}
 	CurrentSaveData->MetaData.PlayerStartTag = SaveParams.DestinationPlayerStartTag;
 	CurrentSaveData->SaveSlotName = CurrentSaveSlotName;
 	SaveGameData(CurrentSaveData);
+}
+
+void UAuraSaveGameManager::LoadGame(const FString& SlotName)
+{
+	if (UAuraSaveGame* SaveGame = LoadSaveGameData(SlotName))
+	{
+		FAuraLevelTransitionParams LevelTransitionParams;
+		LevelTransitionParams.MapAssetName = SaveGame->MetaData.MapAssetName;
+		LevelTransitionParams.PlayerStartTag = SaveGame->MetaData.PlayerStartTag;
+		LevelTransitionParams.bShouldSave = false;
+		LevelTransitionParams.bShouldLoad = true;
+		LevelTransitionParams.SaveSlot = SlotName;
+		UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this);
+		LevelManager->TransitionLevel(LevelTransitionParams);
+		ApplySaveGame(SaveGame);
+	}
+}
+
+void UAuraSaveGameManager::LoadMostRecentGame()
+{
+	if (bIsMostRecentSaveAutoSave)
+	{
+		LoadGame(GetAutoSaveSlotName());
+	}
+	else
+	{
+		LoadGame(CurrentSaveSlotName);
+	}
 }
 
 void UAuraSaveGameManager::SaveGameData(UAuraSaveGame* CurrentSaveData)
@@ -135,29 +169,8 @@ void UAuraSaveGameManager::SaveGameData(UAuraSaveGame* CurrentSaveData)
 	}
 }
 
-void UAuraSaveGameManager::LoadGame(const FString& SlotName)
+void UAuraSaveGameManager::ApplySaveGame(UAuraSaveGame* LoadedData)
 {
-	if (!UGameplayStatics::DoesSaveGameExist(SlotName, 0))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Save game does not exist in slot: %s"), *SlotName);
-		OnLoadCompleted.Broadcast(false);
-		return;
-	}
-
-	UAuraSaveGame* LoadedData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
-	if (!LoadedData)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load game from slot: %s"), *SlotName);
-		OnLoadCompleted.Broadcast(false);
-		return;
-	}
-
-	if (!LoadedData->bIsAutoSave)
-	{
-		CurrentSaveSlotName = LoadedData->SaveSlotName;
-		bIsMostRecentSaveAutoSave = false;
-	}
-
 	// Load meta data
 	LoadMetaData(LoadedData);
 	// Load global data
@@ -179,12 +192,19 @@ void UAuraSaveGameManager::LoadGame(const FString& SlotName)
 	// Broadcast completion event
 	OnLoadCompleted.Broadcast(true);
 
-	UE_LOG(LogTemp, Log, TEXT("Game loaded successfully from slot: %s"), *SlotName);
+	UE_LOG(LogTemp, Log, TEXT("Game loaded successfully from slot: %s"), *LoadedData->SaveSlotName);
 }
 
-void UAuraSaveGameManager::AutoLoad_LevelTransition()
+void UAuraSaveGameManager::ApplySaveGame(const FString& SaveSlot)
 {
-	LoadGame(GetAutoSaveName());
+	if (UAuraSaveGame* SaveGame = LoadSaveGameData(SaveSlot))
+	{
+		ApplySaveGame(SaveGame);
+	}
+	else
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] No save game found with name: %s"), *GetName(), *SaveSlot);
+	}
 }
 
 bool UAuraSaveGameManager::DoesSaveGameExist(const FString& SlotName) const
@@ -195,6 +215,11 @@ bool UAuraSaveGameManager::DoesSaveGameExist(const FString& SlotName) const
 void UAuraSaveGameManager::DeleteSaveGame(const FString& SlotName)
 {
 	UGameplayStatics::DeleteGameInSlot(SlotName, 0);
+}
+
+FString UAuraSaveGameManager::GetCurrentSaveSlotName() const
+{
+	return CurrentSaveSlotName;
 }
 
 UAuraSaveGame* UAuraSaveGameManager::GetCurrentPrimarySaveGame() const
@@ -208,7 +233,7 @@ UAuraSaveGame* UAuraSaveGameManager::GetCurrentPrimarySaveGame() const
 
 UAuraSaveGame* UAuraSaveGameManager::GetCurrentAutoSaveGame() const
 {
-	const FString AutoSaveName = GetAutoSaveName();
+	const FString AutoSaveName = GetAutoSaveSlotName();
 	if (!CurrentSaveSlotName.IsEmpty() && DoesSaveGameExist(AutoSaveName))
 	{
 		return Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(AutoSaveName, 0));
@@ -475,6 +500,10 @@ void UAuraSaveGameManager::LoadActor(AActor* TargetActor, const FActorSaveData& 
 		// Load component data
 		for (const FComponentSaveData& ComponentData : ActorData.ComponentsData)
 		{
+			if (!ComponentData.IsValid())
+			{
+				continue;
+			}
 			if (UActorComponent* Component = TargetActor->FindComponentByClass(FindObject<UClass>(ANY_PACKAGE, *ComponentData.ComponentClass)))
 			{
 				LoadComponentData(Component, ComponentData);
@@ -501,16 +530,32 @@ void UAuraSaveGameManager::LoadComponentData(UActorComponent* Component, const F
 	}
 }
 
-FString UAuraSaveGameManager::GetAutoSaveName() const
+UAuraSaveGame* UAuraSaveGameManager::LoadSaveGameData(const FString& SlotName)
 {
-	return FString::Printf(TEXT("%s__AutoSave"), *CurrentSaveSlotName);
+	if (!UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Save game does not exist in slot: %s"), *SlotName);
+		OnLoadCompleted.Broadcast(false);
+		return nullptr;
+	}
+
+	UAuraSaveGame* LoadedData = Cast<UAuraSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+	if (!LoadedData)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load game from slot: %s"), *SlotName);
+		OnLoadCompleted.Broadcast(false);
+		return nullptr;
+	}
+
+	if (!LoadedData->bIsAutoSave)
+	{
+		CurrentSaveSlotName = LoadedData->SaveSlotName;
+		bIsMostRecentSaveAutoSave = false;
+	}
+	return LoadedData;
 }
 
-void UAuraSaveGameManager::OnLevelLoadComplete(UWorld* World)
+FString UAuraSaveGameManager::GetAutoSaveSlotName() const
 {
-	if (!CurrentSaveSlotName.IsEmpty() && bIsMostRecentSaveAutoSave)
-	{
-		UE_LOG(LogAura, Warning, TEXT("[%s] Loading auto-save..."), *GetName())
-		AutoLoad_LevelTransition();
-	}
+	return FString::Printf(TEXT("%s__AutoSave"), *CurrentSaveSlotName);
 }

@@ -7,7 +7,6 @@
 #include "Game/Save/AuraSaveGameManager.h"
 #include "Game/Subsystem/AuraLevelTransition.h"
 #include "Kismet/GameplayStatics.h"
-#include "VerseVM/VBPVMRuntimeType.h"
 
 void UAuraLevelManager::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -41,22 +40,22 @@ UAuraLevelManager* UAuraLevelManager::Get(const UObject* WorldContextObject)
 	return nullptr;
 }
 
-void UAuraLevelManager::LoadMap(const UObject* WorldContextObject, const FString& MapDisplayName) const
+void UAuraLevelManager::LoadMap(const UObject* WorldContextObject, const FString& MapAssetName) const
 {
-	const TSoftObjectPtr<UWorld> Map = GetMapFromMapDisplayName(MapDisplayName);
-	if (!Map.IsNull())
+	const FAuraMapConfig& SelectedMapConfig = GetMapConfigByMapAssetName(MapAssetName);
+	if (SelectedMapConfig.IsValid() && !SelectedMapConfig.Map.IsNull())
 	{
-		UGameplayStatics::OpenLevelBySoftObjectPtr(WorldContextObject, Map);
+		UGameplayStatics::OpenLevelBySoftObjectPtr(WorldContextObject, SelectedMapConfig.Map);
 	}
 	else
 	{
-		UE_LOG(LogAura, Error, TEXT("[%s] Failed to load map by display name: %s"), *GetName(), *MapDisplayName);
+		UE_LOG(LogAura, Error, TEXT("[%s] Failed to load map by display name: %s"), *GetName(), *MapAssetName);
 		for (const FAuraMapConfig& MapConfig : MapConfigs)
 		{
 			UE_LOG(
 				LogAura,
 				Error,
-				TEXT("[%s] Map: %s - "),
+				TEXT("[%s] Map: %s - %s"),
 				*GetName(),
 				*MapConfig.MapDisplayName,
 				*MapConfig.Map.ToSoftObjectPath().GetAssetName()
@@ -106,33 +105,28 @@ FName UAuraLevelManager::GetCurrentPlayerStartTag(
 	return NAME_None;
 }
 
-void UAuraLevelManager::TransitionLevel(const FString& MapAssetName, const FName& PlayerStartTag, const bool bAutoSave)
+void UAuraLevelManager::TransitionLevel(const FAuraLevelTransitionParams& Params)
 {
-	if (bAutoSave)
+	if (Params.ShouldSave())
 	{
 		UAuraSaveGameManager* SaveGameManager = UAuraSaveGameManager::Get(GetWorld());
 		FAuraSaveGameParams SaveGameParams;
-		SaveGameParams.DestinationMapName = MapAssetName;
-		SaveGameParams.DestinationPlayerStartTag = PlayerStartTag;
+		SaveGameParams.DestinationMapName = Params.MapAssetName;
+		SaveGameParams.DestinationPlayerStartTag = Params.PlayerStartTag;
 		if (SaveGameManager)
 		{
 			SaveGameManager->AutoSave_LevelTransition(SaveGameParams);
 		}
 	}
 	LevelTransition = NewObject<UAuraLevelTransition>(this, UAuraLevelTransition::StaticClass());
-	LevelTransition->Initialize(PlayerStartTag);
-	LevelTransition->OnComplete.AddWeakLambda(this, [&](UWorld* World)
+	LevelTransition->Initialize(Params);
+	LevelTransition->OnComplete.AddWeakLambda(this, [&](const UWorld* World)
 	{
-		if (bAutoSave)
-		{
-			UAuraSaveGameManager* SaveGameManager = UAuraSaveGameManager::Get(World);
-			SaveGameManager->AutoLoad_LevelTransition();
-		}
 		LevelTransition->ConditionalBeginDestroy();
 		LevelTransition = nullptr;
 		OnLevelTransitionComplete.Broadcast();
 	});
-	const FAuraMapConfig& MapConfig = GetMapConfigByMapAssetName(MapAssetName);
+	const FAuraMapConfig& MapConfig = GetMapConfigByMapAssetName(Params.MapAssetName);
 	UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), MapConfig.Map);
 }
 
