@@ -16,10 +16,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/Widget/AuraUserWidget.h"
 #include "Actor/Spawn/TrackableInterface.h"
-#include "Components/CapsuleComponent.h"
-#include "Game/AuraGameModeBase.h"
 #include "Item/Pickup/AuraTreasurePickup.h"
 #include "Item/Pickup/TieredItemInterface.h"
+#include "Tags/AuraGameplayTags.h"
+#include "Utils/RandUtils.h"
 
 
 AAuraEnemy::AAuraEnemy()
@@ -34,6 +34,7 @@ AAuraEnemy::AAuraEnemy()
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	AbilitySystemComponent->bShouldSave = false;
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>(TEXT("AttributeSet"));
 	HealthWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
 	HealthWidget->SetupAttachment(GetRootComponent());
@@ -44,29 +45,27 @@ AAuraEnemy::AAuraEnemy()
 
 void AAuraEnemy::InitializeAttributeDelegates()
 {
+	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
 	if (UAuraUserWidget* HealthBarWidget = Cast<UAuraUserWidget>(HealthWidget->GetUserWidgetObject()))
 	{
 		HealthBarWidget->SetWidgetController(this);
 	}
-	if (const UAuraAttributeSet* AuraAttributeSet = Cast<UAuraAttributeSet>(AttributeSet))
-	{
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).
-		                        AddLambda(
-			                        [this](const FOnAttributeChangeData& Data)
-			                        {
-				                        OnHealthChanged.Broadcast(Data.NewValue);
-			                        }
-		                        );
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute()).
-		                        AddLambda(
-			                        [this](const FOnAttributeChangeData& Data)
-			                        {
-				                        OnMaxHealthChanged.Broadcast(Data.NewValue);
-			                        }
-		                        );
-		OnHealthChanged.Broadcast(AuraAttributeSet->GetHealth());
-		OnMaxHealthChanged.Broadcast(AuraAttributeSet->GetMaxHealth());
-	}
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetHealthAttribute()).
+	                        AddLambda(
+		                        [&](const FOnAttributeChangeData& Data)
+		                        {
+			                        OnHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Vital_Health, Data.OldValue, Data.NewValue));
+		                        }
+	                        );
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetMaxHealthAttribute()).
+	                        AddLambda(
+		                        [&](const FOnAttributeChangeData& Data)
+		                        {
+			                        OnMaxHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload(GameplayTags.Attributes_Secondary_MaxHealth, Data.OldValue, Data.NewValue));
+		                        }
+	                        );
+	OnHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(GameplayTags.Attributes_Vital_Health, AttributeSet->GetHealth()));
+	OnMaxHealthChanged.Broadcast(FAuraFloatAttributeChangedPayload::CreateBroadcastPayload(GameplayTags.Attributes_Secondary_MaxHealth, AttributeSet->GetMaxHealth()));
 }
 
 void AAuraEnemy::BeginPlay()
@@ -96,7 +95,7 @@ void AAuraEnemy::InitializeDefaultAttributes()
 	{
 		UAuraAbilitySystemLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 	}
-	GetOnAbilitySystemRegisteredDelegate().Broadcast(AbilitySystemComponent);
+	OnAbilitySystemReady(Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent));
 }
 
 void AAuraEnemy::OnStatusShockAdded()

@@ -22,14 +22,6 @@ AAuraEnemySpawnVolume::AAuraEnemySpawnVolume()
 	ActorTrackerComponent = CreateDefaultSubobject<UAuraActorTrackerComponent>(TEXT("Actor Tracker Component"));
 }
 
-void AAuraEnemySpawnVolume::LoadActor_Implementation()
-{
-	if (HasActorBegunPlay() && bTriggered)
-	{
-		SetEnabled(false);
-	}
-}
-
 void AAuraEnemySpawnVolume::SetEnabled(const bool bInEnabled)
 {
 	bEnabled = bInEnabled;
@@ -41,14 +33,18 @@ void AAuraEnemySpawnVolume::SetEnabled(const bool bInEnabled)
 	}
 }
 
+void AAuraEnemySpawnVolume::PostLoad_Implementation()
+{
+	if (bTriggered)
+	{
+		SetEnabled(false);
+	}
+}
+
 void AAuraEnemySpawnVolume::BeginPlay()
 {
 	Super::BeginPlay();
 	if (!bEnabled)
-	{
-		SetEnabled(false);
-	}
-	if (bTriggered)
 	{
 		SetEnabled(false);
 	}

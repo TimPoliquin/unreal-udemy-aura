@@ -22,6 +22,10 @@ public:
 	virtual void HighlightActor_Implementation() override;
 	virtual void UnHighlightActor_Implementation() override;
 	/** IHighlightInterface End **/
+	/** ISaveGameInterface Start **/
+	virtual void PostLoad_Implementation() override;
+	/** ISaveGameInterface End **/
+
 protected:
 	virtual void BeginPlay() override;
 	virtual bool IsPreconditionMet_Implementation(AActor* Player) const override;
@@ -39,7 +43,7 @@ protected:
 	TObjectPtr<UStaticMeshComponent> LockMeshComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock", meta=(Categories="Item.Type.Key"))
 	FGameplayTag KeyTag = FGameplayTag::EmptyTag;
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Lock", meta=(AllowedClasses="/Script/Aura.AuraGateInterface"))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Lock", meta=(AllowedClasses="/Script/Aura.AuraLockedInterface"))
 	TArray<AActor*> Gates;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lock")
 	TObjectPtr<UTexture2D> RuneIcon;

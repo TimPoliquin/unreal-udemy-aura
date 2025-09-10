@@ -4,10 +4,9 @@
 #include "AI/Task/BTService_FindNearestPlayer.h"
 
 #include "AIController.h"
+#include "Aura/AuraLogChannels.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Character/EnemyInterface.h"
-#include "Game/AuraGameInstance.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraAIDirectorGameInstanceSubsystem.h"
 
 UBTService_FindNearestPlayer::UBTService_FindNearestPlayer()
 {
@@ -17,13 +16,19 @@ UBTService_FindNearestPlayer::UBTService_FindNearestPlayer()
 void UBTService_FindNearestPlayer::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	UAuraAIDirectorGameInstanceSubsystem* AIDirectorGameInstanceSubsystem = UAuraAIDirectorGameInstanceSubsystem::Get(OwnerComp.GetAIOwner());
+	if (!AIDirectorGameInstanceSubsystem)
+	{
+		UE_LOG(LogAura, Warning, TEXT("[%s] No AIDirector subsystem - aborting"), *GetName())
+		return;
+	}
 	float ClosestDistance = FLT_MAX;
 	AActor* NearestPlayer = nullptr;
 	if (const AAIController* AIController = OwnerComp.GetAIOwner())
 	{
 		if (const APawn* ControlledPawn = AIController->GetPawn())
 		{
-			const TArray<AActor*> PlayerActors = AAuraGameModeBase::GetAuraGameMode(ControlledPawn)->GetAuraGameInstance()->GetActivePlayerActors();
+			const TArray<AActor*>& PlayerActors = AIDirectorGameInstanceSubsystem->GetActivePlayerActors();
 			for (AActor* PlayerActor : PlayerActors)
 			{
 				const float Distance = FVector::Dist(ControlledPawn->GetActorLocation(), PlayerActor->GetActorLocation());

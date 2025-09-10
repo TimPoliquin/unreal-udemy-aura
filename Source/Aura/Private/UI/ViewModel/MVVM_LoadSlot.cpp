@@ -3,6 +3,8 @@
 
 #include "UI/ViewModel/MVVM_LoadSlot.h"
 
+#include "Game/Save/AuraSaveGame.h"
+
 void UMVVM_LoadSlot::ShowEnterName()
 {
 	SetWidgetSwitcherIndexDelegate.Broadcast(1);
@@ -61,6 +63,20 @@ FString UMVVM_LoadSlot::GetMapAssetName() const
 void UMVVM_LoadSlot::SetMapAssetName(const FString& InMapAssetName)
 {
 	this->MapAssetName = InMapAssetName;
+}
+
+void UMVVM_LoadSlot::FromSaveGame(const UAuraSaveGame* SaveGame)
+{
+	if (SaveGame)
+	{
+		SetLoadSlotName(SaveGame->SaveSlotName);
+		SetPlayerName(SaveGame->MetaData.PlayerName);
+		SetPlayerLevel(SaveGame->MetaData.PlayerLevel);
+		SetMapName(SaveGame->MetaData.MapDisplayName);
+		SetLoadSlotStatus(Taken);
+		SetPlayerStartTag(SaveGame->MetaData.PlayerStartTag);
+	}
+	InitializeSlot();
 }
 
 FString UMVVM_LoadSlot::GetMapName() const

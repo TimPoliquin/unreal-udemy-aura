@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AuraGameplayAbility.h"
-#include "Interaction/FishingComponentInterface.h"
+#include "Fishing/AuraFishTypes.h"
 #include "AuraFishingReelAbility.generated.h"
 
 /**

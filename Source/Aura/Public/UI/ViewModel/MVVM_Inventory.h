@@ -22,7 +22,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitializeInventoryItems();
 	UFUNCTION(BlueprintCallable)
-	void InitializeDependencies(AActor* PlayerActor);
+	void InitializeDependencies();
 	TArray<UMVVM_InventoryItem*> GetInventoryItems();
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int32 GetRows() const;

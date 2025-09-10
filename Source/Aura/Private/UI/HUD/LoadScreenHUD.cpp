@@ -11,6 +11,7 @@ void ALoadScreenHUD::BeginPlay()
 {
 	Super::BeginPlay();
 	LoadScreenViewModel = NewObject<UMVVM_LoadScreen>(this, LoadScreenViewModelClass);
+	LoadScreenViewModel->SetLocalPlayer(GetOwningPlayerController()->GetLocalPlayer());
 	LoadScreenViewModel->InitializeLoadSlots();
 	LoadScreenWidget = CreateWidget<ULoadScreenWidget>(
 		GetWorld(),

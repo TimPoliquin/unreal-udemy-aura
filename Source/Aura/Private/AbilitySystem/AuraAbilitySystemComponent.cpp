@@ -9,7 +9,7 @@
 #include "AbilitySystem/Ability/AuraGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraSaveGame.h"
+#include "Game/Save/AuraSaveGameTypes.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Tags/AuraGameplayTags.h"
@@ -106,7 +106,7 @@ void UAuraAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGa
 			// TODO Cancel and reactivate the ability if it is passive
 		}
 		ClientUpdateAbilityStatus(
-			ICombatInterface::GetCharacterLevel(GetAvatarActor()),
+			IAuraAbilitySystemInterface::GetCharacterLevel(GetAvatarActor()),
 			FAbilityTagStatus::CreateArray(
 				AbilityTag,
 				UAuraAbilitySystemLibrary::GetStatusTagFromSpec(*AbilitySpec),
@@ -254,73 +254,19 @@ bool UAuraAbilitySystemComponent::GetDescriptionsByAbilityTag(
 	return false;
 }
 
-void UAuraAbilitySystemComponent::FromSaveData(const UAuraSaveGame* SaveData)
+TArray<uint8> UAuraAbilitySystemComponent::SaveData_Implementation()
 {
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	for (const FSavedAbility& SavedAbility : SaveData->SavedAbilities)
-	{
-		const TSubclassOf<UGameplayAbility> AbilityClass = SavedAbility.GameplayAbilityClass;
-		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, SavedAbility.AbilityLevel);
-		AssignSlotTagToAbilitySpec(AbilitySpec, SavedAbility.AbilitySlotTag);
-		AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilityStatusTag);
-		if (SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
-		{
-			if (SavedAbility.AbilityState == GiveAbilityAndActivate)
-			{
-				GiveAbilityAndActivateOnce(AbilitySpec);
-			}
-			else
-			{
-				GiveAbility(AbilitySpec);
-			}
-		}
-		else if (!SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Locked))
-		{
-			GiveAbility(AbilitySpec);
-		}
-		MarkAbilitySpecDirty(AbilitySpec);
-	}
-	bAbilitiesGiven = true;
-	OnAbilitiesGivenDelegate.Broadcast();
+	return SerializeActorComponent();
 }
 
-void UAuraAbilitySystemComponent::ToSaveData(UAuraSaveGame* SaveData)
+bool UAuraAbilitySystemComponent::LoadData_Implementation(const TArray<uint8>& Data)
 {
-	if (!GetAvatarActor()->HasAuthority())
-	{
-		return;
-	}
-	const AActor* Actor = GetAvatarActor();
-	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(Actor);
-	FForEachAbility SaveAbilityDelegate;
-	SaveAbilityDelegate.BindLambda(
-		[AbilityInfo, SaveData](FGameplayAbilitySpec& AbilitySpec)
-		{
-			const FGameplayTag AbilityTag = UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(AbilitySpec);
-			if (AbilityTag.IsValid())
-			{
-				const FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
-				FSavedAbility SavedAbility;
-				SavedAbility.GameplayAbilityClass = Info.Ability;
-				SavedAbility.AbilityLevel = AbilitySpec.Level;
-				SavedAbility.AbilityTag = AbilityTag;
-				SavedAbility.AbilityTypeTag = Info.AbilityType;
-				SavedAbility.AbilitySlotTag = UAuraAbilitySystemLibrary::GetInputTagFromSpec(AbilitySpec);
-				SavedAbility.AbilityStatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(AbilitySpec);
-				SavedAbility.AbilityState = AbilitySpec.ActiveCount > 0
-					                            ? GiveAbilityAndActivate
-					                            : ESavedAbilityState::GiveAbility;
-				SaveData->AddSavedAbility(SavedAbility);
-			}
-			else
-			{
-				UE_LOG(LogAura, Warning, TEXT("No ability tag for ability: [%s]"), *AbilitySpec.Ability.GetName());
-			}
-		}
-	);
-	// clear abilities -- just in case!
-	SaveData->SavedAbilities.Empty();
-	ForEachAbility(SaveAbilityDelegate);
+	return DeserializeActorComponent(Data);
+}
+
+bool UAuraAbilitySystemComponent::ShouldSave_Implementation() const
+{
+	return bShouldSave;
 }
 
 void UAuraAbilitySystemComponent::BeginPlay()
@@ -374,6 +320,100 @@ void UAuraAbilitySystemComponent::AssignSlotTagToAbilitySpec(
 	{
 		// This is a special tag that binds to Shift + Left Click.
 		AbilitySpec.GetDynamicSpecSourceTags().AddTag(FAuraGameplayTags::Get().InputTag_AttackTarget);
+	}
+}
+
+TArray<uint8> UAuraAbilitySystemComponent::SerializeActorComponent()
+{
+	TArray<FSavedAbility> SavedAbilityInfo;
+	const AActor* Actor = GetAvatarActor();
+	const UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::GetAbilityInfo(Actor);
+	FForEachAbility SaveAbilityDelegate;
+	SaveAbilityDelegate.BindLambda(
+		[&](FGameplayAbilitySpec& AbilitySpec)
+		{
+			const FGameplayTag AbilityTag = UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(AbilitySpec);
+			if (AbilityTag.IsValid())
+			{
+				const FAuraAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(AbilityTag);
+				FSavedAbility SavedAbility;
+				SavedAbility.GameplayAbilityClass = Info.Ability;
+				SavedAbility.AbilityLevel = AbilitySpec.Level;
+				SavedAbility.AbilityTag = AbilityTag;
+				SavedAbility.AbilityTypeTag = Info.AbilityType;
+				SavedAbility.AbilitySlotTag = UAuraAbilitySystemLibrary::GetInputTagFromSpec(AbilitySpec);
+				SavedAbility.AbilityStatusTag = UAuraAbilitySystemLibrary::GetStatusTagFromSpec(AbilitySpec);
+				SavedAbility.AbilityState = AbilitySpec.ActiveCount > 0
+					                            ? ESavedAbilityState::GiveAbilityAndActivate
+					                            : ESavedAbilityState::GiveAbility;
+				SavedAbilityInfo.Add(SavedAbility);
+			}
+			else
+			{
+				UE_LOG(LogAura, Warning, TEXT("No ability tag for ability: [%s]"), *AbilitySpec.Ability.GetName());
+			}
+		}
+	);
+	ForEachAbility(SaveAbilityDelegate);
+
+	TArray<uint8> SaveData;
+	FMemoryWriter Writer(SaveData, true);
+	// Serialize the struct
+	uint32 NumAbilities = SavedAbilityInfo.Num();
+	Writer << NumAbilities;
+	Writer << SavedAbilityInfo;
+	return SaveData;
+}
+
+bool UAuraAbilitySystemComponent::DeserializeActorComponent(const TArray<uint8>& Data)
+{
+	if (Data.Num() == 0)
+	{
+		return false;
+	}
+
+	FMemoryReader Reader(Data);
+
+	try
+	{
+		uint32 NumAbilities = 0;
+		TArray<FSavedAbility> SavedAbilityInfo;
+		Reader << NumAbilities;
+		Reader << SavedAbilityInfo;
+
+		const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
+		for (const FSavedAbility& SavedAbility : SavedAbilityInfo)
+		{
+			const TSubclassOf<UGameplayAbility> AbilityClass = SavedAbility.GameplayAbilityClass;
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, SavedAbility.AbilityLevel);
+			AssignSlotTagToAbilitySpec(AbilitySpec, SavedAbility.AbilitySlotTag);
+			AbilitySpec.GetDynamicSpecSourceTags().AddTag(SavedAbility.AbilityStatusTag);
+			if (SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
+			{
+				if (SavedAbility.AbilityState == ESavedAbilityState::GiveAbilityAndActivate)
+				{
+					GiveAbilityAndActivateOnce(AbilitySpec);
+				}
+				else
+				{
+					GiveAbility(AbilitySpec);
+				}
+			}
+			else if (!SavedAbility.AbilityStatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Locked))
+			{
+				GiveAbility(AbilitySpec);
+			}
+			MarkAbilitySpecDirty(AbilitySpec);
+		}
+		bAbilitiesGiven = true;
+		OnAbilitiesGivenDelegate.Broadcast();
+
+		return true;
+	}
+	catch (...)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s:%s] Failed to deserialize data"), *GetOwner()->GetName(), *GetName());
+		return false;
 	}
 }
 

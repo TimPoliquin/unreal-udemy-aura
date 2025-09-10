@@ -52,7 +52,7 @@ void AAuraHUD::InitializeWidgets(
 		InAttributeSet
 	);
 	OverlayWidget->OnOpenMenuDelegate.AddDynamic(this, &AAuraHUD::OpenMenu);
-	InitializeInventoryViewModel(InPlayer);
+	InitializeInventoryViewModel();
 	MenuWidget = CreateWidget<UAuraMenuWidget>(GetWorld(), MenuWidgetClass, FName("MenuWidget"));
 	MenuWidget->InitializeDependencies(
 		GetOwningPawn()
@@ -75,7 +75,6 @@ void AAuraHUD::InitializeWidgets(
 			{
 				GetOverlayWidgetController(Params)->BroadcastInitialValues();
 				GetAttributeMenuWidgetController(Params)->BroadcastInitialValues();
-				GetSpellMenuWidgetController(Params)->BroadcastInitialValues();
 			});
 		}
 	}
@@ -159,9 +158,9 @@ UAuraOverlayWidget* AAuraHUD::CreateAuraWidget(
 	return Widget;
 }
 
-void AAuraHUD::InitializeInventoryViewModel(AActor* InPlayer)
+void AAuraHUD::InitializeInventoryViewModel()
 {
 	InventoryViewModel = NewObject<UMVVM_Inventory>(this, InventoryViewModelClass);
 	InventoryViewModel->InitializeInventoryItems();
-	InventoryViewModel->InitializeDependencies(InPlayer);
+	InventoryViewModel->InitializeDependencies();
 }

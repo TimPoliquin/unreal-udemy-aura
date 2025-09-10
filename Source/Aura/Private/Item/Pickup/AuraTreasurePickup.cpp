@@ -3,7 +3,8 @@
 
 #include "Item/Pickup/AuraTreasurePickup.h"
 
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
+#include "Item/Data/AuraTreasureConfig.h"
 #include "Tags/AuraGameplayTags.h"
 
 
@@ -19,7 +20,7 @@ AAuraTreasurePickup* AAuraTreasurePickup::SpawnTreasure(const AActor* WorldConte
 {
 	if (Value >= 1.f)
 	{
-		if (const UAuraTreasureConfig* TreasureConfig = AAuraGameModeBase::GetAuraGameMode(WorldContextObject)->GetTreasureConfig())
+		if (const UAuraTreasureConfig* TreasureConfig = UAuraGameDataSubsystem::Get(WorldContextObject)->GetTreasureConfig())
 		{
 			if (const FTreasureConfig TreasureConfigVal = TreasureConfig->GetTreasureConfig(Value, bRandomize); TreasureConfigVal.IsValid())
 			{

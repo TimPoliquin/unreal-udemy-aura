@@ -5,9 +5,7 @@
 
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
-#include "AbilitySystem/Data/LevelUpInfo.h"
-#include "Game/AuraSaveGame.h"
-#include "Net/UnrealNetwork.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 
 AAuraPlayerState::AAuraPlayerState()
 {
@@ -15,6 +13,7 @@ AAuraPlayerState::AAuraPlayerState()
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+	AbilitySystemComponent->bShouldSave = true;
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>(TEXT("AttributeSet"));
 }
 
@@ -26,47 +25,68 @@ UAbilitySystemComponent* AAuraPlayerState::GetAbilitySystemComponent() const
 void AAuraPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AAuraPlayerState, Level);
-	DOREPLIFETIME(AAuraPlayerState, XP);
-	DOREPLIFETIME(AAuraPlayerState, AttributePoints);
-	DOREPLIFETIME(AAuraPlayerState, SpellPoints);
 }
 
-UAttributeSet* AAuraPlayerState::GetAttributeSet() const
+UAuraAbilitySystemComponent* AAuraPlayerState::GetAuraAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+UAuraAttributeSet* AAuraPlayerState::GetAuraAttributeSet() const
 {
 	return AttributeSet;
 }
 
-void AAuraPlayerState::FromSaveData(const UAuraSaveGame* SaveData)
+int32 AAuraPlayerState::GetCharacterLevel_Implementation() const
 {
-	InitializeLevel(SaveData->PlayerLevel);
-	SetXP(SaveData->PlayerXP);
-	SetAttributePoints(SaveData->AttributePoints);
-	SetSpellPoints(SaveData->SpellPoints);
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this))
+	{
+		return ProgressionComponent->GetCharacterLevel();
+	}
+	return -1;
 }
 
-void AAuraPlayerState::ToSaveData(UAuraSaveGame* SaveData) const
+TArray<uint8> AAuraPlayerState::SaveData_Implementation()
 {
-	SaveData->PlayerLevel = GetCharacterLevel();
-	SaveData->PlayerXP = GetXP();
-	SaveData->AttributePoints = GetAttributePoints();
-	SaveData->SpellPoints = GetSpellPoints();
+	TArray<uint8> SaveData;
+	FMemoryWriter Writer(SaveData);
+	FAuraAttributeSetSaveData AttributeSetSaveData;
+	AttributeSet->ToSaveData(AttributeSetSaveData);
+	Writer << AttributeSetSaveData;
+	return SaveData;
 }
 
-float AAuraPlayerState::GetXPToNextLevelPercentage() const
+bool AAuraPlayerState::LoadData_Implementation(const TArray<uint8>& InData)
 {
-	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))
-	return LevelUpInfo->GetLevelProgressPercentage(XP);
+	try
+	{
+		if (InData.Num() <= 0)
+		{
+			return false;
+		}
+		FMemoryReader Reader(InData);
+		FAuraAttributeSetSaveData AttributeSetSaveData;
+		Reader << AttributeSetSaveData;
+		AttributeSet->FromSaveData(AttributeSetSaveData);
+		return true;
+	}
+	catch (...)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s] Failed to deserialize attribute data"), *GetName());
+		return false;
+	}
 }
 
-int32 AAuraPlayerState::FindLevelByXP(const int32 InXP) const
+void AAuraPlayerState::InitializeAbilityActorInfo()
 {
-	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))
-	return LevelUpInfo->FindLevelByXP(InXP);
+	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
 }
 
-FAuraLevelUpRewards AAuraPlayerState::GetLevelUpRewards(int32 CurrentLevel) const
+void AAuraPlayerState::BeginPlay()
 {
-	checkf(LevelUpInfo, TEXT("LevelUpInfo not set on AuraPlayerState - this must be set in the Blueprint"))
-	return LevelUpInfo->GetRewardsByLevel(CurrentLevel);
+	Super::BeginPlay();
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(this))
+	{
+		AttributeSet->InitializeDefaultAttributes(ProgressionComponent->GetCharacterLevel());
+	}
 }

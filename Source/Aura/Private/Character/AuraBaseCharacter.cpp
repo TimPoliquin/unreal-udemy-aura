@@ -5,7 +5,6 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
-#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
@@ -117,23 +116,16 @@ FVector AAuraBaseCharacter::GetCombatSocketLocation_Implementation(const FGamepl
 	return GetActorLocation();
 }
 
-void AAuraBaseCharacter::InitializeDefaultAttributes()
-{
-	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
-	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
-	ApplyEffectToSelf(InitializeVitalAttributes, 1.f);
-}
-
 void AAuraBaseCharacter::AddCharacterAbilities()
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
-	UAuraAbilitySystemComponent* AuraAbilitySystemComponent = CastChecked<UAuraAbilitySystemComponent>(
-		AbilitySystemComponent
-	);
-	AuraAbilitySystemComponent->AddCharacterAbilities(StartingAbilities, StartingPassiveAbilities);
+	if (!AbilitySystemComponent->HasFiredOnAbilitiesGivenDelegate())
+	{
+		AbilitySystemComponent->AddCharacterAbilities(StartingAbilities, StartingPassiveAbilities);
+	}
 	AbilitySystemComponent->RegisterGameplayTagEvent(
 		FAuraGameplayTags::Get().Effect_HitReact_Default,
 		EGameplayTagEventType::NewOrRemoved
@@ -300,6 +292,11 @@ void AAuraBaseCharacter::Dissolve()
 	}
 }
 
+void AAuraBaseCharacter::OnAbilitySystemReady_Implementation(UAuraAbilitySystemComponent* InAbilitySystemComponent)
+{
+	GetOnAbilitySystemRegisteredDelegate().Broadcast(InAbilitySystemComponent);
+}
+
 void AAuraBaseCharacter::Dissolve(
 	UMeshComponent* InMesh,
 	UMaterialInstance* MaterialInstance,
@@ -381,16 +378,6 @@ void AAuraBaseCharacter::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attribut
 UAbilitySystemComponent* AAuraBaseCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
-}
-
-UAttributeSet* AAuraBaseCharacter::GetAttributeSet() const
-{
-	return AttributeSet;
-}
-
-UAuraAttributeSet* AAuraBaseCharacter::GetAuraAttributeSet() const
-{
-	return Cast<UAuraAttributeSet>(AttributeSet);
 }
 
 float AAuraBaseCharacter::TakeDamage(

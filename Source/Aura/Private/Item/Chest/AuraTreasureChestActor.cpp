@@ -5,14 +5,13 @@
 
 #include "Actor/Spawn/AuraSpawnBlueprintLibrary.h"
 #include "Aura/AuraLogChannels.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Item/AuraItemTypes.h"
 #include "Item/Component/AuraLockComponent.h"
 #include "Item/Effect/SpawnEffectInterface.h"
 #include "Item/Pickup/AuraTreasurePickup.h"
 #include "Item/Pickup/TieredItemInterface.h"
-#include "Player/InventoryActorInterface.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Player/AuraInventoryComponent.h"
 #include "Tags/AuraGameplayTags.h"
 #include "Utils/ArrayUtils.h"
 
@@ -49,13 +48,10 @@ void AAuraTreasureChestActor::HandleInitialState()
 	}
 }
 
-void AAuraTreasureChestActor::LoadActor_Implementation()
+void AAuraTreasureChestActor::PostLoad_Implementation()
 {
-	Super::LoadActor_Implementation();
-	if (HasActorBegunPlay())
-	{
-		HandleInitialState();
-	}
+	Super::PostLoad_Implementation();
+	HandleInitialState();
 }
 
 void AAuraTreasureChestActor::BeginPlay()
@@ -133,15 +129,15 @@ FTransform AAuraTreasureChestActor::GetRewardInitialSpawnLocation_Implementation
 
 void AAuraTreasureChestActor::GrantRewards_DirectToInventory_Implementation(AActor* Player)
 {
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = IInventoryActorInterface::GetInventoryComponent(Player))
+	if (UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(Player))
 	{
 		for (const FAuraLootDefinition& LootDefinition : LootDefinitions)
 		{
-			PlayerInventoryComponent->AddToInventory(LootDefinition.ItemTag);
+			InventoryComponent->AddToInventory(LootDefinition.ItemTag);
 		}
 		if (GoldAmount > 0.0)
 		{
-			PlayerInventoryComponent->AddToInventory(FAuraGameplayTags::Get().Item_Type_Treasure, GoldAmount);
+			InventoryComponent->AddToInventory(FAuraGameplayTags::Get().Item_Type_Treasure, GoldAmount);
 		}
 	}
 }
@@ -159,12 +155,12 @@ TArray<FAuraLootInstance> AAuraTreasureChestActor::InstantiateRewardActors()
 	TArray<FAuraLootInstance> RewardActors;
 	UArrayUtils::ShuffleArray(Transforms);
 	const FTransform InitialTransform = GetRewardInitialSpawnLocation();
-	AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
+	UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(this);
 	for (int32 LootDefinitionIndex = 0; LootDefinitionIndex < LootDefinitions.Num(); LootDefinitionIndex++)
 	{
 		const FAuraLootDefinition& LootDefinition = LootDefinitions[LootDefinitionIndex];
 		const FTransform& TargetTransform = Transforms[LootDefinitionIndex];
-		const FAuraItemDefinition ItemDefinition = GameMode->FindItemDefinitionByItemTag(LootDefinition.ItemTag);
+		const FAuraItemDefinition ItemDefinition = GameDataSubsystem->FindItemDefinitionByItemTag(LootDefinition.ItemTag);
 		if (!ItemDefinition.IsValid())
 		{
 			UE_LOG(LogAura, Warning, TEXT("[%s] Invalid item definition for item: [%s]"), *GetName(), *LootDefinition.ItemTag.ToString());

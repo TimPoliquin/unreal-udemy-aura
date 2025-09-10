@@ -5,7 +5,7 @@
 
 
 // Add default functionality here for any IFishingActorInterface functions that are not pure virtual.
-TScriptInterface<IFishingComponentInterface> IFishingActorInterface::GetFishingComponent(const UObject* Actor)
+UAuraFishingComponent* IFishingActorInterface::GetFishingComponent(const UObject* Actor)
 {
 	if (IsValid(Actor) && Actor->Implements<UFishingActorInterface>())
 	{

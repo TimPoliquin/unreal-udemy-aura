@@ -3,8 +3,8 @@
 
 #include "Item/Pickup/AuraPickupItemInventory.h"
 
-#include "Player/InventoryActorInterface.h"
-#include "Player/PlayerInventoryComponent.h"
+#include "Interaction/PlayerInterface.h"
+#include "Player/AuraInventoryComponent.h"
 
 
 AAuraPickupItemInventory::AAuraPickupItemInventory()
@@ -19,7 +19,7 @@ void AAuraPickupItemInventory::BeginPlay()
 
 void AAuraPickupItemInventory::ActivatePickup(AActor* PickupActor)
 {
-	if (UPlayerInventoryComponent* InventoryComponent = IInventoryActorInterface::GetInventoryComponent(PickupActor))
+	if (UAuraInventoryComponent* InventoryComponent = UAuraInventoryComponent::Get(PickupActor))
 	{
 		const int32 AmountAdded = InventoryComponent->AddToInventory(ItemType, Count);
 		if (AmountAdded > 0)
@@ -32,7 +32,7 @@ void AAuraPickupItemInventory::ActivatePickup(AActor* PickupActor)
 void AAuraPickupItemInventory::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                               const FHitResult& SweepResult)
 {
-	if (IsValid(OtherActor) && OtherActor->Implements<UInventoryActorInterface>())
+	if (IsValid(OtherActor) && OtherActor->Implements<UPlayerInterface>())
 	{
 		ActivatePickup(OtherActor);
 	}

@@ -7,15 +7,20 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/AttributeInfo.h"
 #include "Player/AuraPlayerState.h"
+#include "Player/Progression/AuraProgressionComponent.h"
+#include "Tags/AuraGameplayTags.h"
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
 	Super::BindCallbacksToDependencies();
 	check(AttributeInfo);
-	GetAuraPlayerState()->OnAttributePointsChangeDelegate.AddDynamic(
-		this,
-		&UAttributeMenuWidgetController::OnAttributePointsChanged
-	);
+	if (UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		ProgressionComponent->OnAttributePointsChangeDelegate.AddUniqueDynamic(
+			this,
+			&UAttributeMenuWidgetController::OnAttributePointsChanged
+		);
+	}
 	for (auto& Pair : GetAuraAttributeSet()->TagsToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
@@ -35,7 +40,10 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
-	OnAttributePointsChanged(GetAuraPlayerState()->GetAttributePoints());
+	if (const UAuraProgressionComponent* ProgressionComponent = UAuraProgressionComponent::Get(GetAuraPlayerState()))
+	{
+		OnAttributePointsChanged(FAuraIntAttributeChangedPayload::CreateBroadcastPayload(FAuraGameplayTags::Get().Attributes_Progression_AttributePoints, ProgressionComponent->GetAttributePoints()));
+	}
 }
 
 void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
@@ -53,7 +61,7 @@ void UAttributeMenuWidgetController::BroadcastAttributeInfo(
 	AttributeInfoDelegate.Broadcast(Info);
 }
 
-void UAttributeMenuWidgetController::OnAttributePointsChanged(int32 InPoints)
+void UAttributeMenuWidgetController::OnAttributePointsChanged(const FAuraIntAttributeChangedPayload& Payload)
 {
-	OnAttributePointsChangedDelegate.Broadcast(InPoints);
+	OnAttributePointsChangedDelegate.Broadcast(Payload);
 }

@@ -3,19 +3,18 @@
 
 #include "AbilitySystem/Ability/AuraFishingReelAbility.h"
 
+#include "Fishing/AuraFishingComponent.h"
 #include "Interaction/FishingActorInterface.h"
-#include "Interaction/FishingComponentInterface.h"
 
 void UAuraFishingReelAbility::ReelIn(AActor* Player)
 {
-	if (const TScriptInterface<IFishingComponentInterface> FishingComponentInterface =
-		IFishingActorInterface::GetFishingComponent(Player))
+	if (UAuraFishingComponent* FishingComponent = IFishingActorInterface::GetFishingComponent(Player))
 	{
-		FishingComponentInterface->GetOnFishingStateChangedDelegate().AddDynamic(
+		FishingComponent->OnFishingStateChangedDelegate.AddDynamic(
 			this,
 			&UAuraFishingReelAbility::OnFishingStateChanged
 		);
-		FishingComponentInterface->Reel();
+		FishingComponent->Reel();
 	}
 	else
 	{

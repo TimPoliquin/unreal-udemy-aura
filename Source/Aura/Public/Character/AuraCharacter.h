@@ -8,12 +8,12 @@
 #include "Interaction/FishingActorInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Player/AuraPlayerState.h"
-#include "Player/InventoryActorInterface.h"
 #include "AuraCharacter.generated.h"
 
+class UAuraPlayerEquipmentComponent;
 class UFishingComponentInterface;
 class UAuraFishingComponent;
-class UPlayerInventoryComponent;
+class UAuraInventoryComponent;
 class UAuraCameraComponent;
 class UAuraAbilitySystemComponent;
 class UAuraAttributeSet;
@@ -29,7 +29,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
 );
 
 UCLASS()
-class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IInventoryActorInterface, public IFishingActorInterface
+class AURA_API AAuraCharacter : public AAuraBaseCharacter, public IPlayerInterface, public IFishingActorInterface
 {
 	GENERATED_BODY()
 
@@ -37,6 +37,7 @@ public:
 	AAuraCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual UAuraAttributeSet* GetAuraAttributeSet() const override;
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -46,8 +47,10 @@ public:
 	AAuraPlayerState* GetAuraPlayerState() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UAuraAbilitySystemComponent* GetAuraAbilitySystemComponent() const;
-	// ICombatInterface
+	/** Start IAuraAbilitySystemInterface **/
 	virtual int32 GetCharacterLevel_Implementation() const override;
+	/** End IAuraAbilitySystemInterface **/
+	// ICombatInterface
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
 	virtual void Die() override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
@@ -68,7 +71,6 @@ public:
 	virtual void SpendSpellPoints_Implementation(int32 SpentPoints) override;
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() override;
-	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
 	virtual void MoveCameraToPoint_Implementation(
 		const FVector& Destination,
 		const FVector& Direction,
@@ -84,37 +86,32 @@ public:
 		UCurveFloat* AnimationCurve
 	) override;
 
-	/** InventoryInterface Start */
-	virtual UPlayerInventoryComponent* GetInventoryComponent_Implementation() const override;
-	/** InventoryInterface End */
-
 	/** FishingActorInterface Start */
-	virtual TScriptInterface<IFishingComponentInterface> GetFishingComponent_Implementation() const override;
+	virtual UAuraFishingComponent* GetFishingComponent_Implementation() const override;
 	virtual void ShowFishingStatusEffect_Implementation(UNiagaraSystem* EffectSystem) override;
 	/** FishingActorInterface End */
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
-	void LoadProgress();
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UPlayerInventoryComponent> PlayerInventoryComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UAuraFishingComponent> FishingComponent;
-
-private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UAuraPlayerEquipmentComponent> EquipmentComponent;
+	UPROPERTY(VisibleAnywhere, Category="Components")
 	TObjectPtr<UAuraCameraComponent> CameraComponent;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="Components")
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Components")
 	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Components")
 	TObjectPtr<UNiagaraComponent> FishingStatusEffectNiagaraComponent;
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USoundBase> LevelUpSound;
 	UPROPERTY(EditDefaultsOnly)
 	float DeathTime = 5.f;
+
+private:
 	UPROPERTY()
 	FTimerHandle DeathTimer;
 	FOnCameraMoveFinishedSignature OnCameraReturnDelegate;
@@ -126,6 +123,8 @@ private:
 	void Multicast_LevelUpParticles() const;
 	UFUNCTION()
 	void OnCameraReturned();
+	UFUNCTION()
+	void OnLevelLoaded();
 
 	FVector DesiredCameraForwardVector;
 };

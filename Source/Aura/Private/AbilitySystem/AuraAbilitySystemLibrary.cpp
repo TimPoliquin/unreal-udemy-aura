@@ -12,8 +12,8 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Aura/AuraLogChannels.h"
 #include "Character/AuraBaseCharacter.h"
-#include "Game/AuraGameModeBase.h"
-#include "Game/AuraSaveGame.h"
+#include "Engine/OverlapResult.h"
+#include "Game/Subsystem/AuraGameDataSubsystem.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/AuraPlayerState.h"
@@ -73,7 +73,9 @@ USpellMenuWidgetController* UAuraAbilitySystemLibrary::GetSpellMenuWidgetControl
 
 UAuraAbilitySystemComponent* UAuraAbilitySystemLibrary::GetAuraAbilitySystemComponent(AActor* Actor)
 {
-	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Actor))
+	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+		Actor
+	))
 	{
 		return Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 	}
@@ -87,71 +89,15 @@ void UAuraAbilitySystemLibrary::InitializeDefaultAttributes(
 	UAbilitySystemComponent* AbilitySystemComponent
 )
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		const UCharacterClassInfo* ClassInfo = GameMode->GetCharacterClassInfo();
+		const UCharacterClassInfo* ClassInfo = GameDataSubsystem->GetCharacterClassInfo();
 		const FCharacterClassDefaultInfo DefaultInfo = ClassInfo->GetClassDefaultInfo(CharacterClass);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, DefaultInfo.PrimaryAttributes, Level);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->SecondaryAttributes, Level);
 		ApplyGameplayEffectSpec(AbilitySystemComponent, AbilitySystemComponent, ClassInfo->VitalAttributes, Level);
-	}
-}
-
-void UAuraAbilitySystemLibrary::InitializeDefaultAttributesFromSaveData(
-	const UObject* WorldContextObject,
-	UAbilitySystemComponent* AbilitySystemComponent,
-	const UAuraSaveGame* SaveData,
-	const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
-)
-{
-	const UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
-	if (!CharacterClassInfo)
-	{
-		UE_LOG(
-			LogAura,
-			Error,
-			TEXT("Unable to initialize default attributes from save data - character class info is undefined")
-		);
-		return;
-	}
-	const FAuraGameplayTags& GameplayTags = FAuraGameplayTags::Get();
-	const AActor* SourceAvatarActor = AbilitySystemComponent->GetAvatarActor();
-	FGameplayEffectContextHandle EffectContextHandle = AbilitySystemComponent->MakeEffectContext();
-	const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
-		CharacterClassInfo->PrimaryAttributes_SetByCaller,
-		1.f,
-		EffectContextHandle
-	);
-	// primary attributes
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Strength,
-		SaveData->Strength
-	);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Intelligence,
-		SaveData->Intelligence
-	);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Resilience,
-		SaveData->Resilience
-	);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-		SpecHandle,
-		GameplayTags.Attributes_Primary_Vigor,
-		SaveData->Vigor
-	);
-	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
-	for (auto Effect : InitializeEffects)
-	{
-		ApplyGameplayEffectSpec(
-			AbilitySystemComponent,
-			AbilitySystemComponent,
-			Effect,
-			1.f
-		);
 	}
 }
 
@@ -162,9 +108,11 @@ void UAuraAbilitySystemLibrary::GrantStartupAbilities(
 	const int Level
 )
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		UCharacterClassInfo* CharacterClassInfo = GameMode->GetCharacterClassInfo();
+		UCharacterClassInfo* CharacterClassInfo = GameDataSubsystem->GetCharacterClassInfo();
 		GrantAbilities(AbilitySystemComponent, CharacterClassInfo->CommonAbilities, 1);
 		GrantAbilities(
 			AbilitySystemComponent,
@@ -190,18 +138,22 @@ void UAuraAbilitySystemLibrary::GrantAbilities(
 
 UCharacterClassInfo* UAuraAbilitySystemLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		return GameMode->GetCharacterClassInfo();
+		return GameDataSubsystem->GetCharacterClassInfo();
 	}
 	return nullptr;
 }
 
 UAbilityInfo* UAuraAbilitySystemLibrary::GetAbilityInfo(const UObject* WorldContextObject)
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		return GameMode->GetAbilityInfo();
+		return GameDataSubsystem->GetAbilityInfo();
 	}
 	return nullptr;
 }
@@ -244,7 +196,7 @@ bool UAuraAbilitySystemLibrary::IsInstantEffect(const FGameplayEffectSpecHandle&
 
 int UAuraAbilitySystemLibrary::GetCharacterLevel(UAbilitySystemComponent* AbilitySystemComponent)
 {
-	return ICombatInterface::GetCharacterLevel(AbilitySystemComponent->GetAvatarActor());
+	return IAuraAbilitySystemInterface::GetCharacterLevel(AbilitySystemComponent->GetAvatarActor());
 }
 
 FGameplayTag UAuraAbilitySystemLibrary::GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
@@ -299,9 +251,11 @@ int32 UAuraAbilitySystemLibrary::GetXPReward(
 	const int32 Level
 )
 {
-	if (const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	if (const UAuraGameDataSubsystem* GameDataSubsystem = UAuraGameDataSubsystem::Get(
+		WorldContextObject
+	))
 	{
-		return GameMode->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
+		return GameDataSubsystem->GetCharacterClassInfo()->GetXPReward(CharacterClass, Level);
 	}
 	UE_LOG(LogAura, Error, TEXT("Game mode is not set to AuraGameMode!"))
 	return 0;
@@ -596,7 +550,7 @@ bool UAuraAbilitySystemLibrary::GetWidgetControllerParams(
 	{
 		AAuraPlayerState* PlayerState = PlayerController->GetPlayerState<AAuraPlayerState>();
 		UAbilitySystemComponent* AbilitySystemComponent = PlayerState->GetAbilitySystemComponent();
-		UAttributeSet* AttributeSet = PlayerState->GetAttributeSet();
+		UAttributeSet* AttributeSet = PlayerState->GetAuraAttributeSet();
 		FWidgetControllerParams.PlayerController = PlayerController;
 		FWidgetControllerParams.PlayerState = PlayerState;
 		FWidgetControllerParams.AbilitySystemComponent = AbilitySystemComponent;
@@ -759,20 +713,30 @@ FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(
 	const int32 Level
 )
 {
-	UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
+	if (!IsValid(TargetActor) || !IsValid(GameplayEffect))
+	{
+		UE_LOG(LogAura, Warning, TEXT("Requested to apply effect to either invalid actor or effect!"));
+		return FActiveGameplayEffectHandle();
+	}
+	if (UAbilitySystemComponent* TargetAbilitySystem = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		TargetActor
-	);
-	FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
-	EffectContextHandle.AddSourceObject(TargetActor);
-	const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
-		GameplayEffect,
-		Level,
-		EffectContextHandle
-	);
-	const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
-		*EffectSpecHandle.Data.Get()
-	);
-	return ActiveEffectHandle;
+	))
+	{
+		FGameplayEffectContextHandle EffectContextHandle = TargetAbilitySystem->MakeEffectContext();
+		EffectContextHandle.AddSourceObject(TargetActor);
+		const FGameplayEffectSpecHandle EffectSpecHandle = TargetAbilitySystem->MakeOutgoingSpec(
+			GameplayEffect,
+			Level,
+			EffectContextHandle
+		);
+		const FActiveGameplayEffectHandle ActiveEffectHandle = TargetAbilitySystem->ApplyGameplayEffectSpecToSelf(
+			*EffectSpecHandle.Data.Get()
+		);
+		return ActiveEffectHandle;
+	}
+	UE_LOG(LogAura, Error, TEXT("[%s] Cannot apply basic gameplay effect - no AbilitySystem available on actor! [%s]"), *FString("UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect"),
+	       *TargetActor->GetName())
+	return FActiveGameplayEffectHandle();
 }
 
 FActiveGameplayEffectHandle UAuraAbilitySystemLibrary::ApplyBasicGameplayEffectWithMagnitude(
@@ -806,6 +770,10 @@ void UAuraAbilitySystemLibrary::RemoveGameplayEffect(
 	bool bRemoveAll
 )
 {
+	if (!GameplayEffectHandle.IsValid())
+	{
+		return;
+	}
 	if (UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 		TargetActor
 	))

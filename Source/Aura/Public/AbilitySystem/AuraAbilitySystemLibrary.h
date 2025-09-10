@@ -11,7 +11,7 @@
 #include "AuraAbilitySystemLibrary.generated.h"
 
 class ULootTiers;
-class UAuraSaveGame;
+class UOLD_AuraSaveGame;
 DECLARE_DELEGATE_OneParam(FMakeEffectSpecSignature, FGameplayEffectSpecHandle&);
 
 struct FDamageEffectParams;
@@ -70,14 +70,6 @@ public:
 		ECharacterClass CharacterClass,
 		const float Level,
 		UAbilitySystemComponent* AbilitySystemComponent
-	);
-
-	UFUNCTION(BlueprintCallable, Category= "AuraAbilitySystemLibrary|CharacterClassDefaults")
-	static void InitializeDefaultAttributesFromSaveData(
-		const UObject* WorldContextObject,
-		UAbilitySystemComponent* AbilitySystemComponent,
-		const UAuraSaveGame* SaveData,
-		const TArray<TSubclassOf<UGameplayEffect>> InitializeEffects
 	);
 
 	UFUNCTION(BlueprintCallable, Category = "AuraAbilitySystemLibrary|CharacterClassDefaults")

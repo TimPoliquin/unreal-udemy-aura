@@ -6,9 +6,10 @@
 #include "AbilitySystemComponent.h"
 #include "AttributeChangeDelegates.h"
 #include "AuraAbilitySystemTypes.h"
+#include "Game/Save/SaveableInterface.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
-class UAuraSaveGame;
+class UOLD_AuraSaveGame;
 class UAuraAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& /*Asset Tags*/)
@@ -46,7 +47,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(
  * 
  */
 UCLASS()
-class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
+class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent, public ISaveableInterface
 {
 	GENERATED_BODY()
 
@@ -87,15 +88,22 @@ public:
 
 	bool GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FAuraAbilityDescription& OutDescription);
 
-	void FromSaveData(const UAuraSaveGame* SaveData);
-	void ToSaveData(UAuraSaveGame* SaveData);
-
 	FOnPlayerAbilityStatusChangedSignature OnPlayerLevelChangedDelegate;
 	FAbilityEquippedSignature OnAbilityEquippedDelegate;
 	FDeactivatePassiveAbilitySignature OnDeactivatePassiveAbilityDelegate;
 	FActivatePassiveEffectSignature OnActivatePassiveEffectDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnAbilitySystemOutgoingDamageSignature OnOutgoingDamageDelegate;
+
+	/** Start ISaveableInterface **/
+	virtual TArray<uint8> SaveData_Implementation() override;
+	virtual bool LoadData_Implementation(const TArray<uint8>& Data) override;
+	virtual bool ShouldSave_Implementation() const override;
+	virtual bool ShouldAutoSpawn_Implementation() const override { return false; }
+	virtual bool ShouldLoadTransform_Implementation() const override { return false; }
+	/** End ISaveableInterface **/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Save Game")
+	bool bShouldSave = false;
 
 protected:
 	virtual void BeginPlay() override;
@@ -119,4 +127,7 @@ private:
 	bool IsSlotEmpty(const FGameplayTag& SlotTag);
 	FGameplayAbilitySpec* GetAbilitySpecWithSlot(const FGameplayTag& SlotTag);
 	void AssignSlotTagToAbilitySpec(FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& SlotTag);
+
+	TArray<uint8> SerializeActorComponent();
+	bool DeserializeActorComponent(const TArray<uint8>& Data);
 };

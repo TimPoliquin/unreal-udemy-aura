@@ -5,7 +5,7 @@
 
 #include "Aura/Aura.h"
 #include "Components/SphereComponent.h"
-#include "Game/AuraGameModeBase.h"
+#include "Game/Save/AuraSaveGameManager.h"
 #include "Interaction/PlayerInterface.h"
 
 ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -26,9 +26,9 @@ ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	MoveToComponent->SetupAttachment(GetRootComponent());
 }
 
-void ACheckpoint::LoadActor_Implementation()
+void ACheckpoint::PostLoad_Implementation()
 {
-	if (bHasBeenActivated && HasActorBegunPlay())
+	if (bHasBeenActivated)
 	{
 		PlayActivatedEffect();
 	}
@@ -38,10 +38,7 @@ void ACheckpoint::BeginPlay()
 {
 	Super::BeginPlay();
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ACheckpoint::OnSphereOverlap);
-	if (bHasBeenActivated && HasActorBegunPlay())
-	{
-		PlayActivatedEffect();
-	}
+	Execute_PostLoad(this);
 }
 
 void ACheckpoint::OnSphereOverlap(
@@ -57,9 +54,13 @@ void ACheckpoint::OnSphereOverlap(
 	{
 		bHasBeenActivated = true;
 		PlayActivatedEffect();
-		AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
-		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);
-		GameMode->SaveWorldState(GetWorld());
+		if (UAuraSaveGameManager* SaveGameManager = UAuraSaveGameManager::Get(this))
+		{
+			FAuraSaveGameParams SaveGameParams;
+			SaveGameParams.DestinationMapName = GetWorld()->GetPathName();
+			SaveGameParams.DestinationPlayerStartTag = PlayerStartTag;
+			SaveGameManager->SaveGame(SaveGameParams);
+		}
 	}
 }
 

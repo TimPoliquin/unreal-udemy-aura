@@ -5,66 +5,11 @@
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
 #include "AbilitySystemComponent.h"
+#include "Attribute/AuraAttributeTypes.h"
 #include "AuraAttributeSet.generated.h"
 
-
-#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
-GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
-GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
-GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
-GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
-
-class UAuraSaveGame;
 class UAbilitySystemComponent;
 
-template <class T>
-using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
-
-USTRUCT()
-struct FEffectPropertiesVal
-{
-	GENERATED_BODY()
-
-	FEffectPropertiesVal()
-	{
-	}
-
-	FEffectPropertiesVal(
-		AActor* InAvatarActor,
-		AController* InController,
-		ACharacter* InCharacter,
-		UAbilitySystemComponent* InAbilitySystemComponent
-	) :
-		AvatarActor(InAvatarActor),
-		Controller(InController),
-		Character(InCharacter),
-		AbilitySystemComponent(InAbilitySystemComponent)
-	{
-	}
-
-	UPROPERTY()
-	AActor* AvatarActor = nullptr;
-	UPROPERTY()
-	AController* Controller = nullptr;
-	UPROPERTY()
-	ACharacter* Character = nullptr;
-	UPROPERTY()
-	UAbilitySystemComponent* AbilitySystemComponent = nullptr;
-};
-
-USTRUCT()
-struct FEffectProperties
-{
-	GENERATED_BODY()
-
-	FEffectProperties()
-	{
-	}
-
-	FEffectPropertiesVal Source;
-	FEffectPropertiesVal Target;
-	FGameplayEffectContextHandle EffectContextHandle;
-};
 
 /**
  * 
@@ -81,12 +26,15 @@ public:
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
-	void FromSaveData(const UAuraSaveGame* SaveData);
-	void ToSaveData(UAuraSaveGame* SaveData) const;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsFullHealth() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsFullMana() const;
+
+	void InitializeDefaultAttributes(const int32 Level = 1);
+	void ToSaveData(FAuraAttributeSetSaveData& SaveData) const;
+	void FromSaveData(const FAuraAttributeSetSaveData& SaveData);
 
 	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
 
@@ -327,6 +275,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Meta Attributes")
 	FGameplayAttributeData Meta_IncomingRefresh;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Meta_IncomingRefresh);
+
+protected:
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributes;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
+	TSubclassOf<UGameplayEffect> InitializeVitalAttributes;
 
 private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;

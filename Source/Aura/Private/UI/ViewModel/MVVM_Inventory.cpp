@@ -3,7 +3,10 @@
 
 #include "UI/ViewModel/MVVM_Inventory.h"
 
+#include "Aura/AuraLogChannels.h"
 #include "Character/AuraCharacter.h"
+#include "Game/AuraGameState.h"
+#include "Player/AuraInventoryComponent.h"
 #include "UI/ViewModel/MVVM_InventoryItem.h"
 
 FString UMVVM_Inventory::GetInventoryName() const
@@ -57,18 +60,15 @@ UMVVM_InventoryItem* UMVVM_Inventory::CreateInventoryItemViewModel(const int32 R
 	return InventoryItem;
 }
 
-void UMVVM_Inventory::InitializeDependencies(AActor* PlayerActor)
+void UMVVM_Inventory::InitializeDependencies()
 {
-	if (AAuraCharacter* AuraCharacter = Cast<AAuraCharacter>(PlayerActor))
+	for (int32 Idx = 0; Idx < InventoryItems.Num(); ++Idx)
 	{
-		for (int32 Idx = 0; Idx < InventoryItems.Num(); ++Idx)
-		{
-			InventoryItems[Idx]->InitializeDependencies(AuraCharacter);
-		}
+		InventoryItems[Idx]->InitializeDependencies();
 	}
-	if (UPlayerInventoryComponent* PlayerInventoryComponent = IInventoryActorInterface::GetInventoryComponent(PlayerActor))
+	if (UAuraInventoryComponent* PlayerInventoryComponent = UAuraInventoryComponent::Get(GetWorld()))
 	{
-		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddDynamic(this, &UMVVM_Inventory::OnPlayerInventoryChanged);
+		PlayerInventoryComponent->OnInventoryItemCountChangedDelegate.AddUniqueDynamic(this, &UMVVM_Inventory::OnPlayerInventoryChanged);
 		for (auto InventoryItem : PlayerInventoryComponent->GetInventory())
 		{
 			if (InventoryItem.IsValid())
@@ -105,6 +105,11 @@ void UMVVM_Inventory::OnPlayerInventoryChanged(const FOnInventoryItemCountChange
 		{
 			return InventoryItem->GetInventoryItemTag().MatchesTagExact(Payload.ItemType);
 		});
+		if (!ItemModel)
+		{
+			UE_LOG(LogAura, Error, TEXT("[%s] No matching inventory item model found! ItemType: %s"), *GetName(), *Payload.ItemType.ToString());
+			return;
+		}
 		if (Payload.NewValue <= 0)
 		{
 			ItemModel->Clear();

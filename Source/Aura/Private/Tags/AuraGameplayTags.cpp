@@ -97,6 +97,23 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FName("Attributes.Passive.Protection"),
 		FString("Protection afforded by passive abilities")
 	);
+	// Progression attributes
+	Instance.Attributes_Progression_Level = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Progression.Level"),
+		FString("The tag representation the character's progression level")
+	);
+	Instance.Attributes_Progression_XP = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Progression.XP"),
+		FString("The tag representation the character's XP")
+	);
+	Instance.Attributes_Progression_SpellPoints = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Progression.SpellPoints"),
+		FString("The tag representation the character's spell points")
+	);
+	Instance.Attributes_Progression_AttributePoints = TagManager.AddNativeGameplayTag(
+		FName("Attributes.Progression.AttributePoints"),
+		FString("The tag representation the character's attribute points")
+	);
 
 	// Input Tags
 	Instance.InputTag = TagManager.AddNativeGameplayTag(
@@ -560,6 +577,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Fish = TagManager.AddNativeGameplayTag(FName("Fish"), FString("Fish root tag"));
 	Instance.Fish_Rarity = TagManager.AddNativeGameplayTag(FName("Fish.Rarity"), FString("Fish Rarity root tag"));
 	Instance.Fish_Tag = TagManager.AddNativeGameplayTag(FName("Fish.Tag"), FString("Fish Tags root tag"));
+	/** Message Tags **/
+	Instance.Message_Default_Item_Pickup = TagManager.AddNativeGameplayTag(FName("Message.Default.Item.Pickup"), FString("Pickup item message tag"));
+	Instance.Message_Default_Item_Use = TagManager.AddNativeGameplayTag(FName("Message.Default.Item.Use"), FString("Use item message tag"));
 }
 
 bool FAuraGameplayTags::IsLeftMouseButton(const FGameplayTag& InputTag)

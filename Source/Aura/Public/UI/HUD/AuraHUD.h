@@ -108,7 +108,7 @@ private:
 	TSubclassOf<UMVVM_Inventory> InventoryViewModelClass;
 	UPROPERTY()
 	TObjectPtr<UMVVM_Inventory> InventoryViewModel;
-	void InitializeInventoryViewModel(AActor* InPlayer);
+	void InitializeInventoryViewModel();
 
 	bool bInitialized = false;
 };

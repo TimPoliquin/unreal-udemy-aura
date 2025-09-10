@@ -18,7 +18,7 @@ class AURA_API UMVVM_InventoryItem : public UMVVMViewModelBase
 	GENERATED_BODY()
 
 public:
-	void InitializeDependencies(AAuraCharacter* InPlayerActor);
+	void InitializeDependencies();
 	FGameplayTag GetInventoryItemTag() const;
 	void SetInventoryItemTag(const FGameplayTag& InInventoryItemTag);
 	FString GetInventoryItemName() const;
@@ -60,6 +60,4 @@ protected:
 
 private:
 	void UpdateFromInventoryItemTag();
-	UPROPERTY()
-	TWeakObjectPtr<AActor> PlayerActor;
 };

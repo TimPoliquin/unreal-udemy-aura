@@ -7,8 +7,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraItemBlueprintLibrary.generated.h"
 
-struct FAuraFishCatch;
 struct FAuraItemDefinition;
+class UAuraFishCatch;
 /**
  * 
  */
@@ -30,5 +30,5 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AuraItemBlueprintLibrary|Messages")
 	static UTexture2D* SubstituteMessageIcon(UTexture2D* MessageIcon, const FMessageSubstitutions& MessageSubstitutions);
 
-	static FAuraFishCatch ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType);
+	static UAuraFishCatch* ToFishCatch(const UObject* WorldContextObject, const FGameplayTag& FishType);
 };

@@ -10,7 +10,6 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Actor/Spawn/TrackableInterface.h"
 #include "AI/AuraAIController.h"
-#include "Utils/RandUtils.h"
 #include "AuraEnemy.generated.h"
 
 struct FAuraSpawnParams;
@@ -28,6 +27,7 @@ public:
 	AAuraEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void PossessedBy(AController* NewController) override;
+	virtual UAuraAttributeSet* GetAuraAttributeSet() const override { return AttributeSet; }
 
 	virtual void OnHitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
 
@@ -40,18 +40,21 @@ public:
 		// do not override destination
 		return false;
 	};
-	// ICombatInterface
+	/** Start IAuraAbilitySystemInterface **/
 	FORCEINLINE virtual int GetCharacterLevel_Implementation() const override
 	{
 		return Level;
 	}
 
+	/** End IAuraAbilitySystemInterface **/
+
+	/** Start ICombatInterface **/
 	virtual int32 GetXPReward_Implementation() const override;
 	virtual USkeletalMeshComponent* GetWeapon_Implementation() const override;
-
 	virtual TArray<FName> GetTargetTagsToIgnore_Implementation() const override;
-
 	virtual void Die() override;
+	/** End ICombatInterface **/
+
 	// IEnemyInterface
 	FORCEINLINE virtual AActor* GetCombatTarget_Implementation() const override
 	{
@@ -84,7 +87,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeAbilityActorInfo() override;
-	virtual void InitializeDefaultAttributes() override;
+	virtual void InitializeDefaultAttributes();
 	virtual void OnStatusShockAdded() override;
 	virtual void OnStatusShockRemoved() override;
 	virtual void SpawnLoot();
@@ -99,7 +102,8 @@ protected:
 	int32 Level = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Class Defaults")
 	ECharacterClass CharacterClass = ECharacterClass::Warrior;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Character Class Defaults")
+	TObjectPtr<UAuraAttributeSet> AttributeSet;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> HealthWidget;
 

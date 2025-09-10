@@ -3,10 +3,9 @@
 
 #include "Checkpoint/MapEntrance.h"
 
-#include "Game/AuraGameModeBase.h"
+#include "Game/Save/AuraSaveGameManager.h"
+#include "Game/Subsystem/AuraLevelManager.h"
 #include "Interaction/PlayerInterface.h"
-#include "Kismet/GameplayStatics.h"
-
 
 AMapEntrance::AMapEntrance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -14,10 +13,6 @@ AMapEntrance::AMapEntrance(const FObjectInitializer& ObjectInitializer) : Super(
 	bDisableAfterActivation = false;
 }
 
-void AMapEntrance::LoadActor_Implementation()
-{
-	// Do nothing
-}
 
 void AMapEntrance::BeginPlay()
 {
@@ -36,9 +31,17 @@ void AMapEntrance::OnSphereOverlap(
 	if (IsValid(OtherActor) && OtherActor->Implements<UPlayerInterface>())
 	{
 		bHasBeenActivated = true;
-		IPlayerInterface::Execute_SaveProgress(OtherActor, DestinationPlayerStartTag);
-		AAuraGameModeBase* GameMode = AAuraGameModeBase::GetAuraGameMode(this);
-		GameMode->SaveWorldState(GetWorld(), DestinationMap.ToSoftObjectPath().GetAssetName());
-		UGameplayStatics::OpenLevelBySoftObjectPtr(this, DestinationMap);
+		if (UAuraLevelManager* LevelManager = UAuraLevelManager::Get(this))
+		{
+			const UAuraSaveGameManager* SaveGameManager = UAuraSaveGameManager::Get(this);
+			FAuraLevelTransitionParams Params;
+			Params.SaveSlot = SaveGameManager->GetCurrentSaveSlotName();
+			Params.SlotIndex = SaveGameManager->GetAutoSaveSlotIndex();
+			Params.bShouldSave = true;
+			Params.bShouldLoad = true;
+			Params.MapAssetName = DestinationMap.GetAssetName();
+			Params.PlayerStartTag = DestinationPlayerStartTag;
+			LevelManager->TransitionLevel(Params);
+		}
 	}
 }

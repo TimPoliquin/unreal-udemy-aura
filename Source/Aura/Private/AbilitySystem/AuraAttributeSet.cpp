@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemInterface.h"
 #include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
@@ -14,7 +15,7 @@
 #include "Player/AuraPlayerController.h"
 #include "Tags/AuraGameplayTags.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
-#include "Game/AuraSaveGame.h"
+#include "Player/Progression/AuraProgressionComponent.h"
 
 
 UAuraAttributeSet::UAuraAttributeSet()
@@ -131,18 +132,6 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 }
 
-void UAuraAttributeSet::FromSaveData(const UAuraSaveGame* SaveData)
-{
-}
-
-void UAuraAttributeSet::ToSaveData(UAuraSaveGame* SaveData) const
-{
-	SaveData->Strength = GetStrength();
-	SaveData->Intelligence = GetIntelligence();
-	SaveData->Resilience = GetResilience();
-	SaveData->Vigor = GetVigor();
-}
-
 bool UAuraAttributeSet::IsFullHealth() const
 {
 	return GetHealth() >= GetMaxHealth();
@@ -151,6 +140,33 @@ bool UAuraAttributeSet::IsFullHealth() const
 bool UAuraAttributeSet::IsFullMana() const
 {
 	return GetMana() >= GetMaxMana();
+}
+
+void UAuraAttributeSet::InitializeDefaultAttributes(const int32 Level)
+{
+	UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(GetOwningActor(), DefaultPrimaryAttributes, Level);
+	UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(GetOwningActor(), DefaultSecondaryAttributes, Level);
+	UAuraAbilitySystemLibrary::ApplyBasicGameplayEffect(GetOwningActor(), InitializeVitalAttributes, Level);
+}
+
+void UAuraAttributeSet::ToSaveData(FAuraAttributeSetSaveData& SaveData) const
+{
+	SaveData.Strength = GetStrength();
+	SaveData.Intelligence = GetIntelligence();
+	SaveData.Resilience = GetResilience();
+	SaveData.Vigor = GetVigor();
+	SaveData.Health = GetHealth();
+	SaveData.Mana = GetMana();
+}
+
+void UAuraAttributeSet::FromSaveData(const FAuraAttributeSetSaveData& SaveData)
+{
+	SetStrength(SaveData.Strength);
+	SetIntelligence(SaveData.Intelligence);
+	SetResilience(SaveData.Resilience);
+	SetVigor(SaveData.Vigor);
+	SetHealth(SaveData.Health);
+	SetMana(SaveData.Mana);
 }
 
 void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const
@@ -239,7 +255,7 @@ void UAuraAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 	{
 		const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.Source.Character);
 		const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.Source.Character, CurrentXP + IncomingXP);
-		const int32 CurrentLevel = ICombatInterface::GetCharacterLevel(Props.Source.Character);
+		const int32 CurrentLevel = IAuraAbilitySystemInterface::GetCharacterLevel(Props.Source.Character);
 		if (CurrentLevel < NewLevel)
 		{
 			for (int32 Idx = 0; Idx < NewLevel - CurrentLevel; Idx++)

@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "AuraFishTypes.h"
+#include "GameplayEffect.h"
 #include "Interaction/PlayerInterface.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Utils/RandUtils.h"
 #include "AuraFishingBlueprintNode.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGoFishingEventSignature, AActor*, FishingActor);
+class UAuraFishCatch;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGoFishingCatchEventSignature, AActor*, FishingActor, const UAuraFishCatch*, Catch);
 
 USTRUCT(BlueprintType)
 struct FAuraGoFishingParams
@@ -30,6 +32,8 @@ struct FAuraGoFishingParams
 	FRandRange LureToBiteTime;
 	UPROPERTY(BlueprintReadWrite)
 	FRandRange BiteToFleeTime;
+	UPROPERTY(BlueprintReadWrite)
+	TSubclassOf<UGameplayEffect> ReelEffectClass;
 };
 
 /**
@@ -71,32 +75,32 @@ public:
 
 protected:
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnCameraInPositionDelegate;
+	FGoFishingCatchEventSignature OnCameraInPositionDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingCancelledDelegate;
+	FGoFishingCatchEventSignature OnFishingCancelledDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnPlayerInPositionDelegate;
+	FGoFishingCatchEventSignature OnPlayerInPositionDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingRodEquippedDelegate;
+	FGoFishingCatchEventSignature OnFishingRodEquippedDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingRodCastDelegate;
+	FGoFishingCatchEventSignature OnFishingRodCastDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingLuredDelegate;
+	FGoFishingCatchEventSignature OnFishingLuredDelegate;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-	FGoFishingEventSignature OnFishingBiteDelegate;
+	FGoFishingCatchEventSignature OnFishingBiteDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingFishHasFledDelegate;
+	FGoFishingCatchEventSignature OnFishingFishHasFledDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingFishReelingDelegate;
+	FGoFishingCatchEventSignature OnFishingFishReelingDelegate;
 	UPROPERTY(BlueprintAssignable)
-	FGoFishingEventSignature OnFishingFishCaughtDelegate;
+	FGoFishingCatchEventSignature OnFishingFishCaughtDelegate;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	FGameplayTag ActiveFishType = FGameplayTag::EmptyTag;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	EFishState ActiveFishState = EFishState::None;
 	UPROPERTY(BlueprintReadOnly)
-	FAuraFishCatch CaughtFish;
+	TObjectPtr<UAuraFishCatch> CaughtFish;
 
 	UFUNCTION(BlueprintCallable)
 	void End();
@@ -104,6 +108,8 @@ protected:
 private:
 	UPROPERTY()
 	AActor* PlayerActor;
+	UPROPERTY()
+	FActiveGameplayEffectHandle FishingEffectHandle;
 	UPROPERTY()
 	FAuraGoFishingParams GoFishingParams;
 

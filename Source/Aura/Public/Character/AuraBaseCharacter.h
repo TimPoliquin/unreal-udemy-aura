@@ -6,10 +6,13 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/AttributeChangeDelegates.h"
+#include "AbilitySystem/AuraAbilitySystemInterface.h"
 #include "Actor/CollidableInterface.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraBaseCharacter.generated.h"
 
+class UAuraAttributeSet;
+class UAuraAbilitySystemComponent;
 class UPassiveNiagaraComponent;
 class UDebuffNiagaraComponent;
 class UNiagaraSystem;
@@ -20,7 +23,7 @@ class UAttributeSet;
 class UAbilitySystemComponent;
 
 UCLASS(Abstract)
-class AURA_API AAuraBaseCharacter : public ACharacter, public IAbilitySystemInterface, public ICombatInterface, public ICollidableInterface
+class AURA_API AAuraBaseCharacter : public ACharacter, public IAbilitySystemInterface, public IAuraAbilitySystemInterface, public ICombatInterface, public ICollidableInterface
 {
 	GENERATED_BODY()
 
@@ -29,9 +32,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UAttributeSet* GetAttributeSet() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UAuraAttributeSet* GetAuraAttributeSet() const;
+	virtual UAuraAttributeSet* GetAuraAttributeSet() const { return nullptr; }
+
 	virtual float TakeDamage(
 		float DamageAmount,
 		const struct FDamageEvent& DamageEvent,
@@ -108,18 +111,8 @@ protected:
 	};
 
 	UPROPERTY()
-	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
-	UPROPERTY()
-	TObjectPtr<UAttributeSet> AttributeSet;
+	TObjectPtr<UAuraAbilitySystemComponent> AbilitySystemComponent;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributes;
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
-	TSubclassOf<UGameplayEffect> InitializeVitalAttributes;
-
-	virtual void InitializeDefaultAttributes();
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> Attributes, const float Level) const;
 
 	void AddCharacterAbilities();
@@ -206,6 +199,9 @@ protected:
 	virtual void OnStatusBurnRemoved()
 	{
 	};
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnAbilitySystemReady(UAuraAbilitySystemComponent* InAbilitySystemComponent);
 
 private:
 	bool bDead = false;

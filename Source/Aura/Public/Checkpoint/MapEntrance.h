@@ -14,8 +14,6 @@ class AURA_API AMapEntrance : public ACheckpoint
 public:
 	AMapEntrance(const FObjectInitializer& ObjectInitializer);
 
-	virtual void LoadActor_Implementation() override;
-
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere)

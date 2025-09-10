@@ -85,6 +85,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="HUD")
 	FOverlayVisibilityChangedSignature OnHUDVisibilityChangedDelegate;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static bool IsBroadcastPayload(const FAuraIntAttributeChangedPayload& Payload);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UDataTable> MessageDataTable;
@@ -94,11 +97,11 @@ protected:
 
 private:
 	UFUNCTION()
-	void OnPlayerXPChange(const int32 XP);
+	void OnPlayerXPChange(const FAuraIntAttributeChangedPayload& Payload);
 	UFUNCTION()
-	void OnPlayerLevelInitialized(int32 NewValue);
+	void OnPlayerLevelInitialized(const FAuraIntAttributeChangedPayload& Payload);
 	UFUNCTION()
-	void OnPlayerLevelChange(const int32 InLevel);
+	void OnPlayerLevelChange(const FAuraIntAttributeChangedPayload& Payload);
 	UFUNCTION()
 	void OnAbilityEquipped(const FAuraEquipAbilityPayload& EquipPayload);
 	UFUNCTION()

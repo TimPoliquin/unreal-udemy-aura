@@ -65,7 +65,7 @@ public:
 	void HandleInitialState();
 
 	/** Start ISaveInterface **/
-	virtual void LoadActor_Implementation() override;
+	virtual void PostLoad_Implementation() override;
 	/** End ISaveInterface **/
 
 

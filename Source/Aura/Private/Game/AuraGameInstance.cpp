@@ -3,28 +3,13 @@
 
 #include "Game/AuraGameInstance.h"
 
-#include "Aura/AuraLogChannels.h"
 #include "Kismet/GameplayStatics.h"
 
-void UAuraGameInstance::Shutdown()
+UAuraGameInstance* UAuraGameInstance::Get(const UObject* WorldContextObject)
 {
-	Super::Shutdown();
-	if (SaveState == EAuraGameSaveState::Undefined || SaveState == EAuraGameSaveState::Transient)
+	if (IsValid(WorldContextObject))
 	{
-		UE_LOG(LogAura, Warning, TEXT("[%s] Deleting save game: %s"), *GetName(), *LoadSlotName);
-		UGameplayStatics::DeleteGameInSlot(LoadSlotName, LoadSlotIndex);
+		return Cast<UAuraGameInstance>(UGameplayStatics::GetGameInstance(WorldContextObject));
 	}
-}
-
-TArray<AActor*> UAuraGameInstance::GetActivePlayerActors()
-{
-	TArray<AActor*> Results;
-	for (TWeakObjectPtr<AActor> Actor : ActivePlayerActors)
-	{
-		if (Actor.IsValid())
-		{
-			Results.Add(Actor.Get());
-		}
-	}
-	return Results;
+	return nullptr;
 }
